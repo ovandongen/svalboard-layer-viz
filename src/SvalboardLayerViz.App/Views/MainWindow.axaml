@@ -7,11 +7,14 @@
         x:Name="MainWin"
         Title="Svalboard Layer Viz"
         Width="1200" Height="600"
+        MinWidth="600" MinHeight="300"
         WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True"
-        SystemDecorations="None">
+        ExtendClientAreaChromeHints="NoChrome"
+        SystemDecorations="Full"
+        Topmost="{Binding IsAlwaysOnTop}">
 
     <Grid RowDefinitions="Auto,*,Auto">
 
@@ -28,6 +31,24 @@
                                VerticalAlignment="Center" />
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Spacing="4">
+                        <Button x:Name="PinButton"
+                                Command="{Binding TogglePinCommand}"
+                                ToolTip.Tip="Always on top"
+                                Padding="8,4">
+                            <Button.Styles>
+                                <Style Selector="Button#PinButton">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Style>
+                                <Style Selector="Button#PinButton[Tag=True]">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </Style>
+                            </Button.Styles>
+                            <Button.Tag>
+                                <Binding Path="IsAlwaysOnTop" />
+                            </Button.Tag>
+                            <PathIcon Width="16" Height="16"
+                                      Data="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z" />
+                        </Button>
                         <Button Command="{Binding OpenSettingsCommand}"
                                 ToolTip.Tip="Settings" Padding="8,4">
                             <PathIcon Width="16" Height="16"

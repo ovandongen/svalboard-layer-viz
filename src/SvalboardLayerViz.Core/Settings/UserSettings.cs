@@ -14,6 +14,9 @@ public record UserSettings
     /// <summary>Custom labels for unknown keycodes. Key = hex keycode (e.g. "0x5300"), Value = label.</summary>
     public Dictionary<string, string> CustomKeyLabels { get; init; } = new();
 
+    /// <summary>Whether the window stays on top of other windows.</summary>
+    public bool AlwaysOnTop { get; init; } = true;
+
     /// <summary>Global hotkey key name (SharpHook KeyCode enum without "Vc" prefix, e.g. "F12").</summary>
     public string HotkeyKey { get; init; } = "F12";
 

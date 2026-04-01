@@ -34,6 +34,9 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _isConnected;
 
     [ObservableProperty]
+    private bool _isAlwaysOnTop;
+
+    [ObservableProperty]
     private ObservableCollection<LayerViewModel> _layers = [];
 
     public IReadOnlyList<ClusterViewModel> Clusters { get; } = ClusterViewModel.BuildFromLayout();
@@ -56,6 +59,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(ISettingsService? settingsService = null)
     {
         _settingsService = settingsService ?? new SettingsService();
+        IsAlwaysOnTop = _settingsService.Load().AlwaysOnTop;
 
         // Try to connect on startup
         TryConnect();
@@ -217,6 +221,14 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenSettings()
     {
         OpenSettingsRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void TogglePin()
+    {
+        IsAlwaysOnTop = !IsAlwaysOnTop;
+        var settings = _settingsService.Load();
+        _settingsService.Save(settings with { AlwaysOnTop = IsAlwaysOnTop });
     }
 
     [RelayCommand]
