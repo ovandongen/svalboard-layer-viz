@@ -114,8 +114,8 @@ public class KeyViewModelTests
     [Fact]
     public void Tooltip_IncludesRawHex()
     {
-        var vm = new KeyViewModel(MakeKey(rawKeycode: 0x5102), MakeLayer());
-        Assert.Contains("0x5102", vm.Tooltip);
+        var vm = new KeyViewModel(MakeKey(rawKeycode: 0x5222), MakeLayer());
+        Assert.Contains("0x5222", vm.Tooltip);
     }
 
     [Fact]

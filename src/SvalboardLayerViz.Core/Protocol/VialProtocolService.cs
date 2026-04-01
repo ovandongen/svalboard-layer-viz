@@ -8,7 +8,7 @@ namespace SvalboardLayerViz.Core.Protocol;
 ///
 /// Reference: keybard-ng/src/services/usb.service.ts and vial.service.ts
 /// </summary>
-public class VialProtocolService : IDisposable
+public class VialProtocolService : IVialProtocolService
 {
     private HidStream? _stream;
     private int _maxOutputLength;

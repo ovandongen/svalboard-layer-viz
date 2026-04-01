@@ -64,9 +64,10 @@ public partial class MainWindowViewModel : ObservableObject
             KeyboardConfig = loader.Load(device);
 
             Layers.Clear();
+            var totalLayers = KeyboardConfig.Layers.Count;
             foreach (var layer in KeyboardConfig.Layers)
             {
-                Layers.Add(new LayerViewModel(layer, i => SelectedLayerIndex = i));
+                Layers.Add(new LayerViewModel(layer, i => SelectedLayerIndex = i, totalLayers));
             }
 
             SelectedLayerIndex = 0;
@@ -83,10 +84,13 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void SelectLayer(int index) => SelectedLayerIndex = index;
 
+    /// <summary>Callback to show/focus the main window. Wired up by App.axaml.cs.</summary>
+    public Action? ShowWindowRequested { get; set; }
+
     [RelayCommand]
     private void Show()
     {
-        // TODO: Show/focus the main window from tray
+        ShowWindowRequested?.Invoke();
     }
 
     [RelayCommand]

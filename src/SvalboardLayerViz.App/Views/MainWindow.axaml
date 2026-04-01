@@ -35,11 +35,17 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:LayerViewModel">
-                        <Button Content="{Binding DisplayName}"
-                                Command="{Binding SelectCommand}"
+                        <Button Command="{Binding SelectCommand}"
                                 MinWidth="80"
                                 HorizontalContentAlignment="Center"
-                                Padding="12,6" />
+                                Padding="12,6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="5"
+                                        Background="{Binding TabColor}" />
+                                <TextBlock Text="{Binding DisplayName}"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

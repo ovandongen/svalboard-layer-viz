@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Models;
 
 namespace SvalboardLayerViz.App.ViewModels;
@@ -11,6 +12,7 @@ public partial class KeyViewModel : ObservableObject
 {
     public Key Key { get; }
     public Layer Layer { get; }
+    private readonly LayerColors _colors;
 
     /// <summary>Primary label shown on the key face.</summary>
     public string DisplayLabel => Key.IsTransparent
@@ -32,10 +34,10 @@ public partial class KeyViewModel : ObservableObject
     // --- Visual styling ---
 
     /// <summary>Background color: dimmer for transparent keys.</summary>
-    public string BackgroundColor => IsTransparent ? "#1E1E2E" : "#313244";
+    public string BackgroundColor => IsTransparent ? _colors.TransparentBackground : _colors.Background;
 
     /// <summary>Border color: lighter for transparent keys.</summary>
-    public string BorderColor => IsTransparent ? "#585B70" : "#45475A";
+    public string BorderColor => IsTransparent ? _colors.TransparentBorder : _colors.Border;
 
     /// <summary>Opacity: reduced for transparent keys.</summary>
     public double KeyOpacity => IsTransparent ? 0.55 : 1.0;
@@ -49,10 +51,12 @@ public partial class KeyViewModel : ObservableObject
     public double Width => Key.Width * Scale;
     public double Height => Key.Height * Scale;
 
-    public KeyViewModel(Key key, Layer layer)
+    public KeyViewModel(Key key, Layer layer, int totalLayers = 8)
     {
         Key = key;
         Layer = layer;
+        _colors = LayerColorService.GetLayerColors(layer.Index, totalLayers,
+            layer.ColorHue, layer.ColorSat, layer.ColorVal);
     }
 
     private string BuildTooltip()

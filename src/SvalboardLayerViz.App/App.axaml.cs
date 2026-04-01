@@ -18,9 +18,18 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var viewModel = new MainWindowViewModel();
-            desktop.MainWindow = new MainWindow
+            var mainWindow = new MainWindow
             {
                 DataContext = viewModel
+            };
+            desktop.MainWindow = mainWindow;
+
+            viewModel.ShowWindowRequested = () =>
+            {
+                mainWindow.Show();
+                mainWindow.Activate();
+                if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
+                    mainWindow.WindowState = Avalonia.Controls.WindowState.Normal;
             };
 
             // Bind tray icon commands to the main view model

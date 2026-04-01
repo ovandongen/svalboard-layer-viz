@@ -12,10 +12,10 @@ namespace SvalboardLayerViz.Core.Keymap;
 /// </summary>
 public class KeymapLoader
 {
-    private readonly VialProtocolService _protocol;
+    private readonly IVialProtocolService _protocol;
     private readonly KeycodeService _keycodeService;
 
-    public KeymapLoader(VialProtocolService protocol, KeycodeService keycodeService)
+    public KeymapLoader(IVialProtocolService protocol, KeycodeService keycodeService)
     {
         _protocol = protocol;
         _keycodeService = keycodeService;
@@ -48,13 +48,17 @@ public class KeymapLoader
         var rows = definition.Matrix.Rows;
         var cols = definition.Matrix.Cols;
 
-        // 4. Get the full keymap
+        // 4. Set custom keycodes so they resolve during key processing
+        var customKeycodes = ParseCustomKeycodes(definition);
+        _keycodeService.SetCustomKeycodes(customKeycodes);
+
+        // 5. Get the full keymap
         var keymap = _protocol.GetKeymapBuffer(layerCount, rows, cols);
 
-        // 5. Get physical layout positions
+        // 6. Get physical layout positions
         var physicalLayout = SvalboardLayout.GetKeyPositions();
 
-        // 6. Build layer models
+        // 7. Build layer models
         var layers = new List<Layer>();
         for (var layerIdx = 0; layerIdx < layerCount; layerIdx++)
         {
@@ -90,11 +94,11 @@ public class KeymapLoader
             {
                 Index = layerIdx,
                 Keys = keys,
-                // TODO: Parse layer_colors from Svalboard-specific config
+                // Layer colors: populated when device data is available (future)
             });
         }
 
-        // 7. Resolve transparent keys (KC_TRNS falls through to layer below)
+        // 8. Resolve transparent keys (KC_TRNS falls through to layer below)
         TransparentKeyResolver.Resolve(layers);
 
         return new KeyboardConfig
@@ -104,7 +108,7 @@ public class KeymapLoader
             MatrixRows = rows,
             MatrixCols = cols,
             Layers = layers,
-            CustomKeycodes = ParseCustomKeycodes(definition),
+            CustomKeycodes = customKeycodes,
         };
     }
 
