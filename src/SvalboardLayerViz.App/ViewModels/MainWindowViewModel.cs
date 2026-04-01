@@ -87,10 +87,19 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Callback to show/focus the main window. Wired up by App.axaml.cs.</summary>
     public Action? ShowWindowRequested { get; set; }
 
+    /// <summary>Callback to toggle window visibility. Wired up by App.axaml.cs.</summary>
+    public Action? ToggleWindowRequested { get; set; }
+
     [RelayCommand]
     private void Show()
     {
         ShowWindowRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void ToggleOverlay()
+    {
+        ToggleWindowRequested?.Invoke();
     }
 
     [RelayCommand]
