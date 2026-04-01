@@ -29,6 +29,17 @@ public partial class KeyViewModel : ObservableObject
     /// <summary>Tooltip with full key details.</summary>
     public string Tooltip => BuildTooltip();
 
+    // --- Visual styling ---
+
+    /// <summary>Background color: dimmer for transparent keys.</summary>
+    public string BackgroundColor => IsTransparent ? "#1E1E2E" : "#313244";
+
+    /// <summary>Border color: lighter for transparent keys.</summary>
+    public string BorderColor => IsTransparent ? "#585B70" : "#45475A";
+
+    /// <summary>Opacity: reduced for transparent keys.</summary>
+    public double KeyOpacity => IsTransparent ? 0.55 : 1.0;
+
     // --- Layout positioning (in pixels, scaled from layout units) ---
 
     private const double Scale = 60.0; // 1 layout unit = 60 pixels (matching keybard-ng)

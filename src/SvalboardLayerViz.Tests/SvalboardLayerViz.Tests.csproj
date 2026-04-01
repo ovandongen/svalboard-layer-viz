@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SvalboardLayerViz.Core\SvalboardLayerViz.Core.csproj" />
+    <ProjectReference Include="..\SvalboardLayerViz.App\SvalboardLayerViz.App.csproj" />
   </ItemGroup>
 
 </Project>

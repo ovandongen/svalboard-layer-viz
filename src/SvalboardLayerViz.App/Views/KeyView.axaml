@@ -25,10 +25,9 @@
             BorderThickness="1"
             Padding="2"
             Margin="1"
-            Background="#313244"
-            BorderBrush="#45475A">
-        <!-- TODO: Dynamic background based on layer color -->
-        <!-- TODO: Dashed border style for transparent keys -->
+            Background="{Binding BackgroundColor}"
+            BorderBrush="{Binding BorderColor}"
+            Opacity="{Binding KeyOpacity}">
 
         <StackPanel VerticalAlignment="Center"
                     HorizontalAlignment="Center"
