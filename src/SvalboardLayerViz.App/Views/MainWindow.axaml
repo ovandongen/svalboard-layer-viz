@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        xmlns:views="using:SvalboardLayerViz.App.Views"
+        x:Class="SvalboardLayerViz.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        x:Name="MainWin"
+        Title="Svalboard Layer Viz"
+        Width="1200" Height="600"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <!-- Status bar at top -->
+        <Border DockPanel.Dock="Top" Background="#1E1E2E" Padding="12,8">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding StatusMessage}"
+                           Foreground="#CDD6F4"
+                           VerticalAlignment="Center" />
+                <Button DockPanel.Dock="Right"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        HorizontalAlignment="Right"
+                        Margin="8,0,0,0" />
+            </DockPanel>
+        </Border>
+
+        <!-- Layer tabs -->
+        <Border DockPanel.Dock="Top" Background="#181825" Padding="8,4">
+            <ItemsControl ItemsSource="{Binding Layers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LayerViewModel">
+                        <Button Content="{Binding DisplayName}"
+                                Command="{Binding SelectCommand}"
+                                MinWidth="80"
+                                HorizontalContentAlignment="Center"
+                                Padding="12,6" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+        <!-- Board visualization area -->
+        <Border Background="#11111B" Padding="16">
+            <views:BoardView DataContext="{Binding}" />
+        </Border>
+    </DockPanel>
+
+</Window>

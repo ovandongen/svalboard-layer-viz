@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+             xmlns:views="using:SvalboardLayerViz.App.Views"
+             x:Class="SvalboardLayerViz.App.Views.BoardView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!--
+    Board visualization using a Canvas.
+    Each key is positioned absolutely based on its physical layout coordinates.
+
+    TODO: This is the scaffold — the actual rendering will need:
+    - Proper scaling/zoom
+    - Cluster grouping with background shapes
+    - The cross/plus pattern per finger cluster
+    - Layer color theming
+    -->
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+        <!-- Canvas sized to fit board: ~24.3 units wide × 7 units tall @ 60 px/unit -->
+        <Canvas Width="1560" Height="480"
+                Background="Transparent">
+
+            <TextBlock Canvas.Left="600" Canvas.Top="220"
+                       Text="Connect your Svalboard to see the layout"
+                       Foreground="#585B70"
+                       FontSize="16"
+                       IsVisible="{Binding !IsConnected}" />
+
+            <ItemsControl ItemsSource="{Binding SelectedLayer.Keys}"
+                          IsVisible="{Binding IsConnected}"
+                          Width="1560" Height="480">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerTheme>
+                    <ControlTheme TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                    </ControlTheme>
+                </ItemsControl.ItemContainerTheme>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:KeyViewModel">
+                        <views:KeyView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </Canvas>
+    </ScrollViewer>
+
+</UserControl>

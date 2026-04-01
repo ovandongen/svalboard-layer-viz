@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+             x:Class="SvalboardLayerViz.App.Views.KeyView"
+             x:DataType="vm:KeyViewModel"
+             Width="{Binding Width}"
+             Height="{Binding Height}">
+
+    <!--
+    Single key visual representation.
+
+    Design goals:
+    - Rounded rectangle background with layer-based color
+    - Primary label centered
+    - Secondary label (modifier) shown smaller above
+    - Dimmed/dashed border for transparent keys
+    - Tooltip on hover with full details
+    -->
+
+    <ToolTip.Tip>
+        <TextBlock Text="{Binding Tooltip}" />
+    </ToolTip.Tip>
+
+    <Border CornerRadius="6"
+            BorderThickness="1"
+            Padding="2"
+            Margin="1"
+            Background="#313244"
+            BorderBrush="#45475A">
+        <!-- TODO: Dynamic background based on layer color -->
+        <!-- TODO: Dashed border style for transparent keys -->
+
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Spacing="0">
+
+            <!-- Secondary label (modifier prefix) -->
+            <TextBlock Text="{Binding SecondaryLabel}"
+                       FontSize="8"
+                       Foreground="#A6ADC8"
+                       HorizontalAlignment="Center"
+                       IsVisible="{Binding SecondaryLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+            <!-- Primary key label -->
+            <TextBlock Text="{Binding DisplayLabel}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Foreground="#CDD6F4"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+        </StackPanel>
+    </Border>
+
+</UserControl>
