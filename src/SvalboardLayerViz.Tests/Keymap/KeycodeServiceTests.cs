@@ -211,8 +211,8 @@ public class KeycodeServiceTests
         _sut.SetCustomKeycodes([
             new CustomKeycode { Name = "My Custom", Title = "Custom Key", ShortName = "CUST" }
         ]);
-        // USER0 = 0x7E40
-        var result = _sut.Resolve(0x7E40);
+        // QK_KB_0 = 0x7E00
+        var result = _sut.Resolve(0x7E00);
         Assert.Equal("CUST", result.Label);
     }
 
@@ -222,16 +222,16 @@ public class KeycodeServiceTests
         _sut.SetCustomKeycodes([
             new CustomKeycode { Name = "MyKey", Title = "", ShortName = "" }
         ]);
-        var result = _sut.Resolve(0x7E40);
+        var result = _sut.Resolve(0x7E00);
         Assert.Equal("MyKey", result.Label);
     }
 
     [Fact]
-    public void Resolve_CustomKeycode_OutOfRange_ReturnsUserN()
+    public void Resolve_CustomKeycode_OutOfRange_ReturnsKBN()
     {
         _sut.SetCustomKeycodes([]);
-        var result = _sut.Resolve(0x7E40);
-        Assert.Equal("USER0", result.Label);
+        var result = _sut.Resolve(0x7E00);
+        Assert.Equal("KB0", result.Label);
     }
 
     // --- Batch 5c: Edge-case tests ---
@@ -276,5 +276,66 @@ public class KeycodeServiceTests
         Assert.Equal("Ctrl", result.SecondaryLabel);
         Assert.True(result.IsLayerSwitch);
         Assert.Equal(1, result.TargetLayer);
+    }
+
+    [Theory]
+    [InlineData(0x021E, "!")]   // Shift+1
+    [InlineData(0x021F, "@")]   // Shift+2
+    [InlineData(0x0220, "#")]   // Shift+3
+    [InlineData(0x0221, "$")]   // Shift+4
+    [InlineData(0x0222, "%")]   // Shift+5
+    [InlineData(0x0223, "^")]   // Shift+6
+    [InlineData(0x0224, "&")]   // Shift+7
+    [InlineData(0x0225, "*")]   // Shift+8
+    [InlineData(0x0226, "(")]   // Shift+9
+    [InlineData(0x0227, ")")]   // Shift+0
+    [InlineData(0x022D, "_")]   // Shift+-
+    [InlineData(0x022E, "+")]   // Shift+=
+    [InlineData(0x022F, "{")]   // Shift+[
+    [InlineData(0x0230, "}")]   // Shift+]
+    [InlineData(0x0231, "|")]   // Shift+backslash
+    [InlineData(0x0233, ":")]   // Shift+;
+    [InlineData(0x0234, "\"")] // Shift+'
+    [InlineData(0x0235, "~")]   // Shift+`
+    [InlineData(0x0236, "<")]   // Shift+,
+    [InlineData(0x0237, ">")]   // Shift+.
+    [InlineData(0x0238, "?")]   // Shift+/
+    public void Resolve_ShiftSymbol_ReturnsSymbol(ushort keycode, string expected)
+    {
+        var result = _sut.Resolve(keycode);
+        Assert.Equal(expected, result.Label);
+        Assert.Null(result.SecondaryLabel);
+    }
+
+    [Theory]
+    [InlineData(0xCD, "Ms\u2191")]
+    [InlineData(0xCE, "Ms\u2193")]
+    [InlineData(0xD1, "Btn1")]
+    [InlineData(0xD2, "Btn2")]
+    [InlineData(0xD6, "Wh\u2191")]
+    [InlineData(0xD7, "Wh\u2193")]
+    [InlineData(0xDA, "Acl0")]
+    public void Resolve_MouseKeys_ReturnLabels(ushort keycode, string expected)
+    {
+        Assert.Equal(expected, _sut.Resolve(keycode).Label);
+    }
+
+    [Fact]
+    public void Resolve_ShiftLetter_StillShowsModifier()
+    {
+        // Shift+A (0x0204) should NOT use symbol lookup — no entry for letters
+        var result = _sut.Resolve(0x0204);
+        Assert.Equal("A", result.Label);
+        Assert.Equal("Shift", result.SecondaryLabel);
+    }
+
+    [Fact]
+    public void Resolve_CtrlShiftBracket_StillShowsModifiers()
+    {
+        // Ctrl+Shift+[ (0x032F) — not Shift-only, should keep modifier display
+        var result = _sut.Resolve(0x032F);
+        Assert.Equal("[", result.Label);
+        Assert.Contains("Ctrl", result.SecondaryLabel!);
+        Assert.Contains("Shift", result.SecondaryLabel!);
     }
 }

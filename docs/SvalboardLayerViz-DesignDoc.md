@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Draft
+**Status:** Phase 1 Complete
 
 ---
 
@@ -38,7 +38,7 @@ The Svalboard is a radically different input device. Learning it means memorizin
 | Component | Technology | Rationale |
 |-----------|-----------|-----------|
 | **UI Framework** | Avalonia UI (.NET) | Cross-platform XAML, system tray support, WPF-like experience |
-| **Language** | C# / .NET 8+ | Developer's primary skill, cross-platform runtime |
+| **Language** | C# / .NET 10 | Developer's primary skill, cross-platform runtime |
 | **USB HID** | HidSharp | Cross-platform USB HID library for .NET, well-maintained |
 | **Data Format** | XZ decompression → JSON | Vial protocol delivers keyboard definitions as XZ-compressed JSON |
 | **Build** | dotnet CLI + standard tooling | Simple, no exotic build pipeline |
@@ -151,19 +151,23 @@ The sequence to load everything:
 
 ### 5.6 Keycode Encoding
 
-Keycodes are 16-bit values with structure depending on the type:
+Keycodes are 16-bit values (post-2023 QMK layout, matching keybard-ng `keygen.ts`):
 
-- **Basic keys:** `0x0000–0x00FF` (KC_A = `0x04`, KC_SPACE = `0x2C`, etc.)
-- **Modifiers in upper byte:** `(mods << 8) | keycode` where mods is a bitmask (Ctrl=0x01, Shift=0x02, Alt=0x04, GUI=0x08)
-- **Layer keys:** Encoded with layer number and type:
-  - `MO(layer)` — Momentary (active while held)
-  - `TG(layer)` — Toggle on/off
-  - `TO(layer)` — Switch permanently
-  - `DF(layer)` — Set default layer
-  - `TT(layer)` — Tap-toggle
-  - `OSL(layer)` — One-shot (next keypress only)
-- **Transparent:** `0x0001` (KC_TRNS — falls through to layer below)
-- **No key:** `0xFF` / `0x0000` (KC_NO)
+- **No key / Transparent:** `0x0000` (KC_NO), `0x0001` (KC_TRNS — falls through to layer below)
+- **Basic keys:** `0x0004–0x00FF` (KC_A = `0x04`, KC_SPACE = `0x2C`, mouse keys `0xCD–0xDC`, modifiers `0xE0–0xE7`)
+- **Modifier + key:** `0x0100–0x1FFF` — `(mods << 8) | keycode` where mods is a bitmask (Ctrl=0x01, Shift=0x02, Alt=0x04, GUI=0x08). Shift-only + symbol key resolves to the shifted symbol (e.g., `{` instead of `Shift [`)
+- **Mod-tap (MT):** `0x2000–0x3FFF` — hold = modifier, tap = keycode
+- **Layer-tap (LT):** `0x4000–0x4FFF` — hold = layer, tap = keycode. `LT(n, KC_NO)` shows as `LT(n)`
+- **Layer-mod (LM):** `0x5000–0x51FF` — activate layer with modifier
+- **Layer functions:** `0x5200–0x52DF` (32 slots each):
+  - `TO` (0x5200) — Switch permanently
+  - `MO` (0x5220) — Momentary (active while held)
+  - `DF` (0x5240) — Set default layer
+  - `TG` (0x5260) — Toggle on/off
+  - `OSL` (0x5280) — One-shot layer
+  - `OSM` (0x52A0) — One-shot modifier
+  - `TT` (0x52C0) — Tap-toggle
+- **Custom keycodes:** `0x7E00–0x7FFF` (QK_KB + QK_USER) — keyboard-specific and user keycodes from the Vial definition JSON. Svalboard has 20 (DPI controls, scroll toggles, sniper modes, etc.)
 
 ### 5.7 Definition Payload
 
@@ -250,24 +254,36 @@ The five-direction-per-finger layout is the core challenge and opportunity for v
 
 ## 7. Phased Delivery
 
-### Phase 1: Read and Display (MVP)
+### Phase 1: Read and Display (MVP) — COMPLETE
 
 **Goal:** Connect to Svalboard, read full config, display all layers interactively.
 
-Features:
-- System tray icon with click-to-open window
-- Auto-detect Svalboard on USB connect/disconnect
-- Read full keymap and definition from device
-- Visual board layout showing all keys with their labels
-- Layer tabs/navigation to switch between layers
-- Transparent keys shown with the effective key from the layer below
-- Color coding per layer (using Svalboard's layer_colors if available)
-- Hotkey to show/hide the overlay
+Implemented features:
+- [x] System tray icon with Show/Toggle/Quit menu
+- [x] Auto-detect Svalboard on USB connect/disconnect (HidSharp device monitoring)
+- [x] Read full keymap and definition from device (Vial protocol, XZ decompression)
+- [x] Visual board layout showing all keys with labels, positioned per physical layout
+- [x] Layer tabs with WrapPanel for responsive layout, empty layers hidden
+- [x] Transparent keys resolved by walking the layer stack, shown dimmed
+- [x] Algorithmic color coding per layer (HLS color space, evenly-spaced hues)
+- [x] Global hotkey (F12) to show/hide overlay via SharpHook
+- [x] Comprehensive keycode resolution: basic keys, modifiers, layer functions (MO/TG/DF/TO/TT/OSL/OSM), mod-tap (MT), layer-tap (LT), layer-mod (LM), shifted symbols, mouse keys, custom/keyboard-specific keycodes (QK_KB range)
+- [x] Responsive scaling via Viewbox
+- [x] 160 unit tests
 
 Scope explicitly excluded:
 - No config editing
 - No auto layer detection
-- No Moergo/Glove80 support
+
+### Phase 1.5: Polish & Settings (NEXT)
+
+**Goal:** User-configurable settings and remaining polish.
+
+Planned features:
+- [ ] Settings page for layer color configuration (user preference over device firmware colors)
+- [ ] Ctrl modifier support for global hotkey (currently F12 only, no modifier — Ctrl didn't work on macOS) should be a setting!
+- [ ] Layer names (stored locally, not on device)
+- [ ] Indicate **layer-switching keys** with color coding showing which layer they activate (Skim does this well)
 
 ### Phase 2: Live Layer Detection
 
@@ -280,19 +296,7 @@ This requires firmware support. Options:
 
 ### Phase 3: Enhanced Visualization
 
-- Search/filter keys ("where is Ctrl+C?")
-- Key frequency heatmap (if keystroke logging is desired)
-- Layout comparison (diff between layers)
 - Export to image/PDF for printing
-- Multiple board profiles
-
-### Phase 4: Moergo/Glove80 Support
-
-- Add Glove80 physical layout definition
-- Adapt to Glove80's ZMK-based config format (different from Vial)
-- Unified UI for switching between boards
-
----
 
 ## 8. Project Structure
 
@@ -301,24 +305,24 @@ SvalboardLayerViz/
 ├── SvalboardLayerViz.sln
 ├── src/
 │   ├── SvalboardLayerViz.App/              # Avalonia application
-│   │   ├── App.axaml                       # Application entry
+│   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring
 │   │   ├── Views/
-│   │   │   ├── MainWindow.axaml            # Main overlay window
-│   │   │   ├── BoardView.axaml             # Full board visualization
-│   │   │   ├── KeyView.axaml               # Single key visual (UserControl)
-│   │   │   └── LayerTabsView.axaml         # Layer selector
+│   │   │   ├── MainWindow.axaml            # Main overlay window (status bar, layer tabs)
+│   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
+│   │   │   └── KeyView.axaml               # Single key visual (UserControl)
 │   │   ├── ViewModels/
-│   │   │   ├── MainWindowViewModel.cs
-│   │   │   ├── BoardViewModel.cs
-│   │   │   ├── KeyViewModel.cs
-│   │   │   └── LayerViewModel.cs
-│   │   └── Converters/
-│   │       └── KeycodeToDisplayConverter.cs
+│   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection
+│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips
+│   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
+│   │   │   └── ClusterViewModel.cs         # Cluster background bounding boxes
+│   │   └── Services/
+│   │       └── GlobalHotkeyService.cs      # SharpHook-based global hotkey listener
 │   │
 │   ├── SvalboardLayerViz.Core/             # Business logic (no UI dependency)
 │   │   ├── Protocol/
 │   │   │   ├── VialCommands.cs             # Command ID constants
-│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial messages
+│   │   │   ├── IVialProtocolService.cs     # Protocol interface (for testability)
+│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages
 │   │   │   └── XzDecompressor.cs           # XZ decompression for definitions
 │   │   ├── Device/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
@@ -326,25 +330,32 @@ SvalboardLayerViz/
 │   │   ├── Keymap/
 │   │   │   ├── KeycodeService.cs           # Translate 16-bit codes to labels
 │   │   │   ├── KeymapLoader.cs             # Orchestrate full config load
-│   │   │   └── KeycodeDefinitions.cs       # QMK keycode table
+│   │   │   ├── TransparentKeyResolver.cs   # Walk layer stack for KC_TRNS
+│   │   │   └── LayerColorService.cs        # HLS-based per-layer color generation
 │   │   ├── Layout/
-│   │   │   ├── SvalboardLayout.cs          # Physical key positions
+│   │   │   ├── SvalboardLayout.cs          # Physical key positions (52 keys)
 │   │   │   └── LayoutDefinition.cs         # Parsed definition from device
 │   │   └── Models/
 │   │       ├── KeyboardConfig.cs           # Full loaded config
-│   │       ├── Layer.cs                    # Single layer's keys
-│   │       └── Key.cs                      # Key position + keycode
+│   │       ├── Layer.cs                    # Single layer's keys + color hints
+│   │       ├── Key.cs                      # Key position + keycode + labels
+│   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests
-│       ├── Protocol/
-│       │   └── VialProtocolTests.cs
+│   └── SvalboardLayerViz.Tests/            # Unit tests (160 tests)
 │       ├── Keymap/
-│       │   └── KeycodeServiceTests.cs
-│       └── TestData/
-│           └── sample-keymap.bin           # Captured device data for testing
+│       │   ├── KeycodeServiceTests.cs      # Keycode resolution (all ranges)
+│       │   ├── TransparentKeyResolverTests.cs
+│       │   └── LayerColorServiceTests.cs
+│       ├── Layout/
+│       │   └── SvalboardLayoutTests.cs
+│       └── ViewModels/
+│           ├── KeyViewModelTests.cs
+│           ├── ClusterViewModelTests.cs
+│           └── MainWindowViewModelShowTests.cs
 │
 ├── docs/
-│   └── SvalboardLayerViz-DesignDoc.md      # This document
+│   ├── SvalboardLayerViz-DesignDoc.md      # This document
+│   └── 01-04-26.md                         # Change log
 └── README.md
 ```
 
@@ -449,21 +460,31 @@ Screen
 
 ---
 
-## 12. Open Questions
+## 12. Open Questions & Resolved Decisions
 
-1. **XZ decompression in .NET** — SharpCompress supports XZ. Need to verify it handles the specific XZ variant Vial uses. Alternative: call out to `xz` CLI.
+### Resolved
 
-2. **HidSharp device filtering** — HidSharp can filter by VendorID/ProductID but filtering by UsagePage may require iterating devices. Need to test.
+1. **XZ decompression in .NET** — SharpCompress handles Vial's XZ variant correctly. Need to detect the magic byte offset (device echoes command prefix before XZ payload).
 
-3. **Svalboard-specific extensions** — Keybard-ng references `sval_proto` version and Svalboard-specific features (layer_colors, cosmetic settings). Need to understand what's standard Vial vs. Svalboard-specific.
+2. **HidSharp device filtering** — Filtering by UsagePage requires iterating `DeviceList` and checking `Indexes.ContainsValue()` with packed 32-bit HID usage values (`(usagePage << 16) | usageId`).
 
-4. **Multiple Svalboards** — Handle the case where someone has more than one connected? Probably not for Phase 1 but worth considering in the architecture.
+3. **Svalboard-specific extensions** — Custom keycodes are in the `QK_KB` range (0x7E00+), defined in the device's Vial definition JSON. The Svalboard has 20 custom keycodes (DPI controls, scroll toggles, sniper modes, etc.). Layer colors are stored as HSV in firmware but not yet exposed via protocol — using algorithmic HLS generation for now.
 
-5. **Config change detection** — If the user changes their config in Keybard-ng while this app is open, should we detect and reload? Polling vs. manual refresh button.
+4. **Config change detection** — Manual refresh button implemented. The Refresh command re-reads the full config from the device.
 
-6. **System tray behavior** — Different platforms handle system tray differently. Avalonia's tray support covers Windows and Linux. macOS uses NSStatusItem. Need to verify Avalonia's cross-platform tray API maturity.
+5. **System tray behavior** — Avalonia's `TrayIcon` API works on macOS. Global hotkey via SharpHook (F12) provides show/hide toggle. macOS requires Accessibility permission for global key hooks.
 
-7. **Layer names** — Vial doesn't store layer names. Should the app let users name layers locally? Store in a local config file?
+6. **Custom keycode base address** — Vial maps `customKeycodes[]` starting at `QK_KB` (0x7E00), NOT `QK_USER` (0x7E40). Both ranges are covered by a single handler.
+
+### Still Open
+
+7. **Multiple Svalboards** — Handle the case where someone has more than one connected? Currently connects to the first found device.
+
+8. **Layer names** — Vial doesn't store layer names. Plan to let users name layers locally via a settings page.
+
+9. **Layer color configuration** — User wants color config via a settings page rather than reading from device firmware. To be implemented in Phase 1.5.
+
+10. **Ctrl modifier on macOS** — Global hotkey Ctrl+F12 didn't work on macOS (EventMask.Ctrl not matching). Currently using F12 with no modifier. Needs investigation.
 
 ---
 
@@ -476,6 +497,7 @@ Screen
 | HidSharp | USB HID communication | Apache 2.0 |
 | SharpCompress | XZ decompression | MIT |
 | CommunityToolkit.Mvvm | MVVM helpers (ObservableObject, RelayCommand) | MIT |
+| SharpHook | Cross-platform global keyboard hooks (libuiohook) | MIT |
 | System.Text.Json | JSON parsing (built-in) | MIT |
 
 ---

@@ -21,7 +21,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedLayerIndex;
 
-    public LayerViewModel? SelectedLayer => Layers.ElementAtOrDefault(SelectedLayerIndex);
+    public LayerViewModel? SelectedLayer => Layers.FirstOrDefault(l => l.Index == SelectedLayerIndex);
 
     partial void OnSelectedLayerIndexChanged(int value) => OnPropertyChanged(nameof(SelectedLayer));
 
@@ -67,6 +67,10 @@ public partial class MainWindowViewModel : ObservableObject
             var totalLayers = KeyboardConfig.Layers.Count;
             foreach (var layer in KeyboardConfig.Layers)
             {
+                // Skip layers where every key is empty (KC_NO)
+                if (layer.Keys.All(k => k.RawKeycode == 0x0000))
+                    continue;
+
                 Layers.Add(new LayerViewModel(layer, i => SelectedLayerIndex = i, totalLayers));
             }
 

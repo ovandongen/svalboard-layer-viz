@@ -40,8 +40,8 @@ public class KeycodeService
     private const ushort QK_ONE_SHOT_MOD_MAX = 0x52BF;
     private const ushort QK_TT = 0x52C0;      // Tap-toggle
     private const ushort QK_TT_MAX = 0x52DF;
-    private const ushort QK_USER = 0x7E40;    // Custom keycodes
-    private const ushort QK_USER_MAX = 0x7FFF;
+    private const ushort QK_KB = 0x7E00;       // Keyboard-specific custom keycodes
+    private const ushort QK_KB_MAX = 0x7FFF;   // Covers both QK_KB and QK_USER ranges
 
     private IReadOnlyList<CustomKeycode>? _customKeycodes;
 
@@ -89,6 +89,8 @@ public class KeycodeService
         {
             var layer = (keycode >> 8) & 0x0F;
             var baseKey = (ushort)(keycode & 0x00FF);
+            if (baseKey == 0x00) // LT(layer, KC_NO) — hold-only layer switch
+                return new KeycodeInfo($"LT({layer})", IsLayerSwitch: true, TargetLayer: layer);
             var baseLabel = BasicKeycodes.GetValueOrDefault(baseKey, $"0x{baseKey:X2}");
             return new KeycodeInfo(baseLabel, SecondaryLabel: $"LT({layer})", IsLayerSwitch: true, TargetLayer: layer);
         }
@@ -127,17 +129,17 @@ public class KeycodeService
         if (keycode is >= QK_TT and <= QK_TT_MAX)
             return new KeycodeInfo($"TT({keycode - QK_TT})", IsLayerSwitch: true, TargetLayer: keycode - QK_TT);
 
-        // Custom/user keycodes (0x7E40-0x7FFF)
-        if (keycode is >= QK_USER and <= QK_USER_MAX)
+        // Custom/keyboard keycodes (0x7E00-0x7FFF)
+        if (keycode is >= QK_KB and <= QK_KB_MAX)
         {
-            var index = keycode - QK_USER;
+            var index = keycode - QK_KB;
             if (_customKeycodes is not null && index < _customKeycodes.Count)
             {
                 var custom = _customKeycodes[index];
                 var label = !string.IsNullOrEmpty(custom.ShortName) ? custom.ShortName : custom.Name;
                 return new KeycodeInfo(label);
             }
-            return new KeycodeInfo($"USER{index}");
+            return new KeycodeInfo($"KB{index}");
         }
 
         // Modifier + key combinations (0x0100-0x1FFF)
@@ -145,6 +147,11 @@ public class KeycodeService
         {
             var mods = (keycode >> 8) & 0x1F;
             var baseKey = (ushort)(keycode & 0x00FF);
+
+            // Shift-only + key with a known symbol → show the symbol directly
+            if (mods == 0x02 && ShiftedSymbols.TryGetValue(baseKey, out var symbol))
+                return new KeycodeInfo(symbol);
+
             var baseLabel = BasicKeycodes.GetValueOrDefault(baseKey, $"0x{baseKey:X2}");
             var modLabel = FormatModifiers(mods);
             return new KeycodeInfo(baseLabel, SecondaryLabel: modLabel);
@@ -163,6 +170,21 @@ public class KeycodeService
         if ((mods & 0x08) != 0) parts.Add("GUI");
         return string.Join("+", parts);
     }
+
+    /// <summary>
+    /// US ANSI layout: Shift + base key → resulting symbol.
+    /// Used to display "{" instead of "Shift [", etc.
+    /// </summary>
+    private static readonly Dictionary<ushort, string> ShiftedSymbols = new()
+    {
+        [0x1E] = "!", [0x1F] = "@", [0x20] = "#", [0x21] = "$",
+        [0x22] = "%", [0x23] = "^", [0x24] = "&", [0x25] = "*",
+        [0x26] = "(", [0x27] = ")",
+        [0x2D] = "_", [0x2E] = "+",
+        [0x2F] = "{", [0x30] = "}",
+        [0x31] = "|", [0x33] = ":", [0x34] = "\"", [0x35] = "~",
+        [0x36] = "<", [0x37] = ">", [0x38] = "?",
+    };
 
     /// <summary>
     /// QMK HID keycodes. Reference: https://docs.qmk.fm/keycodes
@@ -211,6 +233,13 @@ public class KeycodeService
 
         // Non-US & special
         [0x64] = "NUBS", [0x65] = "App",
+
+        // Mouse keys
+        [0xCD] = "Ms\u2191", [0xCE] = "Ms\u2193", [0xCF] = "Ms\u2190", [0xD0] = "Ms\u2192",
+        [0xD1] = "Btn1", [0xD2] = "Btn2", [0xD3] = "Btn3",
+        [0xD4] = "Btn4", [0xD5] = "Btn5",
+        [0xD6] = "Wh\u2191", [0xD7] = "Wh\u2193", [0xD8] = "Wh\u2190", [0xD9] = "Wh\u2192",
+        [0xDA] = "Acl0", [0xDB] = "Acl1", [0xDC] = "Acl2",
 
         // F13-F24
         [0x68] = "F13", [0x69] = "F14", [0x6A] = "F15", [0x6B] = "F16",
