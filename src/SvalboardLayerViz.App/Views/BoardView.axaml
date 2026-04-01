@@ -16,32 +16,6 @@
                        FontSize="16"
                        IsVisible="{Binding !IsConnected}" />
 
-            <!-- Cluster background shapes -->
-            <ItemsControl ItemsSource="{Binding Clusters}"
-                          IsVisible="{Binding IsConnected}"
-                          Width="1458" Height="420">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerTheme>
-                    <ControlTheme TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                    </ControlTheme>
-                </ItemsControl.ItemContainerTheme>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:ClusterViewModel">
-                        <Border Width="{Binding Width}"
-                                Height="{Binding Height}"
-                                Background="#181825"
-                                CornerRadius="10"
-                                Opacity="0.7" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
             <!-- Keys -->
             <ItemsControl ItemsSource="{Binding SelectedLayer.Keys}"
                           IsVisible="{Binding IsConnected}"

@@ -43,7 +43,18 @@ public class GlobalHotkeyService : IDisposable
         }
     }
 
-    public void Dispose()
+    /// <summary>
+    /// Updates the key/modifier to listen for. No restart needed —
+    /// OnKeyPressed reads these values on every event.
+    /// </summary>
+    public void UpdateHotkey(KeyCode key, EventMask modifiers)
+    {
+        Key = key;
+        Modifiers = modifiers;
+    }
+
+    /// <summary>Stops the global hook listener.</summary>
+    public void Stop()
     {
         if (_hook is not null)
         {
@@ -51,5 +62,21 @@ public class GlobalHotkeyService : IDisposable
             _hook.Dispose();
             _hook = null;
         }
+    }
+
+    /// <summary>Parses a key name (e.g. "F12") to a SharpHook KeyCode.</summary>
+    public static KeyCode ParseKey(string name) => Enum.Parse<KeyCode>($"Vc{name}");
+
+    /// <summary>Parses a modifier name (e.g. "None", "Ctrl") to a SharpHook EventMask.</summary>
+    public static EventMask ParseModifiers(string name)
+    {
+        if (string.IsNullOrEmpty(name) || name == "None")
+            return EventMask.None;
+        return Enum.Parse<EventMask>(name);
+    }
+
+    public void Dispose()
+    {
+        Stop();
     }
 }

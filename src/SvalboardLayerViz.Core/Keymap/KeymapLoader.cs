@@ -3,6 +3,7 @@ using SvalboardLayerViz.Core.Device;
 using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
 using SvalboardLayerViz.Core.Protocol;
+using SvalboardLayerViz.Core.Settings;
 
 namespace SvalboardLayerViz.Core.Keymap;
 
@@ -24,7 +25,7 @@ public class KeymapLoader
     /// <summary>
     /// Loads the full keyboard configuration from a connected device.
     /// </summary>
-    public KeyboardConfig Load(DeviceInfo device)
+    public KeyboardConfig Load(DeviceInfo device, UserSettings? settings = null)
     {
         _protocol.Connect(device.HidDevice);
 
@@ -51,6 +52,7 @@ public class KeymapLoader
         // 4. Set custom keycodes so they resolve during key processing
         var customKeycodes = ParseCustomKeycodes(definition);
         _keycodeService.SetCustomKeycodes(customKeycodes);
+        _keycodeService.SetCustomKeyLabels(settings?.CustomKeyLabels);
 
         // 5. Get the full keymap
         var keymap = _protocol.GetKeymapBuffer(layerCount, rows, cols);
@@ -82,6 +84,9 @@ public class KeymapLoader
                         DisplayLabel = info.Label,
                         SecondaryLabel = info.SecondaryLabel,
                         IsTransparent = info.IsTransparent,
+                        IsLayerSwitch = info.IsLayerSwitch,
+                        TargetLayer = info.TargetLayer,
+                        IsUnknown = info.IsUnknown,
                         X = position.X,
                         Y = position.Y,
                         Width = position.Width,
@@ -90,11 +95,14 @@ public class KeymapLoader
                 }
             }
 
+            string? layerName = null;
+            settings?.LayerNames.TryGetValue(layerIdx, out layerName);
+
             layers.Add(new Layer
             {
                 Index = layerIdx,
+                Name = layerName,
                 Keys = keys,
-                // Layer colors: populated when device data is available (future)
             });
         }
 

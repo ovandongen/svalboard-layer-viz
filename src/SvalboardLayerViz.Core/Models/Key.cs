@@ -37,4 +37,13 @@ public record Key
 
     /// <summary>Key height in layout units (typically 1.0).</summary>
     public double Height { get; init; } = 1.0;
+
+    /// <summary>True if this key activates or switches to another layer (MO, TG, LT, etc.).</summary>
+    public bool IsLayerSwitch { get; init; }
+
+    /// <summary>The target layer index for layer-switching keys.</summary>
+    public int? TargetLayer { get; init; }
+
+    /// <summary>True if the keycode could not be resolved to a known label.</summary>
+    public bool IsUnknown { get; init; }
 }

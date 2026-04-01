@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 1 Complete
+**Status:** Phase 1.5 Complete
 
 ---
 
@@ -275,17 +275,26 @@ Scope explicitly excluded:
 - No config editing
 - No auto layer detection
 
-### Phase 1.5: Polish & Settings (NEXT)
+### Phase 1.5: Polish & Settings — COMPLETE
 
-**Goal:** User-configurable settings and remaining polish.
+**Goal:** User-configurable settings and visual polish.
 
-Planned features:
-- [ ] Settings page for layer color configuration (user preference over device firmware colors)
-- [ ] Ctrl modifier support for global hotkey (currently F12 only, no modifier — Ctrl didn't work on macOS) should be a setting!
-- [ ] Layer names (stored locally, not on device)
-- [ ] Indicate **layer-switching keys** with color coding showing which layer they activate (Skim does this well)
+Implemented features:
+- [x] Settings persistence — JSON settings file at `{ApplicationData}/SvalboardLayerViz/settings.json`, defaults on missing/corrupt
+- [x] Settings window — accessible via gear icon button or tray menu
+- [x] Layer color configuration — ColorView picker per layer, user-picked colors render faithfully (not darkened)
+- [x] Configurable global hotkey — key + modifier combo (Ctrl/Shift/Alt/GUI checkboxes)
+- [x] Layer names — user-defined, stored locally, displayed in layer tabs
+- [x] Layer-switch key coloring — MO/TG/LT/DF/TO/TT/OSL keys colored to match their target layer
+- [x] Custom key labels — right-click any key to assign a label, or manage in settings page. User labels override all keycode resolution. Labels persisted for reuse in layout printing (Phase 3)
+- [x] Transparent overlay window — no system decorations, fully transparent background, desktop shows through
+- [x] Auto-flipping bars — status bar + layer tabs auto-switch top/bottom based on window screen position; status bar always at outer edge
+- [x] Icon buttons — gear (settings) and refresh icons replace text
+- [x] Auto-contrast text — W3C luminance-based white/dark text on keys
+- [x] Window dragging — custom drag via bars area (replaces missing title bar)
+- [x] 165 unit tests
 
-### Phase 2: Live Layer Detection
+### Phase 2: Live Layer Detection (NEXT)
 
 **Goal:** Show which layer is currently active in real-time.
 
@@ -305,16 +314,20 @@ SvalboardLayerViz/
 ├── SvalboardLayerViz.sln
 ├── src/
 │   ├── SvalboardLayerViz.App/              # Avalonia application
-│   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring
+│   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring, settings/label dialogs
 │   │   ├── Views/
-│   │   │   ├── MainWindow.axaml            # Main overlay window (status bar, layer tabs)
+│   │   │   ├── MainWindow.axaml(.cs)       # Transparent overlay window, auto-flipping bars, custom drag
 │   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
-│   │   │   └── KeyView.axaml               # Single key visual (UserControl)
+│   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
+│   │   │   └── SettingsWindow.axaml(.cs)   # Settings UI (colors, names, labels, hotkey)
 │   │   ├── ViewModels/
-│   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection
-│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips
+│   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, ApplySettings
+│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, set-label command
 │   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
-│   │   │   └── ClusterViewModel.cs         # Cluster background bounding boxes
+│   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
+│   │   │   └── SettingsViewModel.cs        # Settings page: layer settings, custom labels, hotkey
+│   │   ├── Converters/
+│   │   │   └── HexColorToBrushConverter.cs # Hex string → SolidColorBrush for live preview
 │   │   └── Services/
 │   │       └── GlobalHotkeyService.cs      # SharpHook-based global hotkey listener
 │   │
@@ -327,27 +340,33 @@ SvalboardLayerViz/
 │   │   ├── Device/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
 │   │   │   └── DeviceInfo.cs               # Device metadata
+│   │   ├── Settings/
+│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey)
+│   │   │   ├── ISettingsService.cs         # Load/Save interface
+│   │   │   └── SettingsService.cs          # JSON persistence at {AppData}/SvalboardLayerViz/settings.json
 │   │   ├── Keymap/
-│   │   │   ├── KeycodeService.cs           # Translate 16-bit codes to labels
+│   │   │   ├── KeycodeService.cs           # Translate 16-bit codes to labels (user labels checked first)
 │   │   │   ├── KeymapLoader.cs             # Orchestrate full config load
 │   │   │   ├── TransparentKeyResolver.cs   # Walk layer stack for KC_TRNS
-│   │   │   └── LayerColorService.cs        # HLS-based per-layer color generation
+│   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, auto-contrast text
 │   │   ├── Layout/
 │   │   │   ├── SvalboardLayout.cs          # Physical key positions (52 keys)
 │   │   │   └── LayoutDefinition.cs         # Parsed definition from device
 │   │   └── Models/
 │   │       ├── KeyboardConfig.cs           # Full loaded config
 │   │       ├── Layer.cs                    # Single layer's keys + color hints
-│   │       ├── Key.cs                      # Key position + keycode + labels
+│   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/IsUnknown
 │   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests (160 tests)
+│   └── SvalboardLayerViz.Tests/            # Unit tests (165 tests)
 │       ├── Keymap/
 │       │   ├── KeycodeServiceTests.cs      # Keycode resolution (all ranges)
 │       │   ├── TransparentKeyResolverTests.cs
 │       │   └── LayerColorServiceTests.cs
 │       ├── Layout/
 │       │   └── SvalboardLayoutTests.cs
+│       ├── Settings/
+│       │   └── SettingsServiceTests.cs     # Round-trip, defaults, corrupt file fallback
 │       └── ViewModels/
 │           ├── KeyViewModelTests.cs
 │           ├── ClusterViewModelTests.cs
@@ -476,15 +495,19 @@ Screen
 
 6. **Custom keycode base address** — Vial maps `customKeycodes[]` starting at `QK_KB` (0x7E00), NOT `QK_USER` (0x7E40). Both ranges are covered by a single handler.
 
+7. **Layer names** — Resolved in Phase 1.5. Users can name layers in the settings page; names are stored locally in `settings.json`.
+
+8. **Layer color configuration** — Resolved in Phase 1.5. Users pick colors per layer via ColorView in settings. User-picked colors render faithfully; algorithmic colors used as defaults.
+
+9. **Global hotkey configuration** — Resolved in Phase 1.5. Key + modifier combo (Ctrl/Shift/Alt/GUI) configurable in settings.
+
+10. **Custom key labels** — Resolved in Phase 1.5. Right-click any key to assign a custom label, or manage in settings page. User labels override all keycode resolution (checked first after transparent/empty). Persisted in settings for reuse.
+
 ### Still Open
 
-7. **Multiple Svalboards** — Handle the case where someone has more than one connected? Currently connects to the first found device.
+11. **Multiple Svalboards** — Handle the case where someone has more than one connected? Currently connects to the first found device.
 
-8. **Layer names** — Vial doesn't store layer names. Plan to let users name layers locally via a settings page.
-
-9. **Layer color configuration** — User wants color config via a settings page rather than reading from device firmware. To be implemented in Phase 1.5.
-
-10. **Ctrl modifier on macOS** — Global hotkey Ctrl+F12 didn't work on macOS (EventMask.Ctrl not matching). Currently using F12 with no modifier. Needs investigation.
+12. **Ctrl modifier on macOS** — Global hotkey Ctrl+F12 didn't work on macOS (EventMask.Ctrl not matching). Now configurable so users can pick a working combo.
 
 ---
 
@@ -494,6 +517,7 @@ Screen
 |---------|---------|---------|
 | Avalonia | UI framework | MIT |
 | Avalonia.Desktop | Desktop platform support | MIT |
+| Avalonia.Controls.ColorPicker | Color picker for settings UI | MIT |
 | HidSharp | USB HID communication | Apache 2.0 |
 | SharpCompress | XZ decompression | MIT |
 | CommunityToolkit.Mvvm | MVVM helpers (ObservableObject, RelayCommand) | MIT |

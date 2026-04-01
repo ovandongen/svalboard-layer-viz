@@ -7,54 +7,73 @@
         x:Name="MainWin"
         Title="Svalboard Layer Viz"
         Width="1200" Height="600"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        SystemDecorations="None">
 
-    <DockPanel>
-        <!-- Status bar at top -->
-        <Border DockPanel.Dock="Top" Background="#1E1E2E" Padding="12,8">
-            <DockPanel>
-                <TextBlock DockPanel.Dock="Left"
-                           Text="{Binding StatusMessage}"
-                           Foreground="#CDD6F4"
-                           VerticalAlignment="Center" />
-                <Button DockPanel.Dock="Right"
-                        Content="Refresh"
-                        Command="{Binding RefreshCommand}"
-                        HorizontalAlignment="Right"
-                        Margin="8,0,0,0" />
-            </DockPanel>
-        </Border>
+    <Grid RowDefinitions="Auto,*,Auto">
 
-        <!-- Layer tabs -->
-        <Border DockPanel.Dock="Top" Background="#181825" Padding="8,4">
-            <ItemsControl ItemsSource="{Binding Layers}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:LayerViewModel">
-                        <Button Command="{Binding SelectCommand}"
-                                MinWidth="80"
-                                HorizontalContentAlignment="Center"
-                                Padding="12,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <Border Width="10" Height="10" CornerRadius="5"
-                                        Background="{Binding TabColor}" />
-                                <TextBlock Text="{Binding DisplayName}"
-                                           VerticalAlignment="Center" />
-                            </StackPanel>
+        <!-- Bars panel: Row 0 (top) or Row 2 (bottom), switched automatically.
+             Inner Grid swaps StatusBar/LayerTabs so the status bar is always at the outer edge. -->
+        <Grid x:Name="BarsPanel" Grid.Row="0" RowDefinitions="Auto,Auto">
+            <!-- Status bar (solid, also serves as drag handle) -->
+            <Border x:Name="StatusBar" Grid.Row="0" Background="#1E1E2E" Padding="12,8"
+                    CornerRadius="8,8,0,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left"
+                               Text="{Binding StatusMessage}"
+                               Foreground="#CDD6F4"
+                               VerticalAlignment="Center" />
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                                HorizontalAlignment="Right" Spacing="4">
+                        <Button Command="{Binding OpenSettingsCommand}"
+                                ToolTip.Tip="Settings" Padding="8,4">
+                            <PathIcon Width="16" Height="16"
+                                      Data="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.21 3.79.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.21-3.796.75.75 0 0 1 .271-.826l1.244-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.272-.826 9.793 9.793 0 0 1 2.21-3.792.75.75 0 0 1 .849-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
                         </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Border>
+                        <Button Command="{Binding RefreshCommand}"
+                                ToolTip.Tip="Refresh" Padding="8,4">
+                            <PathIcon Width="16" Height="16"
+                                      Data="M18.537 19.567A9.961 9.961 0 0 1 12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10c0 2.136-.67 4.116-1.81 5.74L17 12h3a8 8 0 1 0-2.46 5.77z" />
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
 
-        <!-- Board visualization area -->
-        <Border Background="#11111B" Padding="16">
+            <!-- Layer tabs -->
+            <Border x:Name="LayerTabs" Grid.Row="1" Background="#66181825" Padding="8,4">
+                <ItemsControl ItemsSource="{Binding Layers}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LayerViewModel">
+                            <Button Command="{Binding SelectCommand}"
+                                    MinWidth="80"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="12,6">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Width="10" Height="10" CornerRadius="5"
+                                            Background="{Binding TabColor}" />
+                                    <TextBlock Text="{Binding DisplayName}"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+        </Grid>
+
+        <!-- Board visualization area (transparent, always row 1) -->
+        <Border Grid.Row="1" Padding="16">
             <views:BoardView DataContext="{Binding}" />
         </Border>
-    </DockPanel>
+
+    </Grid>
 
 </Window>

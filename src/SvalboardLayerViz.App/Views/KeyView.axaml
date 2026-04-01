@@ -21,6 +21,12 @@
         <TextBlock Text="{Binding Tooltip}" />
     </ToolTip.Tip>
 
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Set Custom Label..." Command="{Binding SetLabelCommand}" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
+
     <Border CornerRadius="6"
             BorderThickness="1"
             Padding="2"
@@ -35,16 +41,18 @@
 
             <!-- Secondary label (modifier prefix) -->
             <TextBlock Text="{Binding SecondaryLabel}"
-                       FontSize="8"
-                       Foreground="#A6ADC8"
+                       FontSize="9"
+                       FontWeight="Medium"
+                       Foreground="{Binding TextColor}"
+                       Opacity="0.7"
                        HorizontalAlignment="Center"
                        IsVisible="{Binding SecondaryLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
             <!-- Primary key label -->
             <TextBlock Text="{Binding DisplayLabel}"
-                       FontSize="12"
-                       FontWeight="SemiBold"
-                       Foreground="#CDD6F4"
+                       FontSize="13"
+                       FontWeight="Bold"
+                       Foreground="{Binding TextColor}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center" />
         </StackPanel>

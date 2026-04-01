@@ -1,0 +1,123 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        xmlns:conv="using:SvalboardLayerViz.App.Converters"
+        x:Class="SvalboardLayerViz.App.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Settings"
+        Width="650" Height="800"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <conv:HexColorToBrushConverter x:Key="HexToBrush" />
+    </Window.Resources>
+
+    <DockPanel Margin="16">
+        <!-- Footer buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+            <Button Content="Reset Colors" Command="{Binding ResetColorsCommand}" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+            <Button Content="Save" Command="{Binding SaveCommand}" Classes="accent" />
+        </StackPanel>
+
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+
+                <!-- Layer Colors & Names -->
+                <TextBlock Text="Layers" FontSize="18" FontWeight="Bold"
+                           Foreground="#CDD6F4" Margin="0,0,0,4" />
+                <ItemsControl ItemsSource="{Binding LayerSettings}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LayerSettingViewModel">
+                            <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,2">
+                                <Grid ColumnDefinitions="60,*,Auto" RowDefinitions="Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding Index, StringFormat='Layer {0}'}"
+                                               VerticalAlignment="Center" Foreground="#A6ADC8" />
+                                    <TextBox Grid.Column="1" Text="{Binding Name}"
+                                             Watermark="Name (optional)" Margin="8,0"
+                                             VerticalAlignment="Center" />
+                                    <Button Grid.Column="2" Padding="2" Margin="8,0,0,0"
+                                            Background="Transparent" BorderThickness="0"
+                                            VerticalAlignment="Center">
+                                        <Border Width="32" Height="24" CornerRadius="4"
+                                                Background="{Binding EffectiveColor, Converter={StaticResource HexToBrush}}"
+                                                BorderBrush="#45475A" BorderThickness="1" />
+                                        <Button.Flyout>
+                                            <Flyout Placement="BottomEdgeAlignedRight">
+                                                <ColorView Color="{Binding PickerColor}"
+                                                           IsAlphaVisible="False" />
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Custom Key Labels -->
+                <TextBlock Text="Custom Key Labels" FontSize="18" FontWeight="Bold"
+                           Foreground="#CDD6F4" Margin="0,12,0,4" />
+                <TextBlock Text="Assign custom labels to keycodes. Unknown keycodes from your board are listed automatically."
+                           Foreground="#6C7086" FontSize="12" Margin="0,0,0,4" />
+                <ItemsControl ItemsSource="{Binding CustomKeyLabels}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CustomKeyLabelViewModel">
+                            <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,2">
+                                <Grid ColumnDefinitions="80,100,*,Auto" RowDefinitions="Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding HexKeycode}"
+                                               VerticalAlignment="Center" Foreground="#A6ADC8"
+                                               FontFamily="Cascadia Mono,Consolas,monospace" />
+                                    <TextBlock Grid.Column="1" Text="{Binding CurrentLabel}"
+                                               VerticalAlignment="Center" Foreground="#6C7086"
+                                               Margin="8,0" />
+                                    <TextBox Grid.Column="2" Text="{Binding UserLabel}"
+                                             Watermark="Custom label" Margin="8,0" />
+                                    <Button Grid.Column="3" Content="×" Padding="6,2"
+                                            Command="{Binding RemoveCommand}"
+                                            ToolTip.Tip="Remove"
+                                            IsVisible="{Binding IsManualEntry}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <!-- Add manual keycode entry -->
+                <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,4">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding NewKeycodeHex}"
+                                 Watermark="Hex keycode (e.g. 0x5300)" />
+                        <Button Grid.Column="1" Content="Add" Margin="8,0,0,0"
+                                Command="{Binding AddCustomLabelCommand}" Padding="12,4" />
+                    </Grid>
+                </Border>
+
+                <!-- Global Hotkey -->
+                <TextBlock Text="Global Hotkey" FontSize="18" FontWeight="Bold"
+                           Foreground="#CDD6F4" Margin="0,12,0,4" />
+                <Border Background="#1E1E2E" CornerRadius="4" Padding="12">
+                    <StackPanel Spacing="8">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="Key:" VerticalAlignment="Center"
+                                       Width="80" Foreground="#A6ADC8" />
+                            <TextBox Text="{Binding HotkeyKey}" Watermark="e.g. F12" />
+                        </DockPanel>
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="Modifiers:" VerticalAlignment="Center"
+                                       Width="80" Foreground="#A6ADC8" />
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <CheckBox Content="Ctrl" IsChecked="{Binding HotkeyCtrl}" />
+                                <CheckBox Content="Shift" IsChecked="{Binding HotkeyShift}" />
+                                <CheckBox Content="Alt" IsChecked="{Binding HotkeyAlt}" />
+                                <CheckBox Content="GUI" IsChecked="{Binding HotkeyGui}" />
+                            </StackPanel>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+
+</Window>

@@ -20,18 +20,21 @@ public partial class LayerViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<KeyViewModel> _keys = [];
 
-    public LayerViewModel(Layer layer, Action<int>? selectLayer = null, int totalLayers = 8)
+    public LayerViewModel(Layer layer, Action<int>? selectLayer = null, int totalLayers = 8,
+        Dictionary<int, string>? userLayerColors = null,
+        Action<KeyViewModel>? setLabelRequested = null)
     {
         Layer = layer;
         _selectLayer = selectLayer;
 
+        var userColor = userLayerColors?.GetValueOrDefault(layer.Index);
         var colors = LayerColorService.GetLayerColors(layer.Index, totalLayers,
-            layer.ColorHue, layer.ColorSat, layer.ColorVal);
+            layer.ColorHue, layer.ColorSat, layer.ColorVal, userColor);
         TabColor = colors.Accent;
 
         foreach (var key in layer.Keys)
         {
-            Keys.Add(new KeyViewModel(key, layer, totalLayers));
+            Keys.Add(new KeyViewModel(key, layer, totalLayers, userLayerColors, setLabelRequested));
         }
     }
 

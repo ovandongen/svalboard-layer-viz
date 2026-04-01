@@ -44,6 +44,7 @@ public class KeycodeService
     private const ushort QK_KB_MAX = 0x7FFF;   // Covers both QK_KB and QK_USER ranges
 
     private IReadOnlyList<CustomKeycode>? _customKeycodes;
+    private Dictionary<string, string>? _customKeyLabels;
 
     /// <summary>
     /// Sets custom keycodes from the device definition for resolution.
@@ -52,6 +53,15 @@ public class KeycodeService
     public void SetCustomKeycodes(IReadOnlyList<CustomKeycode> keycodes)
     {
         _customKeycodes = keycodes;
+    }
+
+    /// <summary>
+    /// Sets user-defined labels for unknown keycodes from settings.
+    /// Key = hex string (e.g. "0x5300"), Value = display label.
+    /// </summary>
+    public void SetCustomKeyLabels(Dictionary<string, string>? labels)
+    {
+        _customKeyLabels = labels;
     }
 
     /// <summary>
@@ -66,6 +76,11 @@ public class KeycodeService
         // Transparent
         if (keycode == 0x0001)
             return new KeycodeInfo("___", IsTransparent: true);
+
+        // User-defined custom label takes priority over all other resolution
+        var hexKey = $"0x{keycode:X4}";
+        if (_customKeyLabels is not null && _customKeyLabels.TryGetValue(hexKey, out var userLabel))
+            return new KeycodeInfo(userLabel);
 
         // Basic keycodes
         if (keycode <= 0x00FF)
@@ -158,7 +173,7 @@ public class KeycodeService
         }
 
         // Fallback: show hex
-        return new KeycodeInfo($"0x{keycode:X4}");
+        return new KeycodeInfo($"0x{keycode:X4}", IsUnknown: true);
     }
 
     private static string FormatModifiers(int mods)
@@ -264,5 +279,6 @@ public record KeycodeInfo(
     bool IsTransparent = false,
     bool IsEmpty = false,
     bool IsLayerSwitch = false,
-    int? TargetLayer = null
+    int? TargetLayer = null,
+    bool IsUnknown = false
 );
