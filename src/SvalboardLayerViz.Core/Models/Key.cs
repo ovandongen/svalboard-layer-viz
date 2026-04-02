@@ -46,4 +46,7 @@ public record Key
 
     /// <summary>True if the keycode could not be resolved to a known label.</summary>
     public bool IsUnknown { get; init; }
+
+    /// <summary>Shifted symbol for this key (e.g., "@" for "2", ":" for ";"). US ANSI layout.</summary>
+    public string? ShiftedLabel { get; init; }
 }

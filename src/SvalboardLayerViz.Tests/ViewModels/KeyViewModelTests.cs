@@ -131,4 +131,48 @@ public class KeyViewModelTests
         var vm = new KeyViewModel(MakeKey(), MakeLayer());
         Assert.DoesNotContain("Transparent", vm.Tooltip);
     }
+
+    [Fact]
+    public void IsPressed_DefaultFalse()
+    {
+        var vm = new KeyViewModel(MakeKey(), MakeLayer());
+        Assert.False(vm.IsPressed);
+    }
+
+    [Fact]
+    public void IsPressed_WhenSet_ChangesColors()
+    {
+        var vm = new KeyViewModel(MakeKey(), MakeLayer());
+        var normalBorder = vm.BorderColor;
+        var normalBg = vm.BackgroundColor;
+
+        vm.IsPressed = true;
+        Assert.Equal("#FFFFFF", vm.BorderColor);
+        Assert.Equal(normalBg, vm.BackgroundColor); // Background unchanged — glow is border-only
+        Assert.NotEqual(normalBorder, vm.BorderColor);
+    }
+
+    [Fact]
+    public void IsPressed_WhenSet_IncreasesBorderThickness()
+    {
+        var vm = new KeyViewModel(MakeKey(), MakeLayer());
+        Assert.Equal(new Avalonia.Thickness(1.5), vm.ActiveBorderThickness);
+
+        vm.IsPressed = true;
+        Assert.Equal(new Avalonia.Thickness(3.0), vm.ActiveBorderThickness);
+    }
+
+    [Fact]
+    public void IsPressed_NotifiesPropertyChanged()
+    {
+        var vm = new KeyViewModel(MakeKey(), MakeLayer());
+        var changed = new List<string>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName!);
+
+        vm.IsPressed = true;
+
+        Assert.Contains("IsPressed", changed);
+        Assert.Contains("BorderColor", changed);
+        Assert.Contains("ActiveBorderThickness", changed);
+    }
 }

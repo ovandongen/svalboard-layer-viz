@@ -36,6 +36,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _hotkeyGui;
 
+    [ObservableProperty]
+    private double _backgroundOpacity;
+
+    public string OpacityPercent => $"{(int)(BackgroundOpacity * 100)}%";
+
+    partial void OnBackgroundOpacityChanged(double value) => OnPropertyChanged(nameof(OpacityPercent));
+
     /// <summary>Fired when the user saves settings successfully.</summary>
     public Action? SettingsSaved { get; set; }
 
@@ -87,6 +94,9 @@ public partial class SettingsViewModel : ObservableObject
                 AddCustomKeyLabelVm(hex, "(manual)", label, isManual: true);
         }
 
+        // Populate opacity
+        BackgroundOpacity = settings.BackgroundOpacity;
+
         // Populate hotkey
         HotkeyKey = settings.HotkeyKey;
         var mods = settings.HotkeyModifiers;
@@ -130,6 +140,7 @@ public partial class SettingsViewModel : ObservableObject
             CustomKeyLabels = customLabels,
             HotkeyKey = HotkeyKey,
             HotkeyModifiers = modsString,
+            BackgroundOpacity = Math.Clamp(BackgroundOpacity, 0.0, 1.0),
         };
 
         _settingsService.Save(settings);

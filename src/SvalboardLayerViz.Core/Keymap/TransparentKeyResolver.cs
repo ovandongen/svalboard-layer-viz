@@ -31,7 +31,13 @@ public static class TransparentKeyResolver
 
                     if (lowerKey is not null && !lowerKey.IsTransparent)
                     {
-                        resolvedKeys[keyIdx] = key with { EffectiveLabel = lowerKey.DisplayLabel };
+                        resolvedKeys[keyIdx] = key with
+                        {
+                            EffectiveLabel = lowerKey.DisplayLabel,
+                            IsLayerSwitch = lowerKey.IsLayerSwitch,
+                            TargetLayer = lowerKey.TargetLayer,
+                            SecondaryLabel = lowerKey.SecondaryLabel,
+                        };
                         break;
                     }
                 }

@@ -338,4 +338,71 @@ public class KeycodeServiceTests
         Assert.Contains("Ctrl", result.SecondaryLabel!);
         Assert.Contains("Shift", result.SecondaryLabel!);
     }
+
+    // --- ShiftedLabel tests ---
+
+    [Theory]
+    [InlineData(0x1E, "!")]   // 1 → !
+    [InlineData(0x1F, "@")]   // 2 → @
+    [InlineData(0x20, "#")]   // 3 → #
+    [InlineData(0x21, "$")]   // 4 → $
+    [InlineData(0x22, "%")]   // 5 → %
+    [InlineData(0x23, "^")]   // 6 → ^
+    [InlineData(0x24, "&")]   // 7 → &
+    [InlineData(0x25, "*")]   // 8 → *
+    [InlineData(0x26, "(")]   // 9 → (
+    [InlineData(0x27, ")")]   // 0 → )
+    public void Resolve_NumberKeys_HaveShiftedLabel(ushort keycode, string expectedShifted)
+    {
+        var result = _sut.Resolve(keycode);
+        Assert.Equal(expectedShifted, result.ShiftedLabel);
+    }
+
+    [Theory]
+    [InlineData(0x2D, "_")]   // - → _
+    [InlineData(0x2E, "+")]   // = → +
+    [InlineData(0x2F, "{")]   // [ → {
+    [InlineData(0x30, "}")]   // ] → }
+    [InlineData(0x31, "|")]   // \ → |
+    [InlineData(0x33, ":")]   // ; → :
+    [InlineData(0x34, "\"")]  // ' → "
+    [InlineData(0x35, "~")]   // ` → ~
+    [InlineData(0x36, "<")]   // , → <
+    [InlineData(0x37, ">")]   // . → >
+    [InlineData(0x38, "?")]   // / → ?
+    public void Resolve_SymbolKeys_HaveShiftedLabel(ushort keycode, string expectedShifted)
+    {
+        var result = _sut.Resolve(keycode);
+        Assert.Equal(expectedShifted, result.ShiftedLabel);
+    }
+
+    [Theory]
+    [InlineData(0x04)]  // A
+    [InlineData(0x0A)]  // G
+    [InlineData(0x1D)]  // Z
+    public void Resolve_LetterKeys_NoShiftedLabel(ushort keycode)
+    {
+        Assert.Null(_sut.Resolve(keycode).ShiftedLabel);
+    }
+
+    [Fact]
+    public void Resolve_ModTap_NoShiftedLabel()
+    {
+        // MT(Shift, A) = 0x2204
+        Assert.Null(_sut.Resolve(0x2204).ShiftedLabel);
+    }
+
+    [Fact]
+    public void Resolve_LayerTap_NoShiftedLabel()
+    {
+        // LT(1, A) = 0x4104
+        Assert.Null(_sut.Resolve(0x4104).ShiftedLabel);
+    }
+
+    [Fact]
+    public void Resolve_LayerFunction_NoShiftedLabel()
+    {
+        // MO(1) = 0x5221
+        Assert.Null(_sut.Resolve(0x5221).ShiftedLabel);
+    }
 }

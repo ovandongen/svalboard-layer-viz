@@ -53,6 +53,45 @@ byte[] SendCmd(byte[] command)
     return response;
 }
 
+// Test switch matrix state
+Console.WriteLine("\n--- GetSwitchMatrixState (raw dump) ---");
+Console.WriteLine("Press and hold a key on the Svalboard, then press Enter here...");
+Console.ReadLine();
+
+var matrixResp = SendCmd([VialCommands.GetKeyboardValue, VialCommands.SwitchMatrixState]);
+Console.WriteLine($"  Full response ({matrixResp.Length} bytes):");
+for (var i = 0; i < matrixResp.Length; i += 16)
+{
+    var end = Math.Min(i + 16, matrixResp.Length);
+    var hex = string.Join(" ", matrixResp.Skip(i).Take(end - i).Select(b => $"{b:X2}"));
+    Console.WriteLine($"    [{i:D2}] {hex}");
+}
+
+// Interpret as matrix at different offsets
+foreach (var startOffset in new[] { 0, 1, 2, 3, 4 })
+{
+    Console.WriteLine($"\n  Matrix interpretation (data starting at byte {startOffset}):");
+    for (var row = 0; row < 10 && (row + startOffset) < 32; row++)
+    {
+        var rowByte = matrixResp[row + startOffset];
+        var bits = Convert.ToString(rowByte, 2).PadLeft(6, '0');
+        var pressed = rowByte != 0 ? $" <-- row {row} has pressed keys" : "";
+        Console.WriteLine($"    Row {row}: 0x{rowByte:X2} = {bits}{pressed}");
+    }
+}
+
+Console.WriteLine("\nNow release all keys and press Enter...");
+Console.ReadLine();
+
+var matrixResp2 = SendCmd([VialCommands.GetKeyboardValue, VialCommands.SwitchMatrixState]);
+Console.WriteLine($"  Full response (no keys pressed):");
+for (var i = 0; i < matrixResp2.Length; i += 16)
+{
+    var end = Math.Min(i + 16, matrixResp2.Length);
+    var hex = string.Join(" ", matrixResp2.Skip(i).Take(end - i).Select(b => $"{b:X2}"));
+    Console.WriteLine($"    [{i:D2}] {hex}");
+}
+
 // Get definition size
 Console.WriteLine("\n--- GetDefinitionSize ---");
 var sizeResp = SendCmd([VialCommands.VialPrefix, VialCommands.VialGetSize]);

@@ -16,6 +16,7 @@ public static class VialCommands
 
     public const byte GetProtocolVersion = 0x01;
     public const byte GetKeyboardValue = 0x02;
+    public const byte SwitchMatrixState = 0x03; // Sub-command for GetKeyboardValue
     public const byte SetKeyboardValue = 0x03;
     public const byte GetKeycode = 0x04;
     public const byte SetKeycode = 0x05;

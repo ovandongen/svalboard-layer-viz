@@ -166,6 +166,29 @@ public class VialProtocolService : IVialProtocolService
     }
 
     /// <summary>
+    /// Reads the current switch matrix state (which physical keys are pressed).
+    /// Uses VIA id_switch_matrix_state: send [0x02, 0x03], response has row bytes
+    /// where each bit represents a column (bit set = key pressed).
+    /// </summary>
+    public bool[,] GetSwitchMatrixState(int rows, int cols)
+    {
+        var response = SendCommand([VialCommands.GetKeyboardValue, VialCommands.SwitchMatrixState]);
+
+        var state = new bool[rows, cols];
+        // Response: bytes 0-1 are echoed command, matrix data starts at byte 2
+        for (var row = 0; row < rows && (row + 2) < VialCommands.ReportSize; row++)
+        {
+            var rowByte = response[row + 2];
+            for (var col = 0; col < cols; col++)
+            {
+                state[row, col] = (rowByte & (1 << col)) != 0;
+            }
+        }
+
+        return state;
+    }
+
+    /// <summary>
     /// Finds the offset of XZ magic bytes in a response buffer.
     /// The device may echo the command prefix before the actual data.
     /// </summary>

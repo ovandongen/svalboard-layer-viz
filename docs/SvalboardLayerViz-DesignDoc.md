@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 1.5 Complete
+**Status:** Phase 2 In Progress
 
 ---
 
@@ -294,14 +294,23 @@ Implemented features:
 - [x] Window dragging — custom drag via bars area (replaces missing title bar)
 - [x] 165 unit tests
 
-### Phase 2: Live Layer Detection (NEXT)
+### Phase 2: Live Key Highlighting & UI Enhancements — IN PROGRESS
 
-**Goal:** Show which layer is currently active in real-time.
+**Goal:** Real-time key press visualization and UI polish.
 
-This requires firmware support. Options:
-1. **Raw HID query** — add a custom command to Svalboard firmware that reports `layer_state`. QMK supports this via `raw_hid_receive()`/`raw_hid_send()`. Would need a PR to the Svalboard firmware repo.
-2. **Macro-based detection** — bind layer toggle keys to also emit a hidden keycode (like F24). The app catches these globally. Simpler but only works for toggle layers, not momentary.
-3. **Community collaboration** — propose the Raw HID approach to the Svalboard community. Since it's open source and actively maintained, this seems feasible.
+Implemented features:
+- [x] Live key highlighting — polls switch matrix state at ~10Hz via standard VIA `id_switch_matrix_state` command (no firmware changes needed). Pressed keys show bright white border glow with increased thickness
+- [x] Matrix diagnostics popup — live grid of pressed keys with full details (row, col, label, modifier, keycode, layer, flags) and scrolling event log with timestamps
+- [x] Shift-aware key labels — shifted symbols (e.g., `@` on `2`, `{` on `[`) displayed as superscript in top-right corner of keys
+- [x] Layer-activator key highlighting — transparent layer-switch keys (e.g., MO(3) on layer 3) rendered at full opacity since they functionally belong to that layer
+- [x] Background fill slider — settings slider controls background solidity behind keys and tabs (0% = transparent overlay, 100% = solid dark). Toolbar and key content unaffected
+- [x] Close button in toolbar — X button for quitting without macOS taskbar
+- [x] Toggle button for live highlighting with persistence
+- [x] 201 unit tests
+
+Still planned:
+- [ ] Live layer detection — requires firmware support (`layer_state` query via Raw HID). Firmware team is focused on Vial replacement; blocked for now
+- [ ] Active layer auto-switching in the UI based on detected layer
 
 ### Phase 3: Enhanced Visualization
 
@@ -319,13 +328,15 @@ SvalboardLayerViz/
 │   │   │   ├── MainWindow.axaml(.cs)       # Transparent overlay window, auto-flipping bars, custom drag
 │   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
-│   │   │   └── SettingsWindow.axaml(.cs)   # Settings UI (colors, names, labels, hotkey)
+│   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (colors, names, labels, hotkey, bg fill)
+│   │   │   └── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
 │   │   ├── ViewModels/
-│   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, ApplySettings
-│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, set-label command
+│   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, matrix polling
+│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, IsPressed
 │   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
 │   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
-│   │   │   └── SettingsViewModel.cs        # Settings page: layer settings, custom labels, hotkey
+│   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
+│   │   │   └── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, background fill
 │   │   ├── Converters/
 │   │   │   └── HexColorToBrushConverter.cs # Hex string → SolidColorBrush for live preview
 │   │   └── Services/
@@ -333,15 +344,16 @@ SvalboardLayerViz/
 │   │
 │   ├── SvalboardLayerViz.Core/             # Business logic (no UI dependency)
 │   │   ├── Protocol/
-│   │   │   ├── VialCommands.cs             # Command ID constants
+│   │   │   ├── VialCommands.cs             # Command ID constants (incl. SwitchMatrixState)
 │   │   │   ├── IVialProtocolService.cs     # Protocol interface (for testability)
 │   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages
+│   │   │   ├── MatrixPollingService.cs     # ~10Hz switch matrix polling, change detection
 │   │   │   └── XzDecompressor.cs           # XZ decompression for definitions
 │   │   ├── Device/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
 │   │   │   └── DeviceInfo.cs               # Device metadata
 │   │   ├── Settings/
-│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey)
+│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys)
 │   │   │   ├── ISettingsService.cs         # Load/Save interface
 │   │   │   └── SettingsService.cs          # JSON persistence at {AppData}/SvalboardLayerViz/settings.json
 │   │   ├── Keymap/
@@ -358,23 +370,27 @@ SvalboardLayerViz/
 │   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/IsUnknown
 │   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests (165 tests)
+│   └── SvalboardLayerViz.Tests/            # Unit tests (201 tests)
 │       ├── Keymap/
 │       │   ├── KeycodeServiceTests.cs      # Keycode resolution (all ranges)
 │       │   ├── TransparentKeyResolverTests.cs
 │       │   └── LayerColorServiceTests.cs
 │       ├── Layout/
 │       │   └── SvalboardLayoutTests.cs
+│       ├── Protocol/
+│       │   └── MatrixPollingServiceTests.cs # Polling lifecycle tests
 │       ├── Settings/
 │       │   └── SettingsServiceTests.cs     # Round-trip, defaults, corrupt file fallback
 │       └── ViewModels/
-│           ├── KeyViewModelTests.cs
+│           ├── KeyViewModelTests.cs        # Incl. IsPressed, border glow, notifications
 │           ├── ClusterViewModelTests.cs
 │           └── MainWindowViewModelShowTests.cs
 │
 ├── docs/
 │   ├── SvalboardLayerViz-DesignDoc.md      # This document
-│   └── 01-04-26.md                         # Change log
+│   ├── 01-04-26.md                         # Change log (day 1)
+│   ├── 02-04-26.md                         # Change log (day 2, session 1)
+│   └── 02-04-26-b.md                       # Change log (day 2, session 2)
 └── README.md
 ```
 

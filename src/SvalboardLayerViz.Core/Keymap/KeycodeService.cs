@@ -86,7 +86,8 @@ public class KeycodeService
         if (keycode <= 0x00FF)
         {
             var label = BasicKeycodes.GetValueOrDefault(keycode, $"0x{keycode:X4}");
-            return new KeycodeInfo(label);
+            var shifted = ShiftedSymbols.GetValueOrDefault(keycode);
+            return new KeycodeInfo(label, ShiftedLabel: shifted);
         }
 
         // Mod-tap: hold = modifier, tap = keycode (0x2000-0x3FFF)
@@ -280,5 +281,6 @@ public record KeycodeInfo(
     bool IsEmpty = false,
     bool IsLayerSwitch = false,
     int? TargetLayer = null,
-    bool IsUnknown = false
+    bool IsUnknown = false,
+    string? ShiftedLabel = null
 );

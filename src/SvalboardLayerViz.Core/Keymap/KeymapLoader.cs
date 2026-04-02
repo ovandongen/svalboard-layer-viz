@@ -87,6 +87,7 @@ public class KeymapLoader
                         IsLayerSwitch = info.IsLayerSwitch,
                         TargetLayer = info.TargetLayer,
                         IsUnknown = info.IsUnknown,
+                        ShiftedLabel = info.ShiftedLabel,
                         X = position.X,
                         Y = position.Y,
                         Width = position.Width,

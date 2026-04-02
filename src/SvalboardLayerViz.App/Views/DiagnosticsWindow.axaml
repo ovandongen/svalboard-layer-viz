@@ -1,0 +1,115 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        x:Class="SvalboardLayerViz.App.Views.DiagnosticsWindow"
+        x:DataType="vm:DiagnosticsViewModel"
+        Title="Matrix Diagnostics"
+        Width="750" Height="550"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+
+        <!-- Header with stats and clear button -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16" Margin="0,0,0,12">
+            <TextBlock Foreground="#CDD6F4" VerticalAlignment="Center">
+                <Run Text="Events: " />
+                <Run Text="{Binding EventCount}" FontWeight="Bold" Foreground="#89B4FA" />
+            </TextBlock>
+            <TextBlock Foreground="#CDD6F4" VerticalAlignment="Center">
+                <Run Text="Pressed: " />
+                <Run Text="{Binding PressedCount}" FontWeight="Bold" Foreground="#A6E3A1" />
+            </TextBlock>
+            <Button Command="{Binding ClearCommand}" Content="Clear Log" Padding="12,4" />
+        </StackPanel>
+
+        <!-- Currently pressed keys grid -->
+        <Border Grid.Row="1" Background="#11111B" CornerRadius="4"
+                BorderThickness="1" BorderBrush="#313244"
+                Margin="0,0,0,12" Padding="0"
+                MaxHeight="180">
+            <Grid RowDefinitions="Auto,*">
+                <!-- Column headers -->
+                <Border Grid.Row="0" Background="#181825" Padding="8,6"
+                        CornerRadius="4,4,0,0">
+                    <Grid ColumnDefinitions="50,50,120,90,70,100,80">
+                        <TextBlock Grid.Column="0" Text="Row" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="1" Text="Col" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="2" Text="Label" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="3" Text="Modifier" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="4" Text="Keycode" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="5" Text="Layer" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                        <TextBlock Grid.Column="6" Text="Flags" Foreground="#6C7086"
+                                   FontSize="11" FontWeight="SemiBold" />
+                    </Grid>
+                </Border>
+
+                <!-- Pressed key rows -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding PressedKeys}" Padding="8,4">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PressedKeyEntry">
+                            <Grid ColumnDefinitions="50,50,120,90,70,100,80" Margin="0,2">
+                                <TextBlock Grid.Column="0" Text="{Binding Row}"
+                                           Foreground="#CDD6F4" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" />
+                                <TextBlock Grid.Column="1" Text="{Binding Col}"
+                                           Foreground="#CDD6F4" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" />
+                                <TextBlock Grid.Column="2" Text="{Binding Label}"
+                                           Foreground="#F5E0DC" FontSize="12" FontWeight="SemiBold"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" />
+                                <TextBlock Grid.Column="3" Text="{Binding Modifier}"
+                                           Foreground="#F9E2AF" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" />
+                                <TextBlock Grid.Column="4" Text="{Binding Keycode}"
+                                           Foreground="#89B4FA" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" />
+                                <TextBlock Grid.Column="5" Foreground="#A6E3A1" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace">
+                                    <Run Text="{Binding Layer, StringFormat=L{0}}" />
+                                    <Run Text=" " />
+                                    <Run Text="{Binding LayerName}" />
+                                </TextBlock>
+                                <TextBlock Grid.Column="6" Foreground="#6C7086" FontSize="12"
+                                           FontFamily="Cascadia Mono, Consolas, monospace"
+                                           Text="{Binding Flags}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Empty state -->
+                <TextBlock Grid.Row="1"
+                           Text="No keys pressed"
+                           Foreground="#45475A" FontStyle="Italic"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Margin="0,12"
+                           IsVisible="{Binding !PressedKeys.Count}" />
+            </Grid>
+        </Border>
+
+        <!-- Scrolling event log -->
+        <Border Grid.Row="2" Background="#11111B" CornerRadius="4"
+                BorderThickness="1" BorderBrush="#313244">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" Text="Event Log" Foreground="#6C7086"
+                           FontSize="11" FontWeight="SemiBold"
+                           Margin="8,6" />
+                <ListBox Grid.Row="1" ItemsSource="{Binding LogEntries}"
+                         Background="Transparent" Foreground="#A6ADC8"
+                         BorderThickness="0"
+                         FontFamily="Cascadia Mono, Consolas, monospace"
+                         FontSize="11"
+                         Padding="4,0" />
+            </Grid>
+        </Border>
+
+    </Grid>
+
+</Window>

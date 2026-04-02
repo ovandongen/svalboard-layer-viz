@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
         xmlns:views="using:SvalboardLayerViz.App.Views"
+        xmlns:conv="using:SvalboardLayerViz.App.Converters"
         x:Class="SvalboardLayerViz.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:Name="MainWin"
@@ -16,6 +17,10 @@
         SystemDecorations="Full"
         Topmost="{Binding IsAlwaysOnTop}">
 
+    <Window.Resources>
+        <conv:HexColorToBrushConverter x:Key="HexToBrush" />
+    </Window.Resources>
+
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Bars panel: Row 0 (top) or Row 2 (bottom), switched automatically.
@@ -25,12 +30,46 @@
             <Border x:Name="StatusBar" Grid.Row="0" Background="#1E1E2E" Padding="12,8"
                     CornerRadius="8,8,0,0">
                 <DockPanel>
+                    <Button DockPanel.Dock="Left"
+                            Command="{Binding QuitCommand}"
+                            ToolTip.Tip="Quit"
+                            Padding="6,4" Margin="0,0,8,0"
+                            VerticalAlignment="Center">
+                        <PathIcon Width="12" Height="12"
+                                  Data="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                    </Button>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding StatusMessage}"
                                Foreground="#CDD6F4"
                                VerticalAlignment="Center" />
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Spacing="4">
+                        <Button x:Name="LiveButton"
+                                Command="{Binding ToggleLiveHighlightingCommand}"
+                                ToolTip.Tip="Live key highlighting"
+                                Padding="8,4"
+                                IsVisible="{Binding IsConnected}">
+                            <Button.Styles>
+                                <Style Selector="Button#LiveButton">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Style>
+                                <Style Selector="Button#LiveButton[Tag=True]">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </Style>
+                            </Button.Styles>
+                            <Button.Tag>
+                                <Binding Path="IsLiveHighlightingEnabled" />
+                            </Button.Tag>
+                            <PathIcon Width="16" Height="16"
+                                      Data="M3 12h4l3-8 4 16 3-8h4" />
+                        </Button>
+                        <Button Command="{Binding OpenDiagnosticsCommand}"
+                                ToolTip.Tip="Matrix diagnostics"
+                                Padding="8,4"
+                                IsVisible="{Binding IsLiveHighlightingEnabled}">
+                            <PathIcon Width="14" Height="14"
+                                      Data="M2 4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4zm5.5 4.5L10 11l-2.5 2.5L9 15l4-4-4-4-1.5 1.5zM13 15h4v-2h-4v2z" />
+                        </Button>
                         <Button x:Name="PinButton"
                                 Command="{Binding TogglePinCommand}"
                                 ToolTip.Tip="Always on top"
@@ -63,8 +102,10 @@
                 </DockPanel>
             </Border>
 
-            <!-- Layer tabs -->
-            <Border x:Name="LayerTabs" Grid.Row="1" Background="#66181825" Padding="8,4">
+            <!-- Layer tabs — background controlled by slider -->
+            <Border x:Name="LayerTabs" Grid.Row="1"
+                    Background="{Binding TabBackground, Converter={StaticResource HexToBrush}}"
+                    Padding="8,4">
                 <ItemsControl ItemsSource="{Binding Layers}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -90,8 +131,9 @@
             </Border>
         </Grid>
 
-        <!-- Board visualization area (transparent, always row 1) -->
-        <Border Grid.Row="1" Padding="16">
+        <!-- Board visualization area — background controlled by slider -->
+        <Border Grid.Row="1" Padding="16"
+                Background="{Binding BoardBackground, Converter={StaticResource HexToBrush}}">
             <views:BoardView DataContext="{Binding}" />
         </Border>
 

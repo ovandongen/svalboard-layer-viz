@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.Core.Device;
@@ -16,6 +17,13 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly KeycodeService _keycodeService = new();
     private readonly ISettingsService _settingsService;
     private IDisposable? _deviceSubscription;
+    private MatrixPollingService? _matrixPolling;
+
+    /// <summary>Diagnostics log for matrix polling events. Shared with the diagnostics popup.</summary>
+    public DiagnosticsViewModel Diagnostics { get; } = new();
+
+    /// <summary>Callback to open the diagnostics window. Wired up by App.axaml.cs.</summary>
+    public Action? OpenDiagnosticsRequested { get; set; }
 
     [ObservableProperty]
     private KeyboardConfig? _keyboardConfig;
@@ -35,6 +43,36 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isAlwaysOnTop;
+
+    [ObservableProperty]
+    private bool _isLiveHighlightingEnabled;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BoardBackground))]
+    [NotifyPropertyChangedFor(nameof(TabBackground))]
+    private double _backgroundOpacity;
+
+    /// <summary>Background color for the board area, with alpha from the slider.</summary>
+    public string BoardBackground
+    {
+        get
+        {
+            var alpha = (int)(BackgroundOpacity * 255);
+            return $"#{alpha:X2}181825";
+        }
+    }
+
+    /// <summary>Background color for the layer tabs, blending base transparency with the slider.</summary>
+    public string TabBackground
+    {
+        get
+        {
+            // Base is #66181825 (40% alpha). Slider adds on top, up to fully solid.
+            var baseAlpha = 0x66;
+            var alpha = Math.Min(255, baseAlpha + (int)(BackgroundOpacity * (255 - baseAlpha)));
+            return $"#{alpha:X2}181825";
+        }
+    }
 
     [ObservableProperty]
     private ObservableCollection<LayerViewModel> _layers = [];
@@ -59,7 +97,9 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(ISettingsService? settingsService = null)
     {
         _settingsService = settingsService ?? new SettingsService();
-        IsAlwaysOnTop = _settingsService.Load().AlwaysOnTop;
+        var initialSettings = _settingsService.Load();
+        IsAlwaysOnTop = initialSettings.AlwaysOnTop;
+        BackgroundOpacity = Math.Clamp(initialSettings.BackgroundOpacity, 0.0, 1.0);
 
         // Try to connect on startup
         TryConnect();
@@ -76,6 +116,7 @@ public partial class MainWindowViewModel : ObservableObject
             var devices = _deviceService.FindVialDevices();
             if (devices.Count == 0)
             {
+                StopMatrixPolling();
                 StatusMessage = "No Svalboard found. Connect your device via USB.";
                 IsConnected = false;
                 return;
@@ -91,10 +132,16 @@ public partial class MainWindowViewModel : ObservableObject
 
             SelectedLayerIndex = 0;
             IsConnected = true;
+            IsLiveHighlightingEnabled = settings.LiveKeyHighlighting;
+            BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
             StatusMessage = $"Connected: {device.ProductName} — {KeyboardConfig.Layers.Count} layers";
+
+            if (IsLiveHighlightingEnabled)
+                StartMatrixPolling();
         }
         catch (Exception ex)
         {
+            StopMatrixPolling();
             StatusMessage = $"Connection error: {ex.Message}";
             IsConnected = false;
         }
@@ -130,6 +177,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Notify hotkey change
         HotkeyChangeRequested?.Invoke(settings.HotkeyKey, settings.HotkeyModifiers);
+        BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
 
         if (KeyboardConfig is null) return;
 
@@ -157,8 +205,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         var currentLayer = SelectedLayerIndex;
         BuildLayerViewModels(settings);
-        // Force re-selection even if index unchanged, so the UI rebinds
-        _selectedLayerIndex = -1;
+        // Force property-changed even if index unchanged, so the UI rebinds
+        SelectedLayerIndex = -1;
         SelectedLayerIndex = currentLayer;
     }
 
@@ -202,6 +250,73 @@ public partial class MainWindowViewModel : ObservableObject
         ApplySettings();
     }
 
+    private void StartMatrixPolling()
+    {
+        StopMatrixPolling();
+        if (KeyboardConfig is null) return;
+
+        _matrixPolling = new MatrixPollingService(
+            _protocolService, KeyboardConfig.MatrixRows, KeyboardConfig.MatrixCols);
+        _matrixPolling.MatrixStateChanged += OnMatrixStateChanged;
+        _matrixPolling.PollError += msg =>
+            Dispatcher.UIThread.Post(() => StatusMessage = $"Key polling error: {msg}");
+        _matrixPolling.Start();
+        StatusMessage += " | Live keys ON";
+    }
+
+    private void StopMatrixPolling()
+    {
+        if (_matrixPolling is null) return;
+        _matrixPolling.MatrixStateChanged -= OnMatrixStateChanged;
+        _matrixPolling.Dispose();
+        _matrixPolling = null;
+
+        // Clear all pressed states
+        ClearPressedStates();
+    }
+
+    private void OnMatrixStateChanged(bool[,] state)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            // Update pressed states and collect pressed keys for diagnostics
+            var pressedKeys = new List<(KeyViewModel Key, string LayerName)>();
+            foreach (var layerVm in Layers)
+            {
+                foreach (var keyVm in layerVm.Keys)
+                {
+                    var pressed = state[keyVm.Key.Row, keyVm.Key.Col];
+                    keyVm.IsPressed = pressed;
+                    if (pressed)
+                        pressedKeys.Add((keyVm, layerVm.DisplayName));
+                }
+            }
+
+            Diagnostics.LogMatrixEvent(pressedKeys);
+        });
+    }
+
+    private void ClearPressedStates()
+    {
+        foreach (var layerVm in Layers)
+            foreach (var keyVm in layerVm.Keys)
+                keyVm.IsPressed = false;
+    }
+
+    [RelayCommand]
+    private void ToggleLiveHighlighting()
+    {
+        IsLiveHighlightingEnabled = !IsLiveHighlightingEnabled;
+
+        if (IsLiveHighlightingEnabled && IsConnected)
+            StartMatrixPolling();
+        else
+            StopMatrixPolling();
+
+        var settings = _settingsService.Load();
+        _settingsService.Save(settings with { LiveKeyHighlighting = IsLiveHighlightingEnabled });
+    }
+
     [RelayCommand]
     private void SelectLayer(int index) => SelectedLayerIndex = index;
 
@@ -224,6 +339,12 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenDiagnostics()
+    {
+        OpenDiagnosticsRequested?.Invoke();
+    }
+
+    [RelayCommand]
     private void TogglePin()
     {
         IsAlwaysOnTop = !IsAlwaysOnTop;
@@ -240,6 +361,7 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void Quit()
     {
+        StopMatrixPolling();
         _deviceSubscription?.Dispose();
         _protocolService.Dispose();
         Environment.Exit(0);

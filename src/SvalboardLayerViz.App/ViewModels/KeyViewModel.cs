@@ -25,8 +25,14 @@ public partial class KeyViewModel : ObservableObject
     /// <summary>Secondary label (modifier prefix, etc.).</summary>
     public string? SecondaryLabel => Key.SecondaryLabel;
 
+    /// <summary>Shifted symbol for keycap-style display (e.g., "@" for "2").</summary>
+    public string? ShiftedLabel => Key.ShiftedLabel;
+
     /// <summary>True if this key is transparent (showing a key from a lower layer).</summary>
     public bool IsTransparent => Key.IsTransparent;
+
+    /// <summary>True if this transparent key activates the layer it's displayed on (e.g., MO(3) on layer 3).</summary>
+    public bool IsActivatorForCurrentLayer => Key.IsTransparent && Key.IsLayerSwitch && Key.TargetLayer == Layer.Index;
 
     /// <summary>True if this key has no assignment.</summary>
     public bool IsEmpty => string.IsNullOrEmpty(Key.DisplayLabel) && !Key.IsTransparent;
@@ -40,29 +46,47 @@ public partial class KeyViewModel : ObservableObject
     /// <summary>True if the keycode could not be resolved to a known label.</summary>
     public bool IsUnknown => Key.IsUnknown;
 
+    /// <summary>True if this key is currently physically pressed on the keyboard.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BackgroundColor))]
+    [NotifyPropertyChangedFor(nameof(BorderColor))]
+    [NotifyPropertyChangedFor(nameof(ActiveBorderThickness))]
+    private bool _isPressed;
+
     /// <summary>Tooltip with full key details.</summary>
     public string Tooltip => BuildTooltip();
 
     // --- Visual styling ---
 
-    /// <summary>Background color: target layer color for layer-switch keys, dimmer for transparent keys.</summary>
+    /// <summary>Border thickness: thicker when key is pressed.</summary>
+    public Avalonia.Thickness ActiveBorderThickness => IsPressed
+        ? new Avalonia.Thickness(3.0)
+        : new Avalonia.Thickness(1.5);
+
+    /// <summary>Background color: target layer for layer-switch, dimmer for transparent.</summary>
     public string BackgroundColor
     {
         get
         {
             if (IsLayerSwitch && _targetLayerColors is not null)
                 return _targetLayerColors.Background;
+            if (IsActivatorForCurrentLayer)
+                return _colors.Background;
             return IsTransparent ? _colors.TransparentBackground : _colors.Background;
         }
     }
 
-    /// <summary>Border color: target layer color for layer-switch keys, lighter for transparent keys.</summary>
+    /// <summary>Border color: bright white when pressed, target layer for layer-switch, lighter for transparent.</summary>
     public string BorderColor
     {
         get
         {
+            if (IsPressed)
+                return "#FFFFFF";
             if (IsLayerSwitch && _targetLayerColors is not null)
                 return _targetLayerColors.Accent;
+            if (IsActivatorForCurrentLayer)
+                return _colors.Border;
             return IsTransparent ? _colors.TransparentBorder : _colors.Border;
         }
     }
@@ -74,12 +98,14 @@ public partial class KeyViewModel : ObservableObject
         {
             if (IsLayerSwitch && _targetLayerColors is not null)
                 return _targetLayerColors.TextColor;
+            if (IsActivatorForCurrentLayer)
+                return _colors.TextColor;
             return IsTransparent ? _colors.TransparentTextColor : _colors.TextColor;
         }
     }
 
-    /// <summary>Opacity: reduced for transparent keys.</summary>
-    public double KeyOpacity => IsTransparent ? 0.55 : 1.0;
+    /// <summary>Opacity: reduced for transparent keys, full for layer activators.</summary>
+    public double KeyOpacity => (IsTransparent && !IsActivatorForCurrentLayer) ? 0.55 : 1.0;
 
     // --- Layout positioning (in pixels, scaled from layout units) ---
 

@@ -22,4 +22,10 @@ public record UserSettings
 
     /// <summary>Global hotkey modifier (SharpHook EventMask name, e.g. "None", "Ctrl").</summary>
     public string HotkeyModifiers { get; init; } = "None";
+
+    /// <summary>Whether live key highlighting (matrix state polling) is enabled.</summary>
+    public bool LiveKeyHighlighting { get; init; } = true;
+
+    /// <summary>Background solidity behind the board and tabs (0.0 = transparent, 1.0 = solid dark). Default: 0.0.</summary>
+    public double BackgroundOpacity { get; init; } = 0.0;
 }

@@ -120,6 +120,20 @@ public partial class App : Application
                 await dialog.ShowDialog(mainWindow);
             };
 
+            DiagnosticsWindow? diagnosticsWindow = null;
+            viewModel.OpenDiagnosticsRequested = () =>
+            {
+                if (diagnosticsWindow is { IsVisible: true })
+                {
+                    diagnosticsWindow.Activate();
+                    return;
+                }
+
+                diagnosticsWindow = new DiagnosticsWindow { DataContext = viewModel.Diagnostics };
+                diagnosticsWindow.Closed += (_, _) => diagnosticsWindow = null;
+                diagnosticsWindow.Show(mainWindow);
+            };
+
             viewModel.HotkeyChangeRequested = (key, modifiers) =>
             {
                 try
