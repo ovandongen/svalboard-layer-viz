@@ -5,42 +5,50 @@
         x:Class="SvalboardLayerViz.App.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
         Title="Settings"
-        Width="650" Height="800"
+        Width="620" Height="700"
         WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
         <conv:HexColorToBrushConverter x:Key="HexToBrush" />
     </Window.Resources>
 
-    <DockPanel Margin="16">
-        <!-- Footer buttons -->
+    <DockPanel Margin="12">
+        <!-- Footer buttons — always visible -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
-                    HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
-            <Button Content="Reset Colors" Command="{Binding ResetColorsCommand}" />
+                    HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
             <Button Content="Cancel" Command="{Binding CancelCommand}" />
-            <Button Content="Save" Command="{Binding SaveCommand}" Classes="accent" />
+            <Button Content="Save" Command="{Binding SaveCommand}" />
         </StackPanel>
 
-        <ScrollViewer>
-            <StackPanel Spacing="16">
+        <TabControl>
 
-                <!-- Layer Colors & Names -->
-                <TextBlock Text="Layers" FontSize="18" FontWeight="Bold"
-                           Foreground="#CDD6F4" Margin="0,0,0,4" />
-                <ItemsControl ItemsSource="{Binding LayerSettings}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:LayerSettingViewModel">
-                            <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,2">
-                                <Grid ColumnDefinitions="60,*,Auto" RowDefinitions="Auto">
+            <!-- ══════════════ Appearance Tab ══════════════ -->
+            <TabItem Header="Appearance">
+                <StackPanel Margin="8,12" Spacing="12">
+
+                    <!-- Layer Colors & Names -->
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="Layer Colors &amp; Names"
+                                   FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4"
+                                   VerticalAlignment="Center" />
+                        <Button DockPanel.Dock="Right" Content="Reset Colors"
+                                Command="{Binding ResetColorsCommand}"
+                                HorizontalAlignment="Right" Padding="8,3" FontSize="12" />
+                    </DockPanel>
+
+                    <ItemsControl ItemsSource="{Binding LayerSettings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LayerSettingViewModel">
+                                <Grid ColumnDefinitions="56,*,Auto" Margin="0,2">
                                     <TextBlock Grid.Column="0" Text="{Binding Index, StringFormat='Layer {0}'}"
-                                               VerticalAlignment="Center" Foreground="#A6ADC8" />
+                                               VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12" />
                                     <TextBox Grid.Column="1" Text="{Binding Name}"
-                                             Watermark="Name (optional)" Margin="8,0"
+                                             Watermark="Name (optional)" Margin="6,0"
                                              VerticalAlignment="Center" />
-                                    <Button Grid.Column="2" Padding="2" Margin="8,0,0,0"
+                                    <Button Grid.Column="2" Padding="2"
                                             Background="Transparent" BorderThickness="0"
                                             VerticalAlignment="Center">
-                                        <Border Width="32" Height="24" CornerRadius="4"
+                                        <Border Width="28" Height="20" CornerRadius="3"
                                                 Background="{Binding EffectiveColor, Converter={StaticResource HexToBrush}}"
                                                 BorderBrush="#45475A" BorderThickness="1" />
                                         <Button.Flyout>
@@ -51,109 +59,112 @@
                                         </Button.Flyout>
                                     </Button>
                                 </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <!-- Custom Key Labels -->
-                <TextBlock Text="Custom Key Labels" FontSize="18" FontWeight="Bold"
-                           Foreground="#CDD6F4" Margin="0,12,0,4" />
-                <TextBlock Text="Assign custom labels to keycodes. Unknown keycodes from your board are listed automatically."
-                           Foreground="#6C7086" FontSize="12" Margin="0,0,0,4" />
-                <ItemsControl ItemsSource="{Binding CustomKeyLabels}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:CustomKeyLabelViewModel">
-                            <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,2">
-                                <Grid ColumnDefinitions="80,100,*,Auto" RowDefinitions="Auto">
-                                    <TextBlock Grid.Column="0" Text="{Binding HexKeycode}"
-                                               VerticalAlignment="Center" Foreground="#A6ADC8"
-                                               FontFamily="Cascadia Mono,Consolas,monospace" />
-                                    <TextBlock Grid.Column="1" Text="{Binding CurrentLabel}"
-                                               VerticalAlignment="Center" Foreground="#6C7086"
-                                               Margin="8,0" />
-                                    <TextBox Grid.Column="2" Text="{Binding UserLabel}"
-                                             Watermark="Custom label" Margin="8,0" />
-                                    <Button Grid.Column="3" Content="×" Padding="6,2"
-                                            Command="{Binding RemoveCommand}"
-                                            ToolTip.Tip="Remove"
-                                            IsVisible="{Binding IsManualEntry}" />
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <!-- Add manual keycode entry -->
-                <Border Background="#1E1E2E" CornerRadius="4" Padding="8" Margin="0,4">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBox Grid.Column="0" Text="{Binding NewKeycodeHex}"
-                                 Watermark="Hex keycode (e.g. 0x5300)" />
-                        <Button Grid.Column="1" Content="Add" Margin="8,0,0,0"
-                                Command="{Binding AddCustomLabelCommand}" Padding="12,4" />
-                    </Grid>
-                </Border>
+                    <!-- Separator -->
+                    <Border Height="1" Background="#313244" Margin="0,4" />
 
-                <!-- Global Hotkey -->
-                <TextBlock Text="Global Hotkey" FontSize="18" FontWeight="Bold"
-                           Foreground="#CDD6F4" Margin="0,12,0,4" />
-                <Border Background="#1E1E2E" CornerRadius="4" Padding="12">
-                    <StackPanel Spacing="8">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Key:" VerticalAlignment="Center"
-                                       Width="80" Foreground="#A6ADC8" />
-                            <TextBox Text="{Binding HotkeyKey}" Watermark="e.g. F12" />
-                        </DockPanel>
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Left" Text="Modifiers:" VerticalAlignment="Center"
-                                       Width="80" Foreground="#A6ADC8" />
-                            <StackPanel Orientation="Horizontal" Spacing="12">
-                                <CheckBox Content="Ctrl" IsChecked="{Binding HotkeyCtrl}" />
-                                <CheckBox Content="Shift" IsChecked="{Binding HotkeyShift}" />
-                                <CheckBox Content="Alt" IsChecked="{Binding HotkeyAlt}" />
-                                <CheckBox Content="GUI" IsChecked="{Binding HotkeyGui}" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Layer Hold Threshold -->
-                <TextBlock Text="Layer Hold Threshold" FontSize="18" FontWeight="Bold"
-                           Foreground="#CDD6F4" Margin="0,12,0,4" />
-                <TextBlock Text="How long a momentary layer key (MO, LT) must be held before the visualization switches layers. Prevents flicker from quick taps on dual-function keys. Set to 0 for instant switching."
-                           Foreground="#6C7086" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,4" />
-                <TextBlock Text="{Binding DeviceTappingTermHint}"
-                           Foreground="#A6E3A1" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
-                <Border Background="#1E1E2E" CornerRadius="4" Padding="12">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Right" Text="{Binding ThresholdDisplay}"
-                                   Foreground="#CDD6F4" FontWeight="SemiBold" Width="50"
-                                   VerticalAlignment="Center" TextAlignment="Right" />
-                        <Slider Minimum="0" Maximum="500"
-                                Value="{Binding LayerHoldThresholdMs}"
-                                TickFrequency="50" IsSnapToTickEnabled="True"
-                                TickPlacement="BottomRight" />
-                    </DockPanel>
-                </Border>
-
-                <!-- Background Opacity -->
-                <TextBlock Text="Background Fill" FontSize="18" FontWeight="Bold"
-                           Foreground="#CDD6F4" Margin="0,12,0,4" />
-                <TextBlock Text="Controls how solid the background is behind the keys and layer tabs. 0% = fully transparent (overlay), 100% = solid dark."
-                           Foreground="#6C7086" FontSize="12" Margin="0,0,0,4" />
-                <Border Background="#1E1E2E" CornerRadius="4" Padding="12">
+                    <!-- Background Fill -->
+                    <TextBlock Text="Background Fill" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock Text="0% = transparent overlay, 100% = solid dark"
+                               Foreground="#6C7086" FontSize="11" Margin="0,-4,0,0" />
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Right" Text="{Binding OpacityPercent}"
                                    Foreground="#CDD6F4" FontWeight="SemiBold" Width="40"
                                    VerticalAlignment="Center" TextAlignment="Right" />
                         <Slider Minimum="0" Maximum="1.0"
                                 Value="{Binding BackgroundOpacity}"
-                                TickFrequency="0.05" IsSnapToTickEnabled="True"
-                                TickPlacement="BottomRight" />
+                                TickFrequency="0.05" IsSnapToTickEnabled="True" />
                     </DockPanel>
-                </Border>
 
-            </StackPanel>
-        </ScrollViewer>
+                </StackPanel>
+            </TabItem>
+
+            <!-- ══════════════ Behavior Tab ══════════════ -->
+            <TabItem Header="Behavior">
+                <StackPanel Margin="8,12" Spacing="12">
+
+                    <!-- Global Hotkey -->
+                    <TextBlock Text="Global Hotkey" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto" Margin="0,0,0,0">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Key:"
+                                   VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding HotkeyKey}"
+                                 Watermark="e.g. F12" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modifiers:"
+                                   VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12"
+                                   Margin="0,6,0,0" />
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
+                                    Spacing="10" Margin="0,6,0,0">
+                            <CheckBox Content="Ctrl" IsChecked="{Binding HotkeyCtrl}" />
+                            <CheckBox Content="Shift" IsChecked="{Binding HotkeyShift}" />
+                            <CheckBox Content="Alt" IsChecked="{Binding HotkeyAlt}" />
+                            <CheckBox Content="GUI" IsChecked="{Binding HotkeyGui}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="#313244" Margin="0,4" />
+
+                    <!-- Layer Hold Threshold -->
+                    <TextBlock Text="Layer Hold Threshold" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock Text="Min hold time before MO/LT keys switch the displayed layer. Prevents flicker from quick taps."
+                               Foreground="#6C7086" FontSize="11" TextWrapping="Wrap" Margin="0,-4,0,0" />
+                    <TextBlock Text="{Binding DeviceTappingTermHint}"
+                               Foreground="#A6E3A1" FontSize="11" Margin="0,-4,0,0" />
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding ThresholdDisplay}"
+                                   Foreground="#CDD6F4" FontWeight="SemiBold" Width="50"
+                                   VerticalAlignment="Center" TextAlignment="Right" />
+                        <Slider Minimum="0" Maximum="500"
+                                Value="{Binding LayerHoldThresholdMs}"
+                                TickFrequency="50" IsSnapToTickEnabled="True" />
+                    </DockPanel>
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="#313244" Margin="0,4" />
+
+                    <!-- Custom Key Labels -->
+                    <TextBlock Text="Custom Key Labels" FontSize="14" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock Text="Assign labels to unknown keycodes from your board"
+                               Foreground="#6C7086" FontSize="11" Margin="0,-4,0,0" />
+                    <ItemsControl ItemsSource="{Binding CustomKeyLabels}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CustomKeyLabelViewModel">
+                                <Grid ColumnDefinitions="72,90,*,Auto" Margin="0,2">
+                                    <TextBlock Grid.Column="0" Text="{Binding HexKeycode}"
+                                               VerticalAlignment="Center" Foreground="#A6ADC8"
+                                               FontFamily="Cascadia Mono,Consolas,monospace" FontSize="12" />
+                                    <TextBlock Grid.Column="1" Text="{Binding CurrentLabel}"
+                                               VerticalAlignment="Center" Foreground="#6C7086"
+                                               FontSize="12" Margin="4,0" />
+                                    <TextBox Grid.Column="2" Text="{Binding UserLabel}"
+                                             Watermark="Custom label" Margin="4,0" />
+                                    <Button Grid.Column="3" Content="x" Padding="6,2"
+                                            Command="{Binding RemoveCommand}"
+                                            ToolTip.Tip="Remove"
+                                            IsVisible="{Binding IsManualEntry}" FontSize="11" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding NewKeycodeHex}"
+                                 Watermark="Hex keycode (e.g. 0x5300)" />
+                        <Button Grid.Column="1" Content="Add" Margin="6,0,0,0"
+                                Command="{Binding AddCustomLabelCommand}" Padding="10,4" />
+                    </Grid>
+
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
     </DockPanel>
 
 </Window>

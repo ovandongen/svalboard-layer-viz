@@ -1,0 +1,4 @@
+#!/bin/bash
+# Launch Svalboard Layer Viz (self-contained)
+DIR="$(dirname "${BASH_SOURCE[0]}")"
+exec "$DIR/bin/SvalboardLayerViz.App" 2>/tmp/svalboard-layerviz.log

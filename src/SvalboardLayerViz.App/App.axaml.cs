@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using SvalboardLayerViz.App.Services;
 using SvalboardLayerViz.App.ViewModels;
@@ -25,11 +26,17 @@ public partial class App : Application
         {
             var settingsService = new SettingsService();
             var viewModel = new MainWindowViewModel(settingsService);
-            var mainWindow = new MainWindow
-            {
-                DataContext = viewModel
-            };
+            var mainWindow = new MainWindow { DataContext = viewModel };
             desktop.MainWindow = mainWindow;
+
+            // Set tray icon from embedded PNG
+            var trayIcons = TrayIcon.GetIcons(this);
+            if (trayIcons?.Count > 0)
+            {
+                trayIcons[0].Icon = new WindowIcon(
+                    AssetLoader.Open(new Uri("avares://SvalboardLayerViz.App/Assets/icon.png")));
+            }
+
 
             viewModel.ShowWindowRequested = () =>
             {
@@ -176,4 +183,5 @@ public partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
 }

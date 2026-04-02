@@ -150,7 +150,8 @@ public partial class SettingsViewModel : ObservableObject
         if (HotkeyGui) modParts.Add("GUI");
         var modsString = modParts.Count > 0 ? string.Join("+", modParts) : "None";
 
-        var settings = new UserSettings
+        var existing = _settingsService.Load();
+        var settings = existing with
         {
             LayerColors = layerColors,
             LayerNames = layerNames,

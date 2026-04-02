@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SvalboardLayerViz.Core\SvalboardLayerViz.Core.csproj" />
   </ItemGroup>
 

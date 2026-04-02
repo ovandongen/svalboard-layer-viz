@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SvalboardLayerViz.Core\SvalboardLayerViz.Core.csproj" />
   </ItemGroup>
 

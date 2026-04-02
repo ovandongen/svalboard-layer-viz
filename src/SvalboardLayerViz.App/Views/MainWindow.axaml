@@ -33,6 +33,7 @@
                     <Button DockPanel.Dock="Left"
                             Command="{Binding QuitCommand}"
                             ToolTip.Tip="Quit"
+                            Focusable="False"
                             Padding="6,4" Margin="0,0,8,0"
                             VerticalAlignment="Center">
                         <PathIcon Width="12" Height="12"
@@ -44,6 +45,11 @@
                                VerticalAlignment="Center" />
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Spacing="4">
+                        <StackPanel.Styles>
+                            <Style Selector="StackPanel > Button">
+                                <Setter Property="Focusable" Value="False" />
+                            </Style>
+                        </StackPanel.Styles>
                         <Button x:Name="LiveButton"
                                 Command="{Binding ToggleLiveHighlightingCommand}"
                                 ToolTip.Tip="Live key highlighting"

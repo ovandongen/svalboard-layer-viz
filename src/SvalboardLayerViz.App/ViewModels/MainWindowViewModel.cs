@@ -167,11 +167,12 @@ public partial class MainWindowViewModel : ObservableObject
     {
         try
         {
+            StopMatrixPolling();
+
             var settings = _settingsService.Load();
             var devices = _deviceService.FindVialDevices();
             if (devices.Count == 0)
             {
-                StopMatrixPolling();
                 StatusMessage = "No Svalboard found. Connect your device via USB.";
                 IsConnected = false;
                 return;
