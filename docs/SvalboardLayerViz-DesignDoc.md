@@ -294,7 +294,7 @@ Implemented features:
 - [x] Window dragging — custom drag via bars area (replaces missing title bar)
 - [x] 165 unit tests
 
-### Phase 2: Live Key Highlighting & UI Enhancements — IN PROGRESS
+### Phase 2: Live Key Highlighting & UI Enhancements — COMPLETE
 
 **Goal:** Real-time key press visualization and UI polish.
 
@@ -315,6 +315,13 @@ Implemented features:
   - **Limitations:** Toggle tracking can drift if app starts while a layer is toggled, or on very fast double-taps within one poll cycle. TO/DF/OSL not tracked (need firmware state). True 100% reliable layer detection requires a firmware `get_active_layer` command
 - [x] `LayerSwitchType` enum — classifies layer-switch keys as Momentary, Toggle, Activate, or OneShot throughout the model chain (KeycodeInfo → Key → TransparentKeyResolver)
 - [x] QMK Settings protocol support — `GetQmkSetting(settingId)` reads settings from device via Vial's QMK Settings commands
+- [x] Settings save bug fix — `SettingsViewModel.Save()` now merges with existing settings using `with { }` instead of creating a fresh record, preventing silent loss of unmanaged fields (`AlwaysOnTop`, `LiveKeyHighlighting`, `AutoLayerSwitch`)
+- [x] Refresh button fix — `StopMatrixPolling()` moved to top of `TryConnect()` to prevent race condition where polling reads from a disposed HID stream during reconnect
+- [x] Tabbed settings window — two-tab layout (Appearance / Behavior) replaces scrolling single-page design. Cleaner, more professional styling
+- [x] Toolbar buttons non-focusable — prevents Enter key from re-triggering the last clicked toolbar button (e.g., reopening settings)
+- [x] App icon — Svalboard finger cluster icon (5 dots in cross pattern). Static PNG embedded as AvaloniaResource for tray icon. macOS `.app` bundle with `.icns` for dock icon
+- [x] macOS `.app` bundle — self-contained published app with proper `Info.plist` and dock icon. Solves macOS limitation where `dotnet run` uses the generic .NET dock icon
+- [x] Comprehensive README — getting started guide, macOS bundle setup, usage docs, troubleshooting. Written for users with no .NET experience
 - [x] 216 unit tests
 
 Still planned:
@@ -336,7 +343,7 @@ SvalboardLayerViz/
 │   │   │   ├── MainWindow.axaml(.cs)       # Transparent overlay window, auto-flipping bars, custom drag
 │   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
-│   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (colors, names, labels, hotkey, bg fill)
+│   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (tabbed: Appearance + Behavior)
 │   │   │   └── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
 │   │   ├── ViewModels/
 │   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, matrix polling
@@ -344,11 +351,14 @@ SvalboardLayerViz/
 │   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
 │   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
 │   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
-│   │   │   └── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, background fill
+│   │   │   └── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
 │   │   ├── Converters/
 │   │   │   └── HexColorToBrushConverter.cs # Hex string → SolidColorBrush for live preview
-│   │   └── Services/
-│   │       └── GlobalHotkeyService.cs      # SharpHook-based global hotkey listener
+│   │   ├── Services/
+│   │   │   └── GlobalHotkeyService.cs      # SharpHook-based global hotkey listener
+│   │   └── Assets/
+│   │       ├── icon.png                    # App icon (256x256 PNG, Svalboard cluster pattern)
+│   │       └── icon.icns                   # macOS icon (multi-resolution, for .app bundle)
 │   │
 │   ├── SvalboardLayerViz.Core/             # Business logic (no UI dependency)
 │   │   ├── Protocol/
@@ -400,7 +410,9 @@ SvalboardLayerViz/
 │   ├── 01-04-26.md                         # Change log (day 1)
 │   ├── 02-04-26.md                         # Change log (day 2, session 1)
 │   ├── 02-04-26-b.md                       # Change log (day 2, session 2)
-│   └── 02-04-26-c.md                       # Change log (day 2, session 3)
+│   ├── 02-04-26-c.md                       # Change log (day 2, session 3)
+│   └── 02-04-26-d.md                       # Change log (day 2, session 4)
+├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```
 
