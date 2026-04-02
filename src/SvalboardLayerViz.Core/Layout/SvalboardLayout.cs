@@ -17,6 +17,9 @@ namespace SvalboardLayerViz.Core.Layout;
 /// </summary>
 public static class SvalboardLayout
 {
+    /// <summary>Pixels per layout unit. All layout coordinates use this scale factor.</summary>
+    public const double Scale = 60.0;
+
     private static readonly KeyPosition[] _positions =
     [
         // Row 0 — left inner modifiers

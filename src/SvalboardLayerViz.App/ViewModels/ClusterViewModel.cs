@@ -8,7 +8,6 @@ namespace SvalboardLayerViz.App.ViewModels;
 /// </summary>
 public class ClusterViewModel
 {
-    private const double Scale = 60.0;
     private const double Padding = 4.0; // pixels of padding around the bounding box
 
     public string Name { get; }
@@ -22,10 +21,10 @@ public class ClusterViewModel
         Name = name;
         var list = positions.ToList();
 
-        var minX = list.Min(p => p.X) * Scale - Padding;
-        var minY = list.Min(p => p.Y) * Scale - Padding;
-        var maxX = list.Max(p => p.X + p.Width) * Scale + Padding;
-        var maxY = list.Max(p => p.Y + p.Height) * Scale + Padding;
+        var minX = list.Min(p => p.X) * SvalboardLayout.Scale - Padding;
+        var minY = list.Min(p => p.Y) * SvalboardLayout.Scale - Padding;
+        var maxX = list.Max(p => p.X + p.Width) * SvalboardLayout.Scale + Padding;
+        var maxY = list.Max(p => p.Y + p.Height) * SvalboardLayout.Scale + Padding;
 
         Left = minX;
         Top = minY;

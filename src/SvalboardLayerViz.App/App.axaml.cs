@@ -138,8 +138,13 @@ public partial class App : Application
                     return;
                 }
 
+                viewModel.Diagnostics.IsActive = true;
                 diagnosticsWindow = new DiagnosticsWindow { DataContext = viewModel.Diagnostics };
-                diagnosticsWindow.Closed += (_, _) => diagnosticsWindow = null;
+                diagnosticsWindow.Closed += (_, _) =>
+                {
+                    viewModel.Diagnostics.IsActive = false;
+                    diagnosticsWindow = null;
+                };
                 diagnosticsWindow.Show(mainWindow);
             };
 

@@ -39,6 +39,12 @@ public partial class DiagnosticsViewModel : ObservableObject
 {
     private const int MaxLogEntries = 500;
 
+    /// <summary>When false, LogMatrixEvent is a no-op. Set by App.axaml.cs on window open/close.</summary>
+    public bool IsActive { get; set; }
+
+    /// <summary>Tracks which keys were pressed in the previous event to suppress duplicate logs.</summary>
+    private HashSet<(int Row, int Col)> _previousPressedKeys = [];
+
     [ObservableProperty]
     private int _eventCount;
 
@@ -53,6 +59,15 @@ public partial class DiagnosticsViewModel : ObservableObject
     /// </summary>
     public void LogMatrixEvent(IReadOnlyList<(KeyViewModel Key, string LayerName)> pressedKeys)
     {
+        if (!IsActive) return;
+
+        // Only log when the set of pressed keys actually changes
+        var currentKeys = new HashSet<(int Row, int Col)>(
+            pressedKeys.Select(p => (p.Key.Key.Row, p.Key.Key.Col)));
+        if (currentKeys.SetEquals(_previousPressedKeys))
+            return;
+        _previousPressedKeys = currentKeys;
+
         EventCount++;
         PressedCount = pressedKeys.Count;
 
@@ -102,6 +117,7 @@ public partial class DiagnosticsViewModel : ObservableObject
     {
         LogEntries.Clear();
         PressedKeys.Clear();
+        _previousPressedKeys = [];
         EventCount = 0;
         PressedCount = 0;
     }

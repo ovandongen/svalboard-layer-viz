@@ -11,7 +11,7 @@ namespace SvalboardLayerViz.Core.Export;
 /// </summary>
 public static class BoardRenderer
 {
-    private const float Scale = 60f;
+    private const float Scale = (float)SvalboardLayout.Scale;
     public const float BoardWidth = 24.3f * Scale;  // 1458px
     public const float BoardHeight = 7f * Scale;     // 420px
     public const float HeaderHeight = 40f;
