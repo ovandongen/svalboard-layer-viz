@@ -24,6 +24,7 @@
 
             <!-- ══════════════ Appearance Tab ══════════════ -->
             <TabItem Header="Appearance">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="8,12" Spacing="12">
 
                     <!-- Layer Colors & Names -->
@@ -81,10 +82,12 @@
                     </DockPanel>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <!-- ══════════════ Behavior Tab ══════════════ -->
             <TabItem Header="Behavior">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="8,12" Spacing="12">
 
                     <!-- Global Hotkey -->
@@ -162,6 +165,7 @@
                     </Grid>
 
                 </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
         </TabControl>

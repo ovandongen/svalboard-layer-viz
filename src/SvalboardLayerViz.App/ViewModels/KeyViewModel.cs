@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SvalboardLayerViz.Core.Export;
 using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Models;
 
@@ -64,48 +65,18 @@ public partial class KeyViewModel : ObservableObject
         : new Avalonia.Thickness(1.5);
 
     /// <summary>Background color: target layer for layer-switch, dimmer for transparent.</summary>
-    public string BackgroundColor
-    {
-        get
-        {
-            if (IsLayerSwitch && _targetLayerColors is not null)
-                return _targetLayerColors.Background;
-            if (IsActivatorForCurrentLayer)
-                return _colors.Background;
-            return IsTransparent ? _colors.TransparentBackground : _colors.Background;
-        }
-    }
+    public string BackgroundColor => KeyStyleResolver.Resolve(Key, Layer.Index, _colors, _targetLayerColors).Background;
 
     /// <summary>Border color: bright white when pressed, target layer for layer-switch, lighter for transparent.</summary>
-    public string BorderColor
-    {
-        get
-        {
-            if (IsPressed)
-                return "#FFFFFF";
-            if (IsLayerSwitch && _targetLayerColors is not null)
-                return _targetLayerColors.Accent;
-            if (IsActivatorForCurrentLayer)
-                return _colors.Border;
-            return IsTransparent ? _colors.TransparentBorder : _colors.Border;
-        }
-    }
+    public string BorderColor => IsPressed
+        ? "#FFFFFF"
+        : KeyStyleResolver.Resolve(Key, Layer.Index, _colors, _targetLayerColors).Border;
 
     /// <summary>Text color: auto-contrasts against background.</summary>
-    public string TextColor
-    {
-        get
-        {
-            if (IsLayerSwitch && _targetLayerColors is not null)
-                return _targetLayerColors.TextColor;
-            if (IsActivatorForCurrentLayer)
-                return _colors.TextColor;
-            return IsTransparent ? _colors.TransparentTextColor : _colors.TextColor;
-        }
-    }
+    public string TextColor => KeyStyleResolver.Resolve(Key, Layer.Index, _colors, _targetLayerColors).Text;
 
     /// <summary>Opacity: reduced for transparent keys, full for layer activators.</summary>
-    public double KeyOpacity => (IsTransparent && !IsActivatorForCurrentLayer) ? 0.55 : 1.0;
+    public double KeyOpacity => KeyStyleResolver.Resolve(Key, Layer.Index, _colors, _targetLayerColors).Opacity;
 
     // --- Layout positioning (in pixels, scaled from layout units) ---
 

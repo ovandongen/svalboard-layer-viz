@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using SvalboardLayerViz.App.Services;
 using SvalboardLayerViz.App.ViewModels;
 using SvalboardLayerViz.App.Views;
+using SvalboardLayerViz.Core.Export;
 using SvalboardLayerViz.Core.Settings;
 
 namespace SvalboardLayerViz.App;
@@ -140,6 +141,67 @@ public partial class App : Application
                 diagnosticsWindow = new DiagnosticsWindow { DataContext = viewModel.Diagnostics };
                 diagnosticsWindow.Closed += (_, _) => diagnosticsWindow = null;
                 diagnosticsWindow.Show(mainWindow);
+            };
+
+            viewModel.OpenExportRequested = async () =>
+            {
+                if (viewModel.KeyboardConfig is null) return;
+
+                var exportVm = new ExportDialogViewModel(viewModel.Layers.ToList());
+                var exportDialog = new ExportDialog { DataContext = exportVm };
+
+                exportVm.Cancelled = () => exportDialog.Close();
+                exportVm.ExportRequested = async () =>
+                {
+                    var format = exportVm.SelectedFormat;
+                    var ext = format switch
+                    {
+                        ExportFormat.Png => "png",
+                        ExportFormat.Pdf => "pdf",
+                        ExportFormat.Svg => "svg",
+                        _ => "png"
+                    };
+                    var formatName = format.ToString().ToUpperInvariant();
+
+                    var storageProvider = mainWindow.StorageProvider;
+                    var file = await storageProvider.SaveFilePickerAsync(new Avalonia.Platform.Storage.FilePickerSaveOptions
+                    {
+                        Title = "Export Layout",
+                        DefaultExtension = ext,
+                        SuggestedFileName = $"svalboard-layout.{ext}",
+                        FileTypeChoices =
+                        [
+                            new Avalonia.Platform.Storage.FilePickerFileType(formatName)
+                            {
+                                Patterns = [$"*.{ext}"]
+                            }
+                        ],
+                    });
+
+                    if (file is null) return;
+                    var path = file.Path.LocalPath;
+
+                    try
+                    {
+                        var userSettings = settingsService.Load();
+                        var userColors = userSettings.LayerColors.Count > 0
+                            ? userSettings.LayerColors
+                            : null;
+
+                        var options = exportVm.BuildOptions(path);
+                        ExportService.Export(options, viewModel.KeyboardConfig.Layers,
+                            viewModel.KeyboardConfig.Layers.Count, userColors);
+
+                        viewModel.StatusMessage = $"Exported to {Path.GetFileName(path)}";
+                        exportDialog.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        viewModel.StatusMessage = $"Export error: {ex.Message}";
+                    }
+                };
+
+                await exportDialog.ShowDialog(mainWindow);
             };
 
             viewModel.HotkeyChangeRequested = (key, modifiers) =>

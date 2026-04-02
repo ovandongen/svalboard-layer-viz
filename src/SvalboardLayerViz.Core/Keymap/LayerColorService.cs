@@ -13,7 +13,7 @@ public static class LayerColorService
     /// </summary>
     public static LayerColors GetLayerColors(int layerIndex, int totalLayers,
         byte? deviceHue = null, byte? deviceSat = null, byte? deviceVal = null,
-        string? userHexColor = null)
+        string? userHexColor = null, bool printFriendly = false)
     {
         double h, s, l;
         bool isUserColor = false;
@@ -39,6 +39,9 @@ public static class LayerColorService
             s = 0.55;
             l = 0.50;
         }
+
+        if (printFriendly)
+            return BuildPrintColors(h, s, l, isUserColor);
 
         return BuildColors(h, s, l, isUserColor);
     }
@@ -78,6 +81,26 @@ public static class LayerColorService
         // Auto text color based on background luminance
         var textColor = GetContrastTextColor(bg);
         var transTextColor = GetContrastTextColor(transBg);
+
+        return new LayerColors(bg, border, accent, transBg, transBorder, textColor, transTextColor);
+    }
+
+    /// <summary>
+    /// Print-friendly colors: light pastel fills, dark borders, dark text. Minimal toner on white paper.
+    /// </summary>
+    private static LayerColors BuildPrintColors(double h, double s, double l, bool isUserColor)
+    {
+        // For user colors, lighten them. For algorithmic, use bright pastels.
+        var baseSat = isUserColor ? s : s * 0.7;
+
+        var bg = HslToHex(h, baseSat * 0.5, 0.88);          // Light pastel fill
+        var border = HslToHex(h, baseSat * 0.7, 0.45);       // Medium-dark border
+        var accent = HslToHex(h, baseSat * 0.8, 0.40);       // Dark accent for headers
+        var transBg = HslToHex(h, baseSat * 0.2, 0.94);      // Very light for transparent
+        var transBorder = HslToHex(h, baseSat * 0.3, 0.70);  // Light border for transparent
+
+        var textColor = "#1E1E2E";       // Always dark text on light backgrounds
+        var transTextColor = "#6C7086";  // Gray for transparent keys
 
         return new LayerColors(bg, border, accent, transBg, transBorder, textColor, transTextColor);
     }

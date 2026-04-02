@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 2 In Progress
+**Status:** Phase 3 Complete
 
 ---
 
@@ -327,9 +327,22 @@ Implemented features:
 Still planned:
 - [ ] True layer state query — requires firmware support (`layer_state` via Raw HID or custom Vial command). Would replace heuristic MO/TG tracking with 100% reliable detection. Firmware team is focused on Vial replacement; blocked for now
 
-### Phase 3: Enhanced Visualization
+### Phase 3: Export & Print — COMPLETE
 
-- Export to image/PDF for printing
+**Goal:** Export keyboard layouts to image/PDF for printing and sharing.
+
+Implemented features:
+- [x] Export to PNG — all selected layers stacked vertically, 2× scale for high-DPI output
+- [x] Export to PDF — multiple layers packed per page, scaled to fit standard page sizes (A4 Landscape, Letter Landscape) with 30pt margins. Flows to new pages automatically
+- [x] Export to SVG — vector output, all selected layers stacked vertically
+- [x] Export dialog — format picker, page size selector (PDF only), per-layer checkboxes with "Hide thumbs" toggle, Select All/None
+- [x] Hide bottom clusters — per-layer option to omit thumb clusters and modifier keys (L-Mod, L-Thumb, R-Thumb) from export. Reduces layer height so more layers fit per page
+- [x] Print-friendly colors — light pastel key fills, dark borders and text on white background. Minimal toner usage. User-picked colors lightened for print. Auto-contrast text always dark
+- [x] Toolbar export button — download icon in toolbar, visible when connected
+- [x] SkiaSharp rendering pipeline — single `BoardRenderer` draws to `SKCanvas`, which backs all three formats (bitmap, PDF document, SVG canvas). Layer header with name in accent color above each board
+- [x] `KeyStyleResolver` — shared color/opacity logic extracted from `KeyViewModel` into Core, used by both UI and export renderer. Eliminates duplication
+- [x] Settings window scrollbar fix — both Appearance and Behavior tabs now wrapped in `ScrollViewer`
+- [x] 243 unit tests
 
 ## 8. Project Structure
 
@@ -338,20 +351,22 @@ SvalboardLayerViz/
 ├── SvalboardLayerViz.sln
 ├── src/
 │   ├── SvalboardLayerViz.App/              # Avalonia application
-│   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring, settings/label dialogs
+│   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring, settings/label/export dialogs
 │   │   ├── Views/
 │   │   │   ├── MainWindow.axaml(.cs)       # Transparent overlay window, auto-flipping bars, custom drag
 │   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
 │   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (tabbed: Appearance + Behavior)
-│   │   │   └── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
+│   │   │   ├── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
+│   │   │   └── ExportDialog.axaml(.cs)     # Export dialog (format, page size, layer selection, hide thumbs)
 │   │   ├── ViewModels/
 │   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, matrix polling
 │   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, IsPressed
 │   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
 │   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
 │   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
-│   │   │   └── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
+│   │   │   ├── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
+│   │   │   └── ExportDialogViewModel.cs    # Export dialog: layer checkboxes, format/page size pickers
 │   │   ├── Converters/
 │   │   │   └── HexColorToBrushConverter.cs # Hex string → SolidColorBrush for live preview
 │   │   ├── Services/
@@ -374,11 +389,17 @@ SvalboardLayerViz/
 │   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys, auto-layer, hold threshold)
 │   │   │   ├── ISettingsService.cs         # Load/Save interface
 │   │   │   └── SettingsService.cs          # JSON persistence at {AppData}/SvalboardLayerViz/settings.json
+│   │   ├── Export/
+│   │   │   ├── ExportFormat.cs             # Enums: ExportFormat (Png/Pdf/Svg), PdfPageSize (A4/Letter landscape)
+│   │   │   ├── ExportOptions.cs            # Export config: format, layers, scale, page size, hide thumbs
+│   │   │   ├── ExportService.cs            # Orchestrates multi-layer export to PNG/PDF/SVG
+│   │   │   ├── BoardRenderer.cs            # SkiaSharp rendering: draws one layer (header + keys) to SKCanvas
+│   │   │   └── KeyStyleResolver.cs         # Shared key color/opacity logic (used by UI + export)
 │   │   ├── Keymap/
 │   │   │   ├── KeycodeService.cs           # Translate 16-bit codes to labels (user labels checked first)
 │   │   │   ├── KeymapLoader.cs             # Orchestrate full config load
 │   │   │   ├── TransparentKeyResolver.cs   # Walk layer stack for KC_TRNS
-│   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, auto-contrast text
+│   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, auto-contrast text, print-friendly mode
 │   │   ├── Layout/
 │   │   │   ├── SvalboardLayout.cs          # Physical key positions (52 keys)
 │   │   │   └── LayoutDefinition.cs         # Parsed definition from device
@@ -388,7 +409,12 @@ SvalboardLayerViz/
 │   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/SwitchType/IsUnknown
 │   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests (216 tests)
+│   └── SvalboardLayerViz.Tests/            # Unit tests (243 tests)
+│       ├── Export/
+│       │   ├── KeyStyleResolverTests.cs    # Color/opacity logic for normal, transparent, layer-switch keys
+│       │   ├── BoardRendererTests.cs       # Rendering to bitmap, hide thumbs, user colors, color parsing
+│       │   ├── ExportServiceTests.cs       # PNG/PDF/SVG output validation (magic bytes, file creation)
+│       │   └── ExportDialogViewModelTests.cs # Select all/none, format, hide thumbs, build options
 │       ├── Keymap/
 │       │   ├── KeycodeServiceTests.cs      # Keycode resolution (all ranges)
 │       │   ├── TransparentKeyResolverTests.cs
@@ -411,7 +437,8 @@ SvalboardLayerViz/
 │   ├── 02-04-26.md                         # Change log (day 2, session 1)
 │   ├── 02-04-26-b.md                       # Change log (day 2, session 2)
 │   ├── 02-04-26-c.md                       # Change log (day 2, session 3)
-│   └── 02-04-26-d.md                       # Change log (day 2, session 4)
+│   ├── 02-04-26-d.md                       # Change log (day 2, session 4)
+│   └── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
 ├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```
@@ -560,6 +587,7 @@ Screen
 | SharpCompress | XZ decompression | MIT |
 | CommunityToolkit.Mvvm | MVVM helpers (ObservableObject, RelayCommand) | MIT |
 | SharpHook | Cross-platform global keyboard hooks (libuiohook) | MIT |
+| SkiaSharp | 2D graphics rendering for export (PNG/PDF/SVG) | MIT |
 | System.Text.Json | JSON parsing (built-in) | MIT |
 
 ---

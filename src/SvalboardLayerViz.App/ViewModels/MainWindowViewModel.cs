@@ -143,6 +143,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Callback to open the settings window. Wired up by App.axaml.cs.</summary>
     public Action? OpenSettingsRequested { get; set; }
 
+    /// <summary>Callback to open the export dialog. Wired up by App.axaml.cs.</summary>
+    public Action? OpenExportRequested { get; set; }
+
     /// <summary>Callback when hotkey settings change. Wired up by App.axaml.cs. Args: (key, modifiers).</summary>
     public Action<string, string>? HotkeyChangeRequested { get; set; }
 
@@ -537,6 +540,12 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenDiagnostics()
     {
         OpenDiagnosticsRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void Export()
+    {
+        OpenExportRequested?.Invoke();
     }
 
     [RelayCommand]
