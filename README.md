@@ -84,6 +84,44 @@ dotnet test
 
 ---
 
+## Linux: App Launcher Setup
+
+When you run with `dotnet run`, the app works but isn't integrated into your desktop. To install it as a proper app with an icon and launcher entry:
+
+### Install
+
+```bash
+# Publish a self-contained binary
+dotnet publish src/SvalboardLayerViz.App -c Release -r linux-x64 --self-contained -o ~/.local/share/svalboard-layer-viz
+
+# Copy the icon
+cp src/SvalboardLayerViz.App/Assets/icon.png ~/.local/share/svalboard-layer-viz/icon.png
+
+# Create a .desktop entry
+cat > ~/.local/share/applications/svalboard-layer-viz.desktop << 'EOF'
+[Desktop Entry]
+Name=Svalboard Layer Viz
+Exec=/home/YOUR_USERNAME/.local/share/svalboard-layer-viz/SvalboardLayerViz.App
+Icon=/home/YOUR_USERNAME/.local/share/svalboard-layer-viz/icon.png
+Type=Application
+Categories=Utility;
+StartupWMClass=SvalboardLayerViz.App
+EOF
+
+# Refresh the app menu
+update-desktop-database ~/.local/share/applications
+```
+
+Replace `YOUR_USERNAME` with your actual username (or use `$HOME` in the paths).
+
+The app will appear in your launcher and can be pinned to the taskbar/dock.
+
+### After code changes
+
+Re-run the `dotnet publish` command above to update the installed binary.
+
+---
+
 ## macOS: Dock Icon Setup
 
 When you run with `dotnet run`, macOS shows a generic icon in the dock. For a proper dock icon, use the included `.app` bundle:

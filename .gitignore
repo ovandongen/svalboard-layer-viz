@@ -54,3 +54,6 @@ TestResult.xml
 nunit-*.xml
 # macOS app bundle published binaries
 SvalboardLayerViz.app/Contents/MacOS/bin/
+
+# Publish output
+publish/
