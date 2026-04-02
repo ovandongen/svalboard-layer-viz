@@ -7,11 +7,15 @@ namespace SvalboardLayerViz.App.Views;
 public partial class MainWindow : Window
 {
     private bool _barsOnBottom;
+    private const double ResizeEdge = 6;
 
     public MainWindow()
     {
         InitializeComponent();
         PositionChanged += OnPositionChanged;
+
+        if (OperatingSystem.IsMacOS())
+            SystemDecorations = SystemDecorations.Full;
     }
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e)
@@ -46,9 +50,16 @@ public partial class MainWindow : Window
         }
     }
 
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        var pos = e.GetPosition(this);
+        Cursor = GetResizeCursor(pos) ?? new Cursor(StandardCursorType.Arrow);
+    }
+
     /// <summary>
-    /// Allows dragging the window by clicking the bars area (status bar + tabs).
-    /// Needed because SystemDecorations="None" removes the title bar.
+    /// Handles window drag (bars area) and resize (edges).
+    /// SystemDecorations="None" removes OS title bar and resize handles — we replace both here.
     /// </summary>
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
@@ -57,8 +68,11 @@ public partial class MainWindow : Window
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
 
         var pos = e.GetPosition(this);
-        var barsHeight = BarsPanel.Bounds.Height;
 
+        var edge = GetResizeEdge(pos);
+        if (edge.HasValue) { BeginResizeDrag(edge.Value, e); return; }
+
+        var barsHeight = BarsPanel.Bounds.Height;
         bool inBars = _barsOnBottom
             ? pos.Y > Bounds.Height - barsHeight
             : pos.Y < barsHeight;
@@ -66,4 +80,33 @@ public partial class MainWindow : Window
         if (inBars)
             BeginMoveDrag(e);
     }
+
+    private WindowEdge? GetResizeEdge(Point pos)
+    {
+        bool left   = pos.X < ResizeEdge;
+        bool right  = pos.X > Bounds.Width - ResizeEdge;
+        bool top    = pos.Y < ResizeEdge;
+        bool bottom = pos.Y > Bounds.Height - ResizeEdge;
+
+        if (left  && top)    return WindowEdge.NorthWest;
+        if (right && top)    return WindowEdge.NorthEast;
+        if (left  && bottom) return WindowEdge.SouthWest;
+        if (right && bottom) return WindowEdge.SouthEast;
+        if (left)            return WindowEdge.West;
+        if (right)           return WindowEdge.East;
+        if (top)             return WindowEdge.North;
+        if (bottom)          return WindowEdge.South;
+        return null;
+    }
+
+    private Cursor? GetResizeCursor(Point pos) => GetResizeEdge(pos) switch
+    {
+        WindowEdge.NorthWest => new Cursor(StandardCursorType.TopLeftCorner),
+        WindowEdge.NorthEast => new Cursor(StandardCursorType.TopRightCorner),
+        WindowEdge.SouthWest => new Cursor(StandardCursorType.BottomLeftCorner),
+        WindowEdge.SouthEast => new Cursor(StandardCursorType.BottomRightCorner),
+        WindowEdge.West or WindowEdge.East  => new Cursor(StandardCursorType.SizeWestEast),
+        WindowEdge.North or WindowEdge.South => new Cursor(StandardCursorType.SizeNorthSouth),
+        _ => null
+    };
 }
