@@ -26,6 +26,16 @@ public record UserSettings
     /// <summary>Whether live key highlighting (matrix state polling) is enabled.</summary>
     public bool LiveKeyHighlighting { get; init; } = true;
 
+    /// <summary>Whether to auto-switch the displayed layer based on held layer-switch keys.</summary>
+    public bool AutoLayerSwitch { get; init; } = true;
+
+    /// <summary>
+    /// Minimum hold time (ms) before a momentary layer key triggers a layer switch in the visualization.
+    /// Prevents brief taps on dual-function keys (e.g., LT — tap for Enter, hold for layer) from
+    /// causing flicker. Default 200ms matches QMK's typical TAPPING_TERM.
+    /// </summary>
+    public int LayerHoldThresholdMs { get; init; } = 200;
+
     /// <summary>Background solidity behind the board and tabs (0.0 = transparent, 1.0 = solid dark). Default: 0.0.</summary>
     public double BackgroundOpacity { get; init; } = 0.0;
 }

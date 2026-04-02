@@ -306,11 +306,19 @@ Implemented features:
 - [x] Background fill slider — settings slider controls background solidity behind keys and tabs (0% = transparent overlay, 100% = solid dark). Toolbar and key content unaffected
 - [x] Close button in toolbar — X button for quitting without macOS taskbar
 - [x] Toggle button for live highlighting with persistence
-- [x] 201 unit tests
+- [x] Auto-layer-switching — visualization follows the active keyboard layer in real time:
+  - **Momentary keys (MO, LT, TT):** layer activates after configurable hold threshold (default: device tapping term, read via Vial QMK Settings protocol)
+  - **Toggle keys (TG):** tracked via edge detection (rising edge = flip on/off). Best-effort local mirror of firmware state
+  - **Hold threshold:** prevents flicker from quick taps on dual-function keys (e.g., LT — tap for Enter, hold for layer). Configurable in Settings (0–500ms)
+  - **Device tapping term:** read from device on connect via `VialQmkSettingsGet` (setting 0x0007). Shown in Settings as a hint. Falls back to 200ms if unavailable
+  - **Reset button:** clears toggle state and returns to base layer when tracking drifts
+  - **Limitations:** Toggle tracking can drift if app starts while a layer is toggled, or on very fast double-taps within one poll cycle. TO/DF/OSL not tracked (need firmware state). True 100% reliable layer detection requires a firmware `get_active_layer` command
+- [x] `LayerSwitchType` enum — classifies layer-switch keys as Momentary, Toggle, Activate, or OneShot throughout the model chain (KeycodeInfo → Key → TransparentKeyResolver)
+- [x] QMK Settings protocol support — `GetQmkSetting(settingId)` reads settings from device via Vial's QMK Settings commands
+- [x] 216 unit tests
 
 Still planned:
-- [ ] Live layer detection — requires firmware support (`layer_state` query via Raw HID). Firmware team is focused on Vial replacement; blocked for now
-- [ ] Active layer auto-switching in the UI based on detected layer
+- [ ] True layer state query — requires firmware support (`layer_state` via Raw HID or custom Vial command). Would replace heuristic MO/TG tracking with 100% reliable detection. Firmware team is focused on Vial replacement; blocked for now
 
 ### Phase 3: Enhanced Visualization
 
@@ -344,16 +352,16 @@ SvalboardLayerViz/
 │   │
 │   ├── SvalboardLayerViz.Core/             # Business logic (no UI dependency)
 │   │   ├── Protocol/
-│   │   │   ├── VialCommands.cs             # Command ID constants (incl. SwitchMatrixState)
+│   │   │   ├── VialCommands.cs             # Command ID constants (incl. SwitchMatrixState, QmkSettingTappingTerm)
 │   │   │   ├── IVialProtocolService.cs     # Protocol interface (for testability)
-│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages
-│   │   │   ├── MatrixPollingService.cs     # ~10Hz switch matrix polling, change detection
+│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages, QMK Settings reads
+│   │   │   ├── MatrixPollingService.cs     # ~10Hz switch matrix polling, fires while keys held
 │   │   │   └── XzDecompressor.cs           # XZ decompression for definitions
 │   │   ├── Device/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
 │   │   │   └── DeviceInfo.cs               # Device metadata
 │   │   ├── Settings/
-│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys)
+│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys, auto-layer, hold threshold)
 │   │   │   ├── ISettingsService.cs         # Load/Save interface
 │   │   │   └── SettingsService.cs          # JSON persistence at {AppData}/SvalboardLayerViz/settings.json
 │   │   ├── Keymap/
@@ -367,10 +375,10 @@ SvalboardLayerViz/
 │   │   └── Models/
 │   │       ├── KeyboardConfig.cs           # Full loaded config
 │   │       ├── Layer.cs                    # Single layer's keys + color hints
-│   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/IsUnknown
+│   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/SwitchType/IsUnknown
 │   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests (201 tests)
+│   └── SvalboardLayerViz.Tests/            # Unit tests (216 tests)
 │       ├── Keymap/
 │       │   ├── KeycodeServiceTests.cs      # Keycode resolution (all ranges)
 │       │   ├── TransparentKeyResolverTests.cs
@@ -383,6 +391,7 @@ SvalboardLayerViz/
 │       │   └── SettingsServiceTests.cs     # Round-trip, defaults, corrupt file fallback
 │       └── ViewModels/
 │           ├── KeyViewModelTests.cs        # Incl. IsPressed, border glow, notifications
+│           ├── AutoLayerSwitchTests.cs     # Cache building, momentary/toggle resolve, edge detection
 │           ├── ClusterViewModelTests.cs
 │           └── MainWindowViewModelShowTests.cs
 │
@@ -390,7 +399,8 @@ SvalboardLayerViz/
 │   ├── SvalboardLayerViz-DesignDoc.md      # This document
 │   ├── 01-04-26.md                         # Change log (day 1)
 │   ├── 02-04-26.md                         # Change log (day 2, session 1)
-│   └── 02-04-26-b.md                       # Change log (day 2, session 2)
+│   ├── 02-04-26-b.md                       # Change log (day 2, session 2)
+│   └── 02-04-26-c.md                       # Change log (day 2, session 3)
 └── README.md
 ```
 

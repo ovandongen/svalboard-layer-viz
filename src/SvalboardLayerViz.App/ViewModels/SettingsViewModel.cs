@@ -43,17 +43,33 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnBackgroundOpacityChanged(double value) => OnPropertyChanged(nameof(OpacityPercent));
 
+    [ObservableProperty]
+    private int _layerHoldThresholdMs;
+
+    public string ThresholdDisplay => $"{LayerHoldThresholdMs} ms";
+
+    partial void OnLayerHoldThresholdMsChanged(int value) => OnPropertyChanged(nameof(ThresholdDisplay));
+
     /// <summary>Fired when the user saves settings successfully.</summary>
     public Action? SettingsSaved { get; set; }
 
     /// <summary>Fired when the user cancels.</summary>
     public Action? Cancelled { get; set; }
 
+    /// <summary>Tapping term from device, shown as hint in the settings UI. Null if unavailable.</summary>
+    public int? DeviceTappingTermMs { get; }
+
+    public string DeviceTappingTermHint => DeviceTappingTermMs.HasValue
+        ? $"Device tapping term: {DeviceTappingTermMs.Value} ms"
+        : "Device tapping term not available";
+
     public SettingsViewModel(ISettingsService settingsService, int totalLayers,
-        IReadOnlyList<(string HexKeycode, string CurrentLabel)>? unknownKeycodes = null)
+        IReadOnlyList<(string HexKeycode, string CurrentLabel)>? unknownKeycodes = null,
+        int? deviceTappingTermMs = null)
     {
         _settingsService = settingsService;
         _totalLayers = totalLayers;
+        DeviceTappingTermMs = deviceTappingTermMs;
 
         var settings = settingsService.Load();
 
@@ -94,8 +110,9 @@ public partial class SettingsViewModel : ObservableObject
                 AddCustomKeyLabelVm(hex, "(manual)", label, isManual: true);
         }
 
-        // Populate opacity
+        // Populate opacity and threshold
         BackgroundOpacity = settings.BackgroundOpacity;
+        LayerHoldThresholdMs = settings.LayerHoldThresholdMs;
 
         // Populate hotkey
         HotkeyKey = settings.HotkeyKey;
@@ -141,6 +158,7 @@ public partial class SettingsViewModel : ObservableObject
             HotkeyKey = HotkeyKey,
             HotkeyModifiers = modsString,
             BackgroundOpacity = Math.Clamp(BackgroundOpacity, 0.0, 1.0),
+            LayerHoldThresholdMs = Math.Clamp(LayerHoldThresholdMs, 0, 1000),
         };
 
         _settingsService.Save(settings);

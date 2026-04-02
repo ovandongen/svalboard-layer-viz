@@ -58,7 +58,8 @@ public partial class App : Application
             {
                 var totalLayers = viewModel.KeyboardConfig?.Layers.Count ?? 8;
                 var unknowns = viewModel.GetUnknownKeycodes();
-                var settingsVm = new SettingsViewModel(settingsService, totalLayers, unknowns);
+                var settingsVm = new SettingsViewModel(settingsService, totalLayers, unknowns,
+                    viewModel.DeviceTappingTermMs);
 
                 var settingsWindow = new SettingsWindow { DataContext = settingsVm };
                 settingsVm.SettingsSaved = () =>

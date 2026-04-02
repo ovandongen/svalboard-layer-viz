@@ -20,4 +20,11 @@ public interface IVialProtocolService : IDisposable
     /// Returns bool[rows, cols] where true = key pressed.
     /// </summary>
     bool[,] GetSwitchMatrixState(int rows, int cols);
+
+    /// <summary>
+    /// Reads a QMK setting value from the device via Vial's QMK Settings protocol.
+    /// Returns the value as u16, or null if the setting is not available or the device
+    /// doesn't support QMK settings.
+    /// </summary>
+    ushort? GetQmkSetting(ushort settingId);
 }

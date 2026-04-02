@@ -106,9 +106,9 @@ public class KeycodeService
             var layer = (keycode >> 8) & 0x0F;
             var baseKey = (ushort)(keycode & 0x00FF);
             if (baseKey == 0x00) // LT(layer, KC_NO) — hold-only layer switch
-                return new KeycodeInfo($"LT({layer})", IsLayerSwitch: true, TargetLayer: layer);
+                return new KeycodeInfo($"LT({layer})", IsLayerSwitch: true, TargetLayer: layer, SwitchType: LayerSwitchType.Momentary);
             var baseLabel = BasicKeycodes.GetValueOrDefault(baseKey, $"0x{baseKey:X2}");
-            return new KeycodeInfo(baseLabel, SecondaryLabel: $"LT({layer})", IsLayerSwitch: true, TargetLayer: layer);
+            return new KeycodeInfo(baseLabel, SecondaryLabel: $"LT({layer})", IsLayerSwitch: true, TargetLayer: layer, SwitchType: LayerSwitchType.Momentary);
         }
 
         // Layer-mod: activate layer with modifier (0x5000-0x51FF)
@@ -117,24 +117,24 @@ public class KeycodeService
             var layer = (keycode >> 4) & 0x0F;
             var mods = keycode & 0x0F;
             var modLabel = FormatModifiers(mods);
-            return new KeycodeInfo($"LM({layer})", SecondaryLabel: modLabel, IsLayerSwitch: true, TargetLayer: layer);
+            return new KeycodeInfo($"LM({layer})", SecondaryLabel: modLabel, IsLayerSwitch: true, TargetLayer: layer, SwitchType: LayerSwitchType.Momentary);
         }
 
         // Layer functions (ordered by range: 0x5200 → 0x52DF)
         if (keycode is >= QK_TO and <= QK_TO_MAX)
-            return new KeycodeInfo($"TO({keycode - QK_TO})", IsLayerSwitch: true, TargetLayer: keycode - QK_TO);
+            return new KeycodeInfo($"TO({keycode - QK_TO})", IsLayerSwitch: true, TargetLayer: keycode - QK_TO, SwitchType: LayerSwitchType.Activate);
 
         if (keycode is >= QK_MO and <= QK_MO_MAX)
-            return new KeycodeInfo($"MO({keycode - QK_MO})", IsLayerSwitch: true, TargetLayer: keycode - QK_MO);
+            return new KeycodeInfo($"MO({keycode - QK_MO})", IsLayerSwitch: true, TargetLayer: keycode - QK_MO, SwitchType: LayerSwitchType.Momentary);
 
         if (keycode is >= QK_DF and <= QK_DF_MAX)
-            return new KeycodeInfo($"DF({keycode - QK_DF})", IsLayerSwitch: true, TargetLayer: keycode - QK_DF);
+            return new KeycodeInfo($"DF({keycode - QK_DF})", IsLayerSwitch: true, TargetLayer: keycode - QK_DF, SwitchType: LayerSwitchType.Activate);
 
         if (keycode is >= QK_TG and <= QK_TG_MAX)
-            return new KeycodeInfo($"TG({keycode - QK_TG})", IsLayerSwitch: true, TargetLayer: keycode - QK_TG);
+            return new KeycodeInfo($"TG({keycode - QK_TG})", IsLayerSwitch: true, TargetLayer: keycode - QK_TG, SwitchType: LayerSwitchType.Toggle);
 
         if (keycode is >= QK_OSL and <= QK_OSL_MAX)
-            return new KeycodeInfo($"OSL({keycode - QK_OSL})", IsLayerSwitch: true, TargetLayer: keycode - QK_OSL);
+            return new KeycodeInfo($"OSL({keycode - QK_OSL})", IsLayerSwitch: true, TargetLayer: keycode - QK_OSL, SwitchType: LayerSwitchType.OneShot);
 
         if (keycode is >= QK_ONE_SHOT_MOD and <= QK_ONE_SHOT_MOD_MAX)
         {
@@ -143,7 +143,7 @@ public class KeycodeService
         }
 
         if (keycode is >= QK_TT and <= QK_TT_MAX)
-            return new KeycodeInfo($"TT({keycode - QK_TT})", IsLayerSwitch: true, TargetLayer: keycode - QK_TT);
+            return new KeycodeInfo($"TT({keycode - QK_TT})", IsLayerSwitch: true, TargetLayer: keycode - QK_TT, SwitchType: LayerSwitchType.Momentary);
 
         // Custom/keyboard keycodes (0x7E00-0x7FFF)
         if (keycode is >= QK_KB and <= QK_KB_MAX)
@@ -281,6 +281,7 @@ public record KeycodeInfo(
     bool IsEmpty = false,
     bool IsLayerSwitch = false,
     int? TargetLayer = null,
+    LayerSwitchType SwitchType = LayerSwitchType.None,
     bool IsUnknown = false,
     string? ShiftedLabel = null
 );

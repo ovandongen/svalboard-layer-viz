@@ -116,6 +116,25 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Layer Hold Threshold -->
+                <TextBlock Text="Layer Hold Threshold" FontSize="18" FontWeight="Bold"
+                           Foreground="#CDD6F4" Margin="0,12,0,4" />
+                <TextBlock Text="How long a momentary layer key (MO, LT) must be held before the visualization switches layers. Prevents flicker from quick taps on dual-function keys. Set to 0 for instant switching."
+                           Foreground="#6C7086" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,4" />
+                <TextBlock Text="{Binding DeviceTappingTermHint}"
+                           Foreground="#A6E3A1" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <Border Background="#1E1E2E" CornerRadius="4" Padding="12">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="{Binding ThresholdDisplay}"
+                                   Foreground="#CDD6F4" FontWeight="SemiBold" Width="50"
+                                   VerticalAlignment="Center" TextAlignment="Right" />
+                        <Slider Minimum="0" Maximum="500"
+                                Value="{Binding LayerHoldThresholdMs}"
+                                TickFrequency="50" IsSnapToTickEnabled="True"
+                                TickPlacement="BottomRight" />
+                    </DockPanel>
+                </Border>
+
                 <!-- Background Opacity -->
                 <TextBlock Text="Background Fill" FontSize="18" FontWeight="Bold"
                            Foreground="#CDD6F4" Margin="0,12,0,4" />

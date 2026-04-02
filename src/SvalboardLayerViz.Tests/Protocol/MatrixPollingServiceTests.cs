@@ -25,6 +25,8 @@ public class FakeVialProtocolService : IVialProtocolService
         return NextMatrixState ?? new bool[rows, cols];
     }
 
+    public ushort? GetQmkSetting(ushort settingId) => null;
+
     public void Dispose() { }
 }
 

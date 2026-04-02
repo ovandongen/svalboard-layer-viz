@@ -36,6 +36,7 @@ public static class TransparentKeyResolver
                             EffectiveLabel = lowerKey.DisplayLabel,
                             IsLayerSwitch = lowerKey.IsLayerSwitch,
                             TargetLayer = lowerKey.TargetLayer,
+                            SwitchType = lowerKey.SwitchType,
                             SecondaryLabel = lowerKey.SecondaryLabel,
                         };
                         break;

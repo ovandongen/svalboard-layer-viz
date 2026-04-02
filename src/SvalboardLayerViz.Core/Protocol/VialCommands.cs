@@ -50,6 +50,14 @@ public static class VialCommands
     public const byte VialQmkSettingsReset = 0x0C;
     public const byte VialDynamicEntryOp = 0x0D;
 
+    // --- QMK Settings IDs (from Vial QMK Settings protocol) ---
+
+    /// <summary>
+    /// QMK setting ID for TAPPING_TERM (u16, milliseconds).
+    /// Confirmed on Svalboard firmware via probe: setting 0x0007 returns tapping term.
+    /// </summary>
+    public const ushort QmkSettingTappingTerm = 0x0007;
+
     // --- XZ magic bytes for definition payload ---
 
     public static readonly byte[] XzMagicBytes = [0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00];

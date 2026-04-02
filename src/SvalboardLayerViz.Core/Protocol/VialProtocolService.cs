@@ -189,6 +189,33 @@ public class VialProtocolService : IVialProtocolService
     }
 
     /// <summary>
+    /// Reads a QMK setting value from the device via Vial's QMK Settings protocol.
+    /// Response format: byte 0 = status (0x00 = ok), value as u16 LE at byte 1.
+    /// Returns null if the device doesn't support QMK settings or the setting is unavailable.
+    /// </summary>
+    public ushort? GetQmkSetting(ushort settingId)
+    {
+        try
+        {
+            var response = SendCommand([
+                VialCommands.VialPrefix, VialCommands.VialQmkSettingsGet,
+                (byte)(settingId & 0xFF), (byte)((settingId >> 8) & 0xFF)
+            ]);
+
+            // Check if response is all zeros (command not supported)
+            if (response.All(b => b == 0))
+                return null;
+
+            // Byte 0 = status, value as u16 LE at byte 1
+            return BitConverter.ToUInt16(response, 1);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Finds the offset of XZ magic bytes in a response buffer.
     /// The device may echo the command prefix before the actual data.
     /// </summary>

@@ -19,6 +19,58 @@ public partial class MainWindowViewModel : ObservableObject
     private IDisposable? _deviceSubscription;
     private MatrixPollingService? _matrixPolling;
 
+    /// <summary>
+    /// Cached lookup: (row, col) → target layer for momentary layer-switch keys (MO, LT, TT).
+    /// Built once on connect from layer 0, used during polling to auto-switch the visible layer.
+    /// Momentary keys: layer active while physically held down.
+    /// </summary>
+    private Dictionary<(int Row, int Col), int> _momentaryLayerCache = new();
+
+    /// <summary>
+    /// Cached lookup: (row, col) → target layer for toggle layer-switch keys (TG).
+    /// Built once on connect from layer 0.
+    /// Toggle keys: each press flips the layer on/off. Tracked via edge detection.
+    /// WARNING: Toggle state is tracked locally and can drift from firmware state.
+    /// See <see cref="_toggledLayers"/> and design doc for limitations.
+    /// </summary>
+    private Dictionary<(int Row, int Col), int> _toggleLayerCache = new();
+
+    /// <summary>
+    /// Previous matrix state, used for edge detection on toggle keys.
+    /// A toggle fires on the rising edge (key was not pressed → now pressed).
+    /// </summary>
+    private bool[,]? _previousMatrixState;
+
+    /// <summary>
+    /// Locally tracked set of toggled-on layers. Flipped on each TG key press.
+    /// WARNING: This is a best-effort mirror of firmware state. It can drift if:
+    /// - The app starts while a layer is already toggled on
+    /// - A matrix poll is missed (e.g., very fast double-tap within one poll cycle)
+    /// - Firmware has complex layer logic (combos, macros) that we can't see
+    /// Use ResetLayerState command to re-sync to base layer.
+    /// </summary>
+    private readonly HashSet<int> _toggledLayers = new();
+
+    /// <summary>
+    /// Tracks when each momentary layer key was first detected as pressed.
+    /// Used to implement hold threshold: the key must be held for at least
+    /// <see cref="LayerHoldThresholdMs"/> before the layer switch activates.
+    /// This prevents brief taps on dual-function keys (e.g., LT — tap for Enter,
+    /// hold for layer) from causing the visualization to flicker.
+    /// </summary>
+    private readonly Dictionary<(int Row, int Col), long> _momentaryPressTimestamps = new();
+
+    [ObservableProperty]
+    private int _layerHoldThresholdMs = 200;
+
+    /// <summary>
+    /// Tapping term read from the device via QMK Settings protocol (setting 0x0007).
+    /// Null if the device doesn't support QMK settings or the value couldn't be read.
+    /// Displayed in the settings UI so users know what their device is configured to.
+    /// </summary>
+    [ObservableProperty]
+    private int? _deviceTappingTermMs;
+
     /// <summary>Diagnostics log for matrix polling events. Shared with the diagnostics popup.</summary>
     public DiagnosticsViewModel Diagnostics { get; } = new();
 
@@ -46,6 +98,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isLiveHighlightingEnabled;
+
+    [ObservableProperty]
+    private bool _isAutoLayerSwitchEnabled;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BoardBackground))]
@@ -129,10 +184,31 @@ public partial class MainWindowViewModel : ObservableObject
             KeyboardConfig = loader.Load(device, settings);
 
             BuildLayerViewModels(settings);
+            BuildLayerSwitchCache();
 
             SelectedLayerIndex = 0;
             IsConnected = true;
             IsLiveHighlightingEnabled = settings.LiveKeyHighlighting;
+            IsAutoLayerSwitchEnabled = settings.AutoLayerSwitch;
+
+            // Try to read the device's tapping term via QMK Settings protocol.
+            // If available, use it as the hold threshold (unless user has customized it).
+            var deviceTappingTerm = _protocolService.GetQmkSetting(VialCommands.QmkSettingTappingTerm);
+            if (deviceTappingTerm.HasValue && deviceTappingTerm.Value is > 0 and <= 1000)
+            {
+                DeviceTappingTermMs = deviceTappingTerm.Value;
+                // Use device value if user setting is still at the default (200ms)
+                if (settings.LayerHoldThresholdMs == 200)
+                    LayerHoldThresholdMs = deviceTappingTerm.Value;
+                else
+                    LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
+            }
+            else
+            {
+                DeviceTappingTermMs = null;
+                LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
+            }
+
             BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
             StatusMessage = $"Connected: {device.ProductName} — {KeyboardConfig.Layers.Count} layers";
 
@@ -178,6 +254,7 @@ public partial class MainWindowViewModel : ObservableObject
         // Notify hotkey change
         HotkeyChangeRequested?.Invoke(settings.HotkeyKey, settings.HotkeyModifiers);
         BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
+        LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
 
         if (KeyboardConfig is null) return;
 
@@ -275,6 +352,41 @@ public partial class MainWindowViewModel : ObservableObject
         ClearPressedStates();
     }
 
+    /// <summary>
+    /// Builds lookups of (row, col) → target layer from layer-switch keys on layer 0.
+    /// Separates momentary (hold) keys from toggle (press) keys.
+    /// Called once on connect — the keymap doesn't change while connected.
+    /// </summary>
+    private void BuildLayerSwitchCache()
+    {
+        _momentaryLayerCache.Clear();
+        _toggleLayerCache.Clear();
+        _toggledLayers.Clear();
+        _momentaryPressTimestamps.Clear();
+        _previousMatrixState = null;
+        if (KeyboardConfig is null) return;
+
+        var baseLayer = KeyboardConfig.Layers.FirstOrDefault(l => l.Index == 0);
+        if (baseLayer is null) return;
+
+        foreach (var key in baseLayer.Keys)
+        {
+            if (!key.IsLayerSwitch || !key.TargetLayer.HasValue) continue;
+
+            switch (key.SwitchType)
+            {
+                case LayerSwitchType.Momentary:
+                    _momentaryLayerCache[(key.Row, key.Col)] = key.TargetLayer.Value;
+                    break;
+                case LayerSwitchType.Toggle:
+                    _toggleLayerCache[(key.Row, key.Col)] = key.TargetLayer.Value;
+                    break;
+                // Activate (TO, DF) and OneShot (OSL) are not tracked — would need
+                // firmware-side state to handle reliably.
+            }
+        }
+    }
+
     private void OnMatrixStateChanged(bool[,] state)
     {
         Dispatcher.UIThread.Post(() =>
@@ -293,6 +405,64 @@ public partial class MainWindowViewModel : ObservableObject
             }
 
             Diagnostics.LogMatrixEvent(pressedKeys);
+
+            // Auto-switch layer based on held/toggled layer-switch keys
+            if (IsAutoLayerSwitchEnabled)
+            {
+                // 1. Detect toggle edges: TG key was NOT pressed last poll, IS pressed now → flip
+                if (_previousMatrixState is not null)
+                {
+                    foreach (var (pos, layer) in _toggleLayerCache)
+                    {
+                        var wasPressed = _previousMatrixState[pos.Row, pos.Col];
+                        var isPressed = state[pos.Row, pos.Col];
+                        if (isPressed && !wasPressed)
+                        {
+                            // Rising edge — toggle this layer
+                            if (!_toggledLayers.Remove(layer))
+                                _toggledLayers.Add(layer);
+                        }
+                    }
+                }
+
+                // Save state for next edge detection
+                _previousMatrixState = (bool[,])state.Clone();
+
+                // 2. Update momentary hold timestamps and resolve with threshold
+                var now = Environment.TickCount64;
+                foreach (var (pos, _) in _momentaryLayerCache)
+                {
+                    if (state[pos.Row, pos.Col])
+                    {
+                        // Track when the key was first pressed
+                        _momentaryPressTimestamps.TryAdd(pos, now);
+                    }
+                    else
+                    {
+                        // Key released — clear timestamp
+                        _momentaryPressTimestamps.Remove(pos);
+                    }
+                }
+
+                // Resolve active layer: highest of (momentary held past threshold | toggled on)
+                var targetLayer = 0;
+                foreach (var (pos, layer) in _momentaryLayerCache)
+                {
+                    if (!state[pos.Row, pos.Col]) continue;
+                    if (!_momentaryPressTimestamps.TryGetValue(pos, out var pressedAt)) continue;
+                    var heldMs = now - pressedAt;
+                    if (heldMs >= LayerHoldThresholdMs && layer > targetLayer)
+                        targetLayer = layer;
+                }
+                foreach (var layer in _toggledLayers)
+                {
+                    if (layer > targetLayer)
+                        targetLayer = layer;
+                }
+
+                if (targetLayer != SelectedLayerIndex)
+                    SelectedLayerIndex = targetLayer;
+            }
         });
     }
 
@@ -301,6 +471,30 @@ public partial class MainWindowViewModel : ObservableObject
         foreach (var layerVm in Layers)
             foreach (var keyVm in layerVm.Keys)
                 keyVm.IsPressed = false;
+    }
+
+    /// <summary>
+    /// Resets locally tracked toggle state and returns to base layer.
+    /// Use this when the visualization gets out of sync with the actual keyboard layer.
+    /// This can happen because toggle (TG) tracking is a best-effort local mirror —
+    /// see _toggledLayers field documentation for details.
+    /// </summary>
+    [RelayCommand]
+    private void ResetLayerState()
+    {
+        _toggledLayers.Clear();
+        _momentaryPressTimestamps.Clear();
+        _previousMatrixState = null;
+        SelectedLayerIndex = 0;
+    }
+
+    [RelayCommand]
+    private void ToggleAutoLayerSwitch()
+    {
+        IsAutoLayerSwitchEnabled = !IsAutoLayerSwitchEnabled;
+
+        var settings = _settingsService.Load();
+        _settingsService.Save(settings with { AutoLayerSwitch = IsAutoLayerSwitchEnabled });
     }
 
     [RelayCommand]

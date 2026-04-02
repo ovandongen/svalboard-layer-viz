@@ -55,7 +55,9 @@ public class MatrixPollingService : IDisposable
             {
                 var state = _protocol.GetSwitchMatrixState(_rows, _cols);
 
-                if (!MatrixEquals(state, _lastState))
+                // Fire on state change, OR while any key is pressed (so hold
+                // timers in auto-layer-switch can accumulate elapsed time).
+                if (!MatrixEquals(state, _lastState) || AnyKeyPressed(state))
                 {
                     _lastState = state;
                     MatrixStateChanged?.Invoke(state);
@@ -73,6 +75,15 @@ public class MatrixPollingService : IDisposable
                 break;
             }
         }
+    }
+
+    private bool AnyKeyPressed(bool[,] state)
+    {
+        for (var row = 0; row < _rows; row++)
+            for (var col = 0; col < _cols; col++)
+                if (state[row, col])
+                    return true;
+        return false;
     }
 
     private bool MatrixEquals(bool[,] a, bool[,]? b)

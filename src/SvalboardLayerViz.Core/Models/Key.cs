@@ -1,6 +1,28 @@
 namespace SvalboardLayerViz.Core.Models;
 
 /// <summary>
+/// How a layer-switch key activates its target layer.
+/// Used by auto-layer-switch to decide hold-tracking vs edge-tracking.
+/// </summary>
+public enum LayerSwitchType
+{
+    /// <summary>Not a layer-switch key.</summary>
+    None,
+
+    /// <summary>Momentary: layer active while key is held (MO, LT, TT).</summary>
+    Momentary,
+
+    /// <summary>Toggle: each press flips the layer on/off (TG).</summary>
+    Toggle,
+
+    /// <summary>Activate: turns on layer permanently until another layer change (TO, DF).</summary>
+    Activate,
+
+    /// <summary>One-shot: layer active for the next keypress only (OSL).</summary>
+    OneShot,
+}
+
+/// <summary>
 /// Represents a single key on the board with its physical position and current keycode.
 /// </summary>
 public record Key
@@ -43,6 +65,9 @@ public record Key
 
     /// <summary>The target layer index for layer-switching keys.</summary>
     public int? TargetLayer { get; init; }
+
+    /// <summary>How this layer-switch key activates its target (Momentary, Toggle, etc.).</summary>
+    public LayerSwitchType SwitchType { get; init; }
 
     /// <summary>True if the keycode could not be resolved to a known label.</summary>
     public bool IsUnknown { get; init; }
