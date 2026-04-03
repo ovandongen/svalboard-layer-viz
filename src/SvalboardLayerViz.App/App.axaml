@@ -18,6 +18,7 @@
                         <NativeMenuItemSeparator />
                         <NativeMenuItem Header="Refresh from Device" Command="{Binding RefreshCommand}" />
                         <NativeMenuItem Header="Settings..." Command="{Binding OpenSettingsCommand}" />
+                        <NativeMenuItem Header="Help" Command="{Binding OpenHelpCommand}" />
                         <NativeMenuItemSeparator />
                         <NativeMenuItem Header="Quit" Command="{Binding QuitCommand}" />
                     </NativeMenu>

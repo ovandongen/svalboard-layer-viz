@@ -1,0 +1,240 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        x:Class="SvalboardLayerViz.App.Views.HelpWindow"
+        x:DataType="vm:HelpWindowViewModel"
+        Title="Help — Svalboard Layer Viz"
+        Width="560" Height="680"
+        MinWidth="400" MinHeight="400"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E">
+
+    <DockPanel>
+        <!-- Footer: checkbox + close button -->
+        <Border DockPanel.Dock="Bottom" Padding="24,12" Background="#11111B">
+            <DockPanel>
+                <Button DockPanel.Dock="Right"
+                        Command="{Binding CloseCommand}"
+                        Content="Got it!"
+                        Padding="20,8"
+                        HorizontalAlignment="Right" />
+                <CheckBox IsChecked="{Binding DontShowAgain}"
+                          Content="Don't show this on startup"
+                          Foreground="#6C7086"
+                          VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Scrollable content -->
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="24" Margin="28,24,28,16">
+
+                <!-- Title -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Welcome to Svalboard Layer Viz"
+                               FontSize="22" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock Text="A live keyboard layer visualizer for the Svalboard."
+                               FontSize="14" Foreground="#A6ADC8" />
+                </StackPanel>
+
+                <!-- Getting Started -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Getting Started"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="Connect your Svalboard via USB. The app detects it automatically and loads all layers. If you disconnect and reconnect, it will re-sync." />
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Toolbar -->
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Toolbar Buttons"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+
+                    <!-- Live highlighting -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M3 12h4l3-8 4 16 3-8h4" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Live Highlighting" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Shows which keys are physically pressed in real time. Dim = off, bright = on."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Auto-layer switch -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Auto-Layer Switch" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Automatically follows which layer key you hold. See the important note below."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Reset layer state -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Reset Layer State" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Resets layer tracking back to the base layer. Use this if toggle tracking gets out of sync."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Diagnostics -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M2 4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4zm5.5 4.5L10 11l-2.5 2.5L9 15l4-4-4-4-1.5 1.5zM13 15h4v-2h-4v2z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Matrix Diagnostics" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Opens a live view of matrix events — shows which keys fire and on which layer. Useful for debugging."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Export -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Export" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Save your layout as PNG, PDF, or SVG. Choose which layers to include and whether to hide thumb clusters."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Pin -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Always on Top" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Pins the window above all other windows. Great for using as a floating reference while typing."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Settings -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.21 3.79.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.21-3.796.75.75 0 0 1 .271-.826l1.244-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.272-.826 9.793 9.793 0 0 1 2.21-3.792.75.75 0 0 1 .849-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Settings" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Customize layer colors, names, global hotkey, background transparency, hold threshold, and custom key labels."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Refresh -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M18.537 19.567A9.961 9.961 0 0 1 12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10c0 2.136-.67 4.116-1.81 5.74L17 12h3a8 8 0 1 0-2.46 5.77z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="Refresh" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="Re-reads the keymap from the device. Use after flashing new firmware or changing your layout in Vial."
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Layer Tabs -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Layer Tabs"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="Click a tab to view that layer's key assignments. Each layer has a unique color. Layers where every key is empty (KC_NO) are hidden automatically." />
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Auto-Layer Switch callout -->
+                <Border Background="#1A1A2E" CornerRadius="8" Padding="16"
+                        BorderBrush="#89B4FA" BorderThickness="1">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Important: Auto-Layer Switch &amp; Svalboard Input"
+                                   FontSize="15" FontWeight="SemiBold"
+                                   Foreground="#F9E2AF" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="When auto-layer-switch is enabled (the default), the displayed layer follows whichever layer key you are physically holding down." />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="Since your Svalboard IS your mouse, clicking a layer tab counts as a keypress. The moment you click, no layer key is held, so the app switches back to the base layer. This is expected behavior!" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#CDD6F4" FontSize="13" FontWeight="SemiBold"
+                                   Text="To browse layers manually, turn off auto-layer-switch first (the checkmark button in the toolbar)." />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="If toggle (TG) layer tracking gets out of sync with your actual keyboard state, use the Reset button to return to the base layer." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Tips -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Tips"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <StackPanel Spacing="6" Margin="8,0,0,0">
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="&#x2022; Pin the window (always-on-top) to use as a floating reference while typing" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="&#x2022; Right-click any key to assign a custom label" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="&#x2022; Use the global hotkey (default: F12) to quickly show or hide the window" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="&#x2022; Adjust background transparency in Settings to use the app as a translucent overlay" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="&#x2022; The system tray icon provides quick access to show, refresh, and quit" />
+                    </StackPanel>
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+
+</Window>

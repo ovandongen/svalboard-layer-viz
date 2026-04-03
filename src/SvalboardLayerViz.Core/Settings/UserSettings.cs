@@ -36,6 +36,9 @@ public record UserSettings
     /// </summary>
     public int LayerHoldThresholdMs { get; init; } = 200;
 
-    /// <summary>Background solidity behind the board and tabs (0.0 = transparent, 1.0 = solid dark). Default: 0.0.</summary>
-    public double BackgroundOpacity { get; init; } = 0.0;
+    /// <summary>Background solidity behind the board and tabs (0.0 = transparent, 1.0 = solid dark). Default: 0.5.</summary>
+    public double BackgroundOpacity { get; init; } = 0.5;
+
+    /// <summary>Whether the user has seen the help/welcome window. Controls first-launch auto-open.</summary>
+    public bool HasSeenHelp { get; init; } = false;
 }

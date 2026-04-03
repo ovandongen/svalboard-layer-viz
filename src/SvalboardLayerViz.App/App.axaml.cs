@@ -209,6 +209,28 @@ public partial class App : Application
                 await exportDialog.ShowDialog(mainWindow);
             };
 
+            HelpWindow? helpWindow = null;
+            viewModel.OpenHelpRequested = () =>
+            {
+                if (helpWindow is { IsVisible: true })
+                {
+                    helpWindow.Activate();
+                    return;
+                }
+
+                var helpVm = new HelpWindowViewModel();
+                helpWindow = new HelpWindow { DataContext = helpVm };
+                helpVm.Closed = () =>
+                {
+                    if (helpVm.DontShowAgain)
+                        settingsService.Save(settingsService.Load() with { HasSeenHelp = true });
+                    helpWindow.Close();
+                    helpWindow = null;
+                };
+                helpWindow.Closed += (_, _) => helpWindow = null;
+                helpWindow.Show(mainWindow);
+            };
+
             viewModel.HotkeyChangeRequested = (key, modifiers) =>
             {
                 try
@@ -245,6 +267,14 @@ public partial class App : Application
                 _hotkeyService.Start();
 
                 desktop.Exit += (_, _) => _hotkeyService.Dispose();
+            }
+
+            // Show help on first launch
+            var currentSettings = settingsService.Load();
+            if (!currentSettings.HasSeenHelp)
+            {
+                Dispatcher.UIThread.Post(() => viewModel.OpenHelpRequested?.Invoke(),
+                    DispatcherPriority.Background);
             }
 
             // Bind tray icon commands to the main view model
