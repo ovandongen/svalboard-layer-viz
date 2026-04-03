@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Svalboard Layer Viz
+Comment=Keyboard layer visualization for Svalboard
+Exec=SvalboardLayerViz.App
+Icon=svalboard-layer-viz
+Type=Application
+Categories=Utility;HardwareSettings;
+StartupWMClass=SvalboardLayerViz.App
+Terminal=false

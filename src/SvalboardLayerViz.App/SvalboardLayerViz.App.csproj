@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SvalboardLayerViz.App</RootNamespace>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <Version>0.0.0-dev</Version>
+    <AssemblyTitle>Svalboard Layer Viz</AssemblyTitle>
+    <Product>Svalboard Layer Viz</Product>
   </PropertyGroup>
 
   <ItemGroup>

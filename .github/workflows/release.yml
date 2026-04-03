@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - rid: win-x64
+            os: ubuntu-latest
+            artifact: SvalboardLayerViz-win-x64
+          - rid: osx-arm64
+            os: macos-latest
+            artifact: SvalboardLayerViz-osx-arm64
+          - rid: osx-x64
+            os: macos-latest
+            artifact: SvalboardLayerViz-osx-x64
+          - rid: linux-x64
+            os: ubuntu-latest
+            artifact: SvalboardLayerViz-linux-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Test
+        run: dotnet test --no-restore --configuration Release
+
+      - name: Publish
+        run: |
+          dotnet publish src/SvalboardLayerViz.App \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            --self-contained \
+            /p:Version=${{ steps.version.outputs.version }} \
+            -o publish
+
+      # --- Windows packaging ---
+      - name: Package (Windows)
+        if: matrix.rid == 'win-x64'
+        run: |
+          cd publish
+          zip -r ../SvalboardLayerViz-${{ steps.version.outputs.version }}-win-x64.zip .
+
+      # --- macOS packaging ---
+      - name: Package (macOS)
+        if: startsWith(matrix.rid, 'osx-')
+        run: |
+          # The repo already contains the .app bundle template (Info.plist, run script).
+          # Just publish binaries into the bin/ directory and add the icon.
+          mkdir -p SvalboardLayerViz.app/Contents/MacOS/bin
+          mkdir -p SvalboardLayerViz.app/Contents/Resources
+
+          cp -r publish/* SvalboardLayerViz.app/Contents/MacOS/bin/
+          chmod +x SvalboardLayerViz.app/Contents/MacOS/run
+          cp src/SvalboardLayerViz.App/Assets/icon.icns SvalboardLayerViz.app/Contents/Resources/icon.icns
+
+          zip -r SvalboardLayerViz-${{ steps.version.outputs.version }}-${{ matrix.rid }}.zip SvalboardLayerViz.app
+
+      # --- Linux packaging ---
+      - name: Package (Linux)
+        if: matrix.rid == 'linux-x64'
+        run: |
+          STAGING="svalboard-layer-viz"
+          mkdir -p "$STAGING"
+
+          cp -r publish/* "$STAGING/"
+          cp src/SvalboardLayerViz.App/Assets/icon.png "$STAGING/"
+          cp packaging/linux/svalboard-layer-viz.desktop "$STAGING/"
+          cp packaging/linux/install.sh "$STAGING/"
+          chmod +x "$STAGING/install.sh"
+          chmod +x "$STAGING/SvalboardLayerViz.App"
+
+          tar czf SvalboardLayerViz-${{ steps.version.outputs.version }}-linux-x64.tar.gz "$STAGING"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: SvalboardLayerViz-${{ steps.version.outputs.version }}-*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -la artifacts/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Svalboard Layer Viz $TAG" \
+            --generate-notes \
+            artifacts/*

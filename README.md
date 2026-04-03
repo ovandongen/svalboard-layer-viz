@@ -10,13 +10,32 @@ A cross-platform desktop app that connects to your [Svalboard](https://svalboard
 - Automatically follows which layer is active when you hold/toggle layer-switch keys
 - Works as a transparent overlay you can keep on screen while learning your layout
 
+## Download
+
+Pre-built binaries are available on the [Releases](../../releases/latest) page:
+
+| Platform | Download |
+|----------|----------|
+| **Windows** (x64) | `SvalboardLayerViz-...-win-x64.zip` |
+| **macOS** (Apple Silicon) | `SvalboardLayerViz-...-osx-arm64.zip` |
+| **macOS** (Intel) | `SvalboardLayerViz-...-osx-x64.zip` |
+| **Linux** (x64) | `SvalboardLayerViz-...-linux-x64.tar.gz` |
+
+**Windows**: Extract the zip and run `SvalboardLayerViz.App.exe`. Windows SmartScreen may warn on first run — click "More info" then "Run anyway".
+
+**macOS**: Extract the zip and open `SvalboardLayerViz.app`. On first launch, right-click the app and select "Open" (or run `xattr -cr SvalboardLayerViz.app` in Terminal) to bypass Gatekeeper.
+
+**Linux**: Extract the tar.gz and run `./install.sh` to install to your home directory with a desktop launcher, or run `./SvalboardLayerViz.App` directly.
+
+---
+
 ## Screenshots
 
 *Coming soon*
 
 ---
 
-## Prerequisites
+## Building from Source
 
 You need **.NET 10 SDK** installed. Nothing else.
 
