@@ -16,6 +16,8 @@ public partial class MainWindow : Window
 
         if (OperatingSystem.IsMacOS())
             SystemDecorations = SystemDecorations.Full;
+
+        MinimizeButton.Click += (_, _) => WindowState = WindowState.Minimized;
     }
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e)

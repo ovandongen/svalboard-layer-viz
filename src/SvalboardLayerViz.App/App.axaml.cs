@@ -223,26 +223,29 @@ public partial class App : Application
                 }
             };
 
-            // Global hotkey from settings
-            var settings = settingsService.Load();
-            _hotkeyService = new GlobalHotkeyService();
-            try
+            // Global hotkey — not supported on Linux (Wayland blocks hooks from unfocused windows)
+            if (!OperatingSystem.IsLinux())
             {
-                _hotkeyService.Key = GlobalHotkeyService.ParseKey(settings.HotkeyKey);
-                _hotkeyService.Modifiers = GlobalHotkeyService.ParseModifiers(settings.HotkeyModifiers);
-            }
-            catch
-            {
-                // Invalid saved hotkey — use defaults
-            }
-            _hotkeyService.HotkeyPressed = () =>
-            {
-                // SharpHook fires on its own thread — dispatch to UI thread
-                Dispatcher.UIThread.Post(() => viewModel.ToggleWindowRequested?.Invoke());
-            };
-            _hotkeyService.Start();
+                var settings = settingsService.Load();
+                _hotkeyService = new GlobalHotkeyService();
+                try
+                {
+                    _hotkeyService.Key = GlobalHotkeyService.ParseKey(settings.HotkeyKey);
+                    _hotkeyService.Modifiers = GlobalHotkeyService.ParseModifiers(settings.HotkeyModifiers);
+                }
+                catch
+                {
+                    // Invalid saved hotkey — use defaults
+                }
+                _hotkeyService.HotkeyPressed = () =>
+                {
+                    // SharpHook fires on its own thread — dispatch to UI thread
+                    Dispatcher.UIThread.Post(() => viewModel.ToggleWindowRequested?.Invoke());
+                };
+                _hotkeyService.Start();
 
-            desktop.Exit += (_, _) => _hotkeyService.Dispose();
+                desktop.Exit += (_, _) => _hotkeyService.Dispose();
+            }
 
             // Bind tray icon commands to the main view model
             DataContext = viewModel;

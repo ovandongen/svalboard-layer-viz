@@ -39,6 +39,8 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private double _backgroundOpacity;
 
+    public bool IsHotkeySupported { get; } = !OperatingSystem.IsLinux();
+
     public string OpacityPercent => $"{(int)(BackgroundOpacity * 100)}%";
 
     partial void OnBackgroundOpacityChanged(double value) => OnPropertyChanged(nameof(OpacityPercent));

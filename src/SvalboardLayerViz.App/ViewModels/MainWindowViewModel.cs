@@ -71,6 +71,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int? _deviceTappingTermMs;
 
+    public bool IsLinux { get; } = OperatingSystem.IsLinux();
+
     /// <summary>Diagnostics log for matrix polling events. Shared with the diagnostics popup.</summary>
     public DiagnosticsViewModel Diagnostics { get; } = new();
 

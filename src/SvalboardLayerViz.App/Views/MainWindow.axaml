@@ -34,10 +34,20 @@
                             Command="{Binding QuitCommand}"
                             ToolTip.Tip="Quit"
                             Focusable="False"
-                            Padding="6,4" Margin="0,0,8,0"
+                            Padding="6,4" Margin="0,0,4,0"
                             VerticalAlignment="Center">
                         <PathIcon Width="12" Height="12"
                                   Data="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
+                    </Button>
+                    <Button x:Name="MinimizeButton"
+                            DockPanel.Dock="Left"
+                            ToolTip.Tip="Minimize"
+                            Focusable="False"
+                            IsVisible="{Binding IsLinux}"
+                            Padding="6,4" Margin="0,0,8,0"
+                            VerticalAlignment="Center">
+                        <PathIcon Width="12" Height="12"
+                                  Data="M20 14H4v-2h16v2z" />
                     </Button>
                     <TextBlock DockPanel.Dock="Left"
                                Text="{Binding StatusMessage}"

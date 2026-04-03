@@ -184,11 +184,13 @@ Toggle with the checkmark icon in the toolbar. Reset tracking with the circular 
 Click the gear icon. Settings are split into two tabs:
 
 - **Appearance** — Layer colors, layer names, background transparency
-- **Behavior** — Global hotkey (default: F12), layer hold threshold, custom key labels
+- **Behavior** — Global hotkey (default: F12, macOS/Windows only), layer hold threshold, custom key labels
 
 ### Keyboard shortcut
 
 Press **F12** (configurable) to show/hide the overlay from anywhere. On macOS, you may need to grant Accessibility permission in System Settings > Privacy & Security > Accessibility.
+
+> **Linux:** The global hotkey is not available on Linux. Wayland (the default display server on modern Linux distros) blocks applications from receiving keyboard events when their window is not focused, which makes a global hide/show hotkey impossible without special compositor support. Use the taskbar or tray icon to show the window instead.
 
 ### Right-click a key
 

@@ -90,10 +90,12 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="8,12" Spacing="12">
 
-                    <!-- Global Hotkey -->
+                    <!-- Global Hotkey (not supported on Linux/Wayland) -->
                     <TextBlock Text="Global Hotkey" FontSize="14" FontWeight="SemiBold"
-                               Foreground="#CDD6F4" />
-                    <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto" Margin="0,0,0,0">
+                               Foreground="#CDD6F4"
+                               IsVisible="{Binding IsHotkeySupported}" />
+                    <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto" Margin="0,0,0,0"
+                          IsVisible="{Binding IsHotkeySupported}">
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Key:"
                                    VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12" />
                         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding HotkeyKey}"
