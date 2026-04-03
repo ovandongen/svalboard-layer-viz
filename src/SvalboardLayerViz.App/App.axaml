@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="using:SvalboardLayerViz.App.Localization"
              x:Class="SvalboardLayerViz.App.App"
              RequestedThemeVariant="Dark">
 
@@ -8,7 +9,11 @@
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     </Application.Styles>
 
-    <!-- System tray icon -->
+    <Application.Resources>
+        <loc:Loc x:Key="Loc" />
+    </Application.Resources>
+
+    <!-- System tray icon (NativeMenuItem doesn't support binding — localized in code-behind) -->
     <TrayIcon.Icons>
         <TrayIcons>
             <TrayIcon ToolTipText="Svalboard Layer Viz">

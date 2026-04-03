@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 3 Complete
+**Status:** Phase 3 Complete + i18n
 
 ---
 
@@ -344,6 +344,27 @@ Implemented features:
 - [x] Settings window scrollbar fix — both Appearance and Behavior tabs now wrapped in `ScrollViewer`
 - [x] 243 unit tests
 
+### Localization (i18n) — COMPLETE
+
+**Goal:** Multi-language support with live runtime switching. Dutch (NL) as first translation.
+
+Implemented features:
+- [x] .resx resource files — `Strings.resx` (English, ~110 keys) and `Strings.nl.resx` (Dutch). Standard .NET `ResourceManager` for string lookup. Key naming convention: `Area_Description` (e.g., `Status_Connected`, `Tooltip_LiveHighlighting`, `Settings_Language`)
+- [x] `Loc` singleton — lightweight localization wrapper with `INotifyPropertyChanged`. AXAML bindings via `{Binding [Key], Source={StaticResource Loc}}` re-evaluate automatically on language change. Static shared culture across all instances (AXAML resource creates its own instance). `WeakReference` tracking for cross-instance `PropertyChanged("Item[]")` notification
+- [x] Live language switching — changing language in Settings updates all visible UI text immediately, no restart required. Static `CultureChanged` event lets code-behind and ViewModels refresh computed strings
+- [x] Tooltip workaround — Avalonia's `ToolTip.Tip` attached property doesn't re-evaluate on `PropertyChanged`. All toolbar tooltips set from code-behind via `ToolTip.SetTip()` and refreshed on `CultureChanged`
+- [x] Language picker — ComboBox in Settings Behavior tab. Persisted in `UserSettings.Language` (default `"en"`). Applied at startup before ViewModel creation
+- [x] Tray menu localization — `NativeMenuItem.Header` set from code-behind, refreshed on `CultureChanged`
+- [x] All AXAML views migrated — MainWindow, BoardView, KeyView, SettingsWindow, ExportDialog, DiagnosticsWindow, HelpWindow
+- [x] All C# strings migrated — MainWindowViewModel, KeyViewModel, SettingsViewModel, DiagnosticsViewModel, App.axaml.cs
+- [x] Format strings — `Loc.Instance.Format(key, args)` for interpolated messages (e.g., `"Connected: {0} — {1} layers"`)
+- [x] Zero new NuGet dependencies
+
+Adding a new language requires only:
+1. Copy `Resources/Strings.resx` → `Resources/Strings.xx.resx`
+2. Translate all `<value>` entries
+3. Add one line to `AvailableLanguages` in `SettingsViewModel.cs`
+
 ## 8. Project Structure
 
 ```
@@ -358,7 +379,8 @@ SvalboardLayerViz/
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
 │   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (tabbed: Appearance + Behavior)
 │   │   │   ├── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
-│   │   │   └── ExportDialog.axaml(.cs)     # Export dialog (format, page size, layer selection, hide thumbs)
+│   │   │   ├── ExportDialog.axaml(.cs)     # Export dialog (format, page size, layer selection, hide thumbs)
+│   │   │   └── HelpWindow.axaml(.cs)      # First-launch help dialog
 │   │   ├── ViewModels/
 │   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, matrix polling
 │   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, IsPressed
@@ -366,7 +388,14 @@ SvalboardLayerViz/
 │   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
 │   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
 │   │   │   ├── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
-│   │   │   └── ExportDialogViewModel.cs    # Export dialog: layer checkboxes, format/page size pickers
+│   │   │   ├── ExportDialogViewModel.cs    # Export dialog: layer checkboxes, format/page size pickers
+│   │   │   └── HelpWindowViewModel.cs     # Help dialog: close + don't-show-again
+│   │   ├── Localization/
+│   │   │   └── Loc.cs                  # i18n singleton — INotifyPropertyChanged, runtime culture switch
+│   │   ├── Resources/
+│   │   │   ├── Strings.resx            # English strings (~110 keys)
+│   │   │   ├── Strings.nl.resx         # Dutch translation
+│   │   │   └── Strings.Designer.cs     # ResourceManager wrapper (manually maintained)
 │   │   ├── Converters/
 │   │   │   └── HexColorToBrushConverter.cs # Hex string → SolidColorBrush for live preview
 │   │   ├── Services/
@@ -386,7 +415,7 @@ SvalboardLayerViz/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
 │   │   │   └── DeviceInfo.cs               # Device metadata
 │   │   ├── Settings/
-│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys, auto-layer, hold threshold)
+│   │   │   ├── UserSettings.cs             # Settings record (colors, names, labels, hotkey, bg fill, live keys, auto-layer, hold threshold, language)
 │   │   │   ├── ISettingsService.cs         # Load/Save interface
 │   │   │   └── SettingsService.cs          # JSON persistence at {AppData}/SvalboardLayerViz/settings.json
 │   │   ├── Export/
@@ -438,7 +467,8 @@ SvalboardLayerViz/
 │   ├── 02-04-26-b.md                       # Change log (day 2, session 2)
 │   ├── 02-04-26-c.md                       # Change log (day 2, session 3)
 │   ├── 02-04-26-d.md                       # Change log (day 2, session 4)
-│   └── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
+│   ├── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
+│   └── 03-04-26.md                         # Change log (day 3 — i18n/localization)
 ├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```

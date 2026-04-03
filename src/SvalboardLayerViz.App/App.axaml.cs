@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.App.Services;
 using SvalboardLayerViz.App.ViewModels;
 using SvalboardLayerViz.App.Views;
@@ -26,16 +27,20 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var settingsService = new SettingsService();
+            Loc.Instance.SetCulture(settingsService.Load().Language);
             var viewModel = new MainWindowViewModel(settingsService);
             var mainWindow = new MainWindow { DataContext = viewModel };
             desktop.MainWindow = mainWindow;
 
-            // Set tray icon from embedded PNG
+            // Set tray icon from embedded PNG and localize tray menu
             var trayIcons = TrayIcon.GetIcons(this);
             if (trayIcons?.Count > 0)
             {
                 trayIcons[0].Icon = new WindowIcon(
                     AssetLoader.Open(new Uri("avares://SvalboardLayerViz.App/Assets/icon.png")));
+                LocalizeTrayMenu(trayIcons[0]);
+                Loc.CultureChanged += () =>
+                    Dispatcher.UIThread.Post(() => LocalizeTrayMenu(trayIcons[0]));
             }
 
 
@@ -78,7 +83,7 @@ public partial class App : Application
                     }
                     catch (Exception ex)
                     {
-                        viewModel.StatusMessage = $"Settings error: {ex.Message}";
+                        viewModel.StatusMessage = Loc.Instance.Format("Status_SettingsErrorFormat", ex.Message);
                     }
                     settingsWindow.Close();
                 };
@@ -91,7 +96,7 @@ public partial class App : Application
             {
                 var dialog = new Window
                 {
-                    Title = $"Set Label — {keyVm.HexKeycode}",
+                    Title = Loc.Instance.Format("Title_SetLabelFormat", keyVm.HexKeycode),
                     Width = 350,
                     Height = 150,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
@@ -100,15 +105,15 @@ public partial class App : Application
 
                 var textBox = new TextBox
                 {
-                    Watermark = "Custom label",
+                    Watermark = Loc.Instance["Key_LabelWatermark"],
                     Text = keyVm.Key.IsUnknown ? "" : keyVm.DisplayLabel,
                     Margin = new Thickness(0, 0, 0, 8),
                 };
 
-                var saveBtn = new Button { Content = "Save", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
+                var saveBtn = new Button { Content = Loc.Instance["Common_Save"], HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
                 var info = new TextBlock
                 {
-                    Text = $"Keycode: {keyVm.HexKeycode}  Current: {keyVm.DisplayLabel}",
+                    Text = Loc.Instance.Format("Key_LabelInfoFormat", keyVm.HexKeycode, keyVm.DisplayLabel),
                     Foreground = Avalonia.Media.Brushes.Gray,
                     FontSize = 11,
                     Margin = new Thickness(0, 0, 0, 8),
@@ -171,7 +176,7 @@ public partial class App : Application
                     var storageProvider = mainWindow.StorageProvider;
                     var file = await storageProvider.SaveFilePickerAsync(new Avalonia.Platform.Storage.FilePickerSaveOptions
                     {
-                        Title = "Export Layout",
+                        Title = Loc.Instance["Export_SaveDialogTitle"],
                         DefaultExtension = ext,
                         SuggestedFileName = $"svalboard-layout.{ext}",
                         FileTypeChoices =
@@ -197,12 +202,12 @@ public partial class App : Application
                         ExportService.Export(options, viewModel.KeyboardConfig.Layers,
                             viewModel.KeyboardConfig.Layers.Count, userColors);
 
-                        viewModel.StatusMessage = $"Exported to {Path.GetFileName(path)}";
+                        viewModel.StatusMessage = Loc.Instance.Format("Status_ExportedFormat", Path.GetFileName(path));
                         exportDialog.Close();
                     }
                     catch (Exception ex)
                     {
-                        viewModel.StatusMessage = $"Export error: {ex.Message}";
+                        viewModel.StatusMessage = Loc.Instance.Format("Status_ExportErrorFormat", ex.Message);
                     }
                 };
 
@@ -284,4 +289,23 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    /// <summary>Maps tray menu keys to resource string keys for localization.</summary>
+    private static readonly (string Key, string ResKey)[] TrayMenuKeys =
+    [
+        ("Show", "Tray_ShowLayers"),
+        ("Refresh", "Tray_Refresh"),
+        ("Settings", "Tray_Settings"),
+        ("Help", "Tray_Help"),
+        ("Quit", "Tray_Quit"),
+    ];
+
+    private static void LocalizeTrayMenu(TrayIcon trayIcon)
+    {
+        trayIcon.ToolTipText = Loc.Instance["Tray_Tooltip"];
+        if (trayIcon.Menu is not { } menu) return;
+
+        var menuItems = menu.Items.OfType<NativeMenuItem>().ToList();
+        for (var i = 0; i < menuItems.Count && i < TrayMenuKeys.Length; i++)
+            menuItems[i].Header = Loc.Instance[TrayMenuKeys[i].ResKey];
+    }
 }

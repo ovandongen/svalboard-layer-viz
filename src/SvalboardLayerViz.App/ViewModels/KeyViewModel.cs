@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Export;
 using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Layout;
@@ -113,24 +114,25 @@ public partial class KeyViewModel : ObservableObject
 
     private string BuildTooltip()
     {
+        var loc = Loc.Instance;
         var parts = new List<string>
         {
-            $"Layer {Layer.Index}: {DisplayLabel}"
+            loc.Format("Key_TooltipLayerFormat", Layer.Index, DisplayLabel)
         };
 
         if (SecondaryLabel is not null)
-            parts.Add($"Modifier: {SecondaryLabel}");
+            parts.Add(loc.Format("Key_TooltipModifierFormat", SecondaryLabel));
 
         if (IsTransparent)
-            parts.Add("(Transparent — inherited from layer below)");
+            parts.Add(loc["Key_TooltipTransparent"]);
 
         if (IsLayerSwitch && TargetLayer.HasValue)
-            parts.Add($"→ Layer {TargetLayer.Value}");
+            parts.Add(loc.Format("Key_TooltipTargetLayerFormat", TargetLayer.Value));
 
         if (IsUnknown)
-            parts.Add("(Unknown keycode — assign a label in Settings)");
+            parts.Add(loc["Key_TooltipUnknown"]);
 
-        parts.Add($"Row: {Key.Row}, Col: {Key.Col}");
+        parts.Add(loc.Format("Key_TooltipRowColFormat", Key.Row, Key.Col));
         parts.Add($"Raw: 0x{Key.RawKeycode:X4}");
 
         return string.Join("\n", parts);

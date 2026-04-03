@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using SvalboardLayerViz.App.Localization;
 
 namespace SvalboardLayerViz.App.Views;
 
@@ -18,6 +19,25 @@ public partial class MainWindow : Window
             SystemDecorations = SystemDecorations.Full;
 
         MinimizeButton.Click += (_, _) => WindowState = WindowState.Minimized;
+
+        ApplyToolbarTooltips();
+        Loc.CultureChanged += ApplyToolbarTooltips;
+    }
+
+    private void ApplyToolbarTooltips()
+    {
+        var loc = Loc.Instance;
+        ToolTip.SetTip(QuitButton, loc["Tooltip_Quit"]);
+        ToolTip.SetTip(MinimizeButton, loc["Tooltip_Minimize"]);
+        ToolTip.SetTip(LiveButton, loc["Tooltip_LiveHighlighting"]);
+        ToolTip.SetTip(AutoLayerButton, loc["Tooltip_AutoLayerSwitch"]);
+        ToolTip.SetTip(ResetButton, loc["Tooltip_ResetLayerTracking"]);
+        ToolTip.SetTip(DiagnosticsButton, loc["Tooltip_Diagnostics"]);
+        ToolTip.SetTip(ExportButton, loc["Tooltip_Export"]);
+        ToolTip.SetTip(PinButton, loc["Tooltip_AlwaysOnTop"]);
+        ToolTip.SetTip(HelpButton, loc["Tooltip_Help"]);
+        ToolTip.SetTip(SettingsButton, loc["Tooltip_Settings"]);
+        ToolTip.SetTip(RefreshButton, loc["Tooltip_Refresh"]);
     }
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e)

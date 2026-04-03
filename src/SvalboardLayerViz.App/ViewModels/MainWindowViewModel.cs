@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Device;
 using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Models;
@@ -18,6 +19,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private IDisposable? _deviceSubscription;
     private MatrixPollingService? _matrixPolling;
+    private string? _connectedDeviceName;
 
     /// <summary>
     /// Cached lookup: (row, col) → target layer for momentary layer-switch keys (MO, LT, TT).
@@ -90,7 +92,7 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnSelectedLayerIndexChanged(int value) => OnPropertyChanged(nameof(SelectedLayer));
 
     [ObservableProperty]
-    private string _statusMessage = "Looking for Svalboard...";
+    private string _statusMessage = Loc.Instance["Status_LookingForDevice"];
 
     [ObservableProperty]
     private bool _isConnected;
@@ -181,13 +183,13 @@ public partial class MainWindowViewModel : ObservableObject
             var devices = _deviceService.FindVialDevices();
             if (devices.Count == 0)
             {
-                StatusMessage = "No Svalboard found. Connect your device via USB.";
+                StatusMessage = Loc.Instance["Status_NoDeviceFound"];
                 IsConnected = false;
                 return;
             }
 
             var device = devices[0];
-            StatusMessage = $"Connecting to {device.ProductName}...";
+            StatusMessage = Loc.Instance.Format("Status_ConnectingFormat", device.ProductName);
 
             var loader = new KeymapLoader(_protocolService, _keycodeService);
             KeyboardConfig = loader.Load(device, settings);
@@ -219,7 +221,8 @@ public partial class MainWindowViewModel : ObservableObject
             }
 
             BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
-            StatusMessage = $"Connected: {device.ProductName} — {KeyboardConfig.Layers.Count} layers";
+            _connectedDeviceName = device.ProductName;
+            StatusMessage = Loc.Instance.Format("Status_ConnectedFormat", device.ProductName, KeyboardConfig.Layers.Count);
 
             if (IsLiveHighlightingEnabled)
                 StartMatrixPolling();
@@ -227,7 +230,7 @@ public partial class MainWindowViewModel : ObservableObject
         catch (Exception ex)
         {
             StopMatrixPolling();
-            StatusMessage = $"Connection error: {ex.Message}";
+            StatusMessage = Loc.Instance.Format("Status_ConnectionErrorFormat", ex.Message);
             IsConnected = false;
         }
     }
@@ -294,6 +297,25 @@ public partial class MainWindowViewModel : ObservableObject
         // Force property-changed even if index unchanged, so the UI rebinds
         SelectedLayerIndex = -1;
         SelectedLayerIndex = currentLayer;
+
+        // Refresh status message for new language
+        RefreshStatusMessage();
+    }
+
+    /// <summary>Re-generates StatusMessage in the current locale.</summary>
+    private void RefreshStatusMessage()
+    {
+        if (IsConnected && KeyboardConfig is not null && _connectedDeviceName is not null)
+        {
+            var status = Loc.Instance.Format("Status_ConnectedFormat", _connectedDeviceName, KeyboardConfig.Layers.Count);
+            if (IsLiveHighlightingEnabled)
+                status += Loc.Instance["Status_LiveKeysOn"];
+            StatusMessage = status;
+        }
+        else if (!IsConnected)
+        {
+            StatusMessage = Loc.Instance["Status_NoDeviceFound"];
+        }
     }
 
     /// <summary>
@@ -345,9 +367,9 @@ public partial class MainWindowViewModel : ObservableObject
             _protocolService, KeyboardConfig.MatrixRows, KeyboardConfig.MatrixCols);
         _matrixPolling.MatrixStateChanged += OnMatrixStateChanged;
         _matrixPolling.PollError += msg =>
-            Dispatcher.UIThread.Post(() => StatusMessage = $"Key polling error: {msg}");
+            Dispatcher.UIThread.Post(() => StatusMessage = Loc.Instance.Format("Status_PollingErrorFormat", msg));
         _matrixPolling.Start();
-        StatusMessage += " | Live keys ON";
+        StatusMessage += Loc.Instance["Status_LiveKeysOn"];
     }
 
     private void StopMatrixPolling()

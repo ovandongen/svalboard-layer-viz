@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SvalboardLayerViz.App.Localization;
 
 namespace SvalboardLayerViz.App.ViewModels;
 
@@ -92,7 +93,7 @@ public partial class DiagnosticsViewModel : ObservableObject
         var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
         if (pressedKeys.Count == 0)
         {
-            LogEntries.Insert(0, $"[{timestamp}]  #{EventCount,-5}  --- all released ---");
+            LogEntries.Insert(0, $"[{timestamp}]  #{EventCount,-5}  {Loc.Instance["Diagnostics_AllReleased"]}");
         }
         else
         {

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Settings;
 
@@ -20,6 +21,16 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _newKeycodeHex = "";
+
+    /// <summary>Available UI languages.</summary>
+    public IReadOnlyList<LanguageOption> AvailableLanguages { get; } =
+    [
+        new("en", "English"),
+        new("nl", "Nederlands"),
+    ];
+
+    [ObservableProperty]
+    private LanguageOption _selectedLanguage = null!;
 
     [ObservableProperty]
     private string _hotkeyKey = "F12";
@@ -62,8 +73,8 @@ public partial class SettingsViewModel : ObservableObject
     public int? DeviceTappingTermMs { get; }
 
     public string DeviceTappingTermHint => DeviceTappingTermMs.HasValue
-        ? $"Device tapping term: {DeviceTappingTermMs.Value} ms"
-        : "Device tapping term not available";
+        ? Loc.Instance.Format("Settings_DeviceTappingTermFormat", DeviceTappingTermMs.Value)
+        : Loc.Instance["Settings_DeviceTappingTermUnavailable"];
 
     public SettingsViewModel(ISettingsService settingsService, int totalLayers,
         IReadOnlyList<(string HexKeycode, string CurrentLabel)>? unknownKeycodes = null,
@@ -109,12 +120,16 @@ public partial class SettingsViewModel : ObservableObject
         foreach (var (hex, label) in settings.CustomKeyLabels)
         {
             if (!seenKeycodes.Contains(hex))
-                AddCustomKeyLabelVm(hex, "(manual)", label, isManual: true);
+                AddCustomKeyLabelVm(hex, Loc.Instance["Settings_ManualLabel"], label, isManual: true);
         }
 
         // Populate opacity and threshold
         BackgroundOpacity = settings.BackgroundOpacity;
         LayerHoldThresholdMs = settings.LayerHoldThresholdMs;
+
+        // Populate language
+        SelectedLanguage = AvailableLanguages.FirstOrDefault(l => l.Code == settings.Language)
+                           ?? AvailableLanguages[0];
 
         // Populate hotkey
         HotkeyKey = settings.HotkeyKey;
@@ -150,7 +165,7 @@ public partial class SettingsViewModel : ObservableObject
         if (HotkeyShift) modParts.Add("Shift");
         if (HotkeyAlt) modParts.Add("Alt");
         if (HotkeyGui) modParts.Add("GUI");
-        var modsString = modParts.Count > 0 ? string.Join("+", modParts) : "None";
+        var modsString = modParts.Count > 0 ? string.Join("+", modParts) : "None"; // "None" is a settings key, not UI text
 
         var existing = _settingsService.Load();
         var settings = existing with
@@ -162,7 +177,11 @@ public partial class SettingsViewModel : ObservableObject
             HotkeyModifiers = modsString,
             BackgroundOpacity = Math.Clamp(BackgroundOpacity, 0.0, 1.0),
             LayerHoldThresholdMs = Math.Clamp(LayerHoldThresholdMs, 0, 1000),
+            Language = SelectedLanguage.Code,
         };
+
+        // Apply language change immediately
+        Loc.Instance.SetCulture(SelectedLanguage.Code);
 
         _settingsService.Save(settings);
         SettingsSaved?.Invoke();
@@ -222,6 +241,9 @@ public partial class LayerSettingViewModel : ObservableObject
     private bool _updating;
 
     public int Index { get; init; }
+
+    /// <summary>Localized "Layer N" label for the settings row.</summary>
+    public string LocalizedLayerLabel => Loc.Instance.Format("Settings_LayerFormat", Index);
 
     [ObservableProperty]
     private string _name = "";
@@ -295,4 +317,10 @@ public partial class CustomKeyLabelViewModel : ObservableObject
 
     [RelayCommand]
     private void Remove() => RemoveRequested?.Invoke(this);
+}
+
+/// <summary>Language option for the settings UI language picker.</summary>
+public record LanguageOption(string Code, string DisplayName)
+{
+    public override string ToString() => DisplayName;
 }

@@ -41,4 +41,7 @@ public record UserSettings
 
     /// <summary>Whether the user has seen the help/welcome window. Controls first-launch auto-open.</summary>
     public bool HasSeenHelp { get; init; } = false;
+
+    /// <summary>UI language code (e.g. "en", "nl"). Default follows system locale, falls back to English.</summary>
+    public string Language { get; init; } = "en";
 }

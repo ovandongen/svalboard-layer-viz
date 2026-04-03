@@ -4,7 +4,7 @@
         xmlns:conv="using:SvalboardLayerViz.App.Converters"
         x:Class="SvalboardLayerViz.App.Views.SettingsWindow"
         x:DataType="vm:SettingsViewModel"
-        Title="Settings"
+        Title="{Binding [Title_Settings], Source={StaticResource Loc}}"
         Width="620" Height="700"
         WindowStartupLocation="CenterOwner">
 
@@ -16,23 +16,23 @@
         <!-- Footer buttons — always visible -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                     HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" />
-            <Button Content="Save" Command="{Binding SaveCommand}" />
+            <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}" Command="{Binding CancelCommand}" />
+            <Button Content="{Binding [Common_Save], Source={StaticResource Loc}}" Command="{Binding SaveCommand}" />
         </StackPanel>
 
         <TabControl>
 
             <!-- ══════════════ Appearance Tab ══════════════ -->
-            <TabItem Header="Appearance">
+            <TabItem Header="{Binding [Settings_TabAppearance], Source={StaticResource Loc}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="8,12" Spacing="12">
 
                     <!-- Layer Colors & Names -->
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Left" Text="Layer Colors &amp; Names"
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding [Settings_LayerColorsAndNames], Source={StaticResource Loc}}"
                                    FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4"
                                    VerticalAlignment="Center" />
-                        <Button DockPanel.Dock="Right" Content="Reset Colors"
+                        <Button DockPanel.Dock="Right" Content="{Binding [Settings_ResetColors], Source={StaticResource Loc}}"
                                 Command="{Binding ResetColorsCommand}"
                                 HorizontalAlignment="Right" Padding="8,3" FontSize="12" />
                     </DockPanel>
@@ -41,10 +41,10 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:LayerSettingViewModel">
                                 <Grid ColumnDefinitions="56,*,Auto" Margin="0,2">
-                                    <TextBlock Grid.Column="0" Text="{Binding Index, StringFormat='Layer {0}'}"
+                                    <TextBlock Grid.Column="0" Text="{Binding LocalizedLayerLabel}"
                                                VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12" />
                                     <TextBox Grid.Column="1" Text="{Binding Name}"
-                                             Watermark="Name (optional)" Margin="6,0"
+                                             Watermark="{Binding [Settings_NameWatermark], Source={StaticResource Loc}}" Margin="6,0"
                                              VerticalAlignment="Center" />
                                     <Button Grid.Column="2" Padding="2"
                                             Background="Transparent" BorderThickness="0"
@@ -68,9 +68,9 @@
                     <Border Height="1" Background="#313244" Margin="0,4" />
 
                     <!-- Background Fill -->
-                    <TextBlock Text="Background Fill" FontSize="14" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding [Settings_BackgroundFill], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold"
                                Foreground="#CDD6F4" />
-                    <TextBlock Text="0% = transparent overlay, 100% = solid dark"
+                    <TextBlock Text="{Binding [Settings_BackgroundFillHint], Source={StaticResource Loc}}"
                                Foreground="#6C7086" FontSize="11" Margin="0,-4,0,0" />
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Right" Text="{Binding OpacityPercent}"
@@ -86,21 +86,31 @@
             </TabItem>
 
             <!-- ══════════════ Behavior Tab ══════════════ -->
-            <TabItem Header="Behavior">
+            <TabItem Header="{Binding [Settings_TabBehavior], Source={StaticResource Loc}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="8,12" Spacing="12">
 
+                    <!-- Language -->
+                    <TextBlock Text="{Binding [Settings_Language], Source={StaticResource Loc}}"
+                               FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4" />
+                    <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                              SelectedItem="{Binding SelectedLanguage}"
+                              HorizontalAlignment="Stretch" />
+
+                    <!-- Separator -->
+                    <Border Height="1" Background="#313244" Margin="0,4" />
+
                     <!-- Global Hotkey (not supported on Linux/Wayland) -->
-                    <TextBlock Text="Global Hotkey" FontSize="14" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding [Settings_GlobalHotkey], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold"
                                Foreground="#CDD6F4"
                                IsVisible="{Binding IsHotkeySupported}" />
                     <Grid ColumnDefinitions="70,*" RowDefinitions="Auto,Auto" Margin="0,0,0,0"
                           IsVisible="{Binding IsHotkeySupported}">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Key:"
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding [Settings_HotkeyKey], Source={StaticResource Loc}}"
                                    VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12" />
                         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding HotkeyKey}"
-                                 Watermark="e.g. F12" />
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Modifiers:"
+                                 Watermark="{Binding [Settings_HotkeyKeyWatermark], Source={StaticResource Loc}}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding [Settings_HotkeyModifiers], Source={StaticResource Loc}}"
                                    VerticalAlignment="Center" Foreground="#A6ADC8" FontSize="12"
                                    Margin="0,6,0,0" />
                         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal"
@@ -116,9 +126,9 @@
                     <Border Height="1" Background="#313244" Margin="0,4" />
 
                     <!-- Layer Hold Threshold -->
-                    <TextBlock Text="Layer Hold Threshold" FontSize="14" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding [Settings_LayerHoldThreshold], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold"
                                Foreground="#CDD6F4" />
-                    <TextBlock Text="Min hold time before MO/LT keys switch the displayed layer. Prevents flicker from quick taps."
+                    <TextBlock Text="{Binding [Settings_LayerHoldThresholdHint], Source={StaticResource Loc}}"
                                Foreground="#6C7086" FontSize="11" TextWrapping="Wrap" Margin="0,-4,0,0" />
                     <TextBlock Text="{Binding DeviceTappingTermHint}"
                                Foreground="#A6E3A1" FontSize="11" Margin="0,-4,0,0" />
@@ -135,9 +145,9 @@
                     <Border Height="1" Background="#313244" Margin="0,4" />
 
                     <!-- Custom Key Labels -->
-                    <TextBlock Text="Custom Key Labels" FontSize="14" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding [Settings_CustomKeyLabels], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold"
                                Foreground="#CDD6F4" />
-                    <TextBlock Text="Assign labels to unknown keycodes from your board"
+                    <TextBlock Text="{Binding [Settings_CustomKeyLabelsHint], Source={StaticResource Loc}}"
                                Foreground="#6C7086" FontSize="11" Margin="0,-4,0,0" />
                     <ItemsControl ItemsSource="{Binding CustomKeyLabels}">
                         <ItemsControl.ItemTemplate>
@@ -150,10 +160,10 @@
                                                VerticalAlignment="Center" Foreground="#6C7086"
                                                FontSize="12" Margin="4,0" />
                                     <TextBox Grid.Column="2" Text="{Binding UserLabel}"
-                                             Watermark="Custom label" Margin="4,0" />
+                                             Watermark="{Binding [Settings_CustomLabelWatermark], Source={StaticResource Loc}}" Margin="4,0" />
                                     <Button Grid.Column="3" Content="x" Padding="6,2"
                                             Command="{Binding RemoveCommand}"
-                                            ToolTip.Tip="Remove"
+                                            ToolTip.Tip="{Binding [Tooltip_Remove], Source={StaticResource Loc}}"
                                             IsVisible="{Binding IsManualEntry}" FontSize="11" />
                                 </Grid>
                             </DataTemplate>
@@ -161,8 +171,8 @@
                     </ItemsControl>
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBox Grid.Column="0" Text="{Binding NewKeycodeHex}"
-                                 Watermark="Hex keycode (e.g. 0x5300)" />
-                        <Button Grid.Column="1" Content="Add" Margin="6,0,0,0"
+                                 Watermark="{Binding [Settings_HexKeycodeWatermark], Source={StaticResource Loc}}" />
+                        <Button Grid.Column="1" Content="{Binding [Common_Add], Source={StaticResource Loc}}" Margin="6,0,0,0"
                                 Command="{Binding AddCustomLabelCommand}" Padding="10,4" />
                     </Grid>
 

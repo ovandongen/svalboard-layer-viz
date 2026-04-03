@@ -3,7 +3,7 @@
         xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
         x:Class="SvalboardLayerViz.App.Views.DiagnosticsWindow"
         x:DataType="vm:DiagnosticsViewModel"
-        Title="Matrix Diagnostics"
+        Title="{Binding [Title_Diagnostics], Source={StaticResource Loc}}"
         Width="750" Height="550"
         WindowStartupLocation="CenterOwner"
         Background="#1E1E2E">
@@ -13,14 +13,14 @@
         <!-- Header with stats and clear button -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="16" Margin="0,0,0,12">
             <TextBlock Foreground="#CDD6F4" VerticalAlignment="Center">
-                <Run Text="Events: " />
+                <Run Text="{Binding [Diagnostics_Events], Source={StaticResource Loc}}" />
                 <Run Text="{Binding EventCount}" FontWeight="Bold" Foreground="#89B4FA" />
             </TextBlock>
             <TextBlock Foreground="#CDD6F4" VerticalAlignment="Center">
-                <Run Text="Pressed: " />
+                <Run Text="{Binding [Diagnostics_Pressed], Source={StaticResource Loc}}" />
                 <Run Text="{Binding PressedCount}" FontWeight="Bold" Foreground="#A6E3A1" />
             </TextBlock>
-            <Button Command="{Binding ClearCommand}" Content="Clear Log" Padding="12,4" />
+            <Button Command="{Binding ClearCommand}" Content="{Binding [Diagnostics_ClearLog], Source={StaticResource Loc}}" Padding="12,4" />
         </StackPanel>
 
         <!-- Currently pressed keys grid -->
@@ -33,19 +33,19 @@
                 <Border Grid.Row="0" Background="#181825" Padding="8,6"
                         CornerRadius="4,4,0,0">
                     <Grid ColumnDefinitions="50,50,120,90,70,100,80">
-                        <TextBlock Grid.Column="0" Text="Row" Foreground="#6C7086"
+                        <TextBlock Grid.Column="0" Text="{Binding [Diagnostics_Row], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="1" Text="Col" Foreground="#6C7086"
+                        <TextBlock Grid.Column="1" Text="{Binding [Diagnostics_Col], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="2" Text="Label" Foreground="#6C7086"
+                        <TextBlock Grid.Column="2" Text="{Binding [Diagnostics_Label], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="3" Text="Modifier" Foreground="#6C7086"
+                        <TextBlock Grid.Column="3" Text="{Binding [Diagnostics_Modifier], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="4" Text="Keycode" Foreground="#6C7086"
+                        <TextBlock Grid.Column="4" Text="{Binding [Diagnostics_Keycode], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="5" Text="Layer" Foreground="#6C7086"
+                        <TextBlock Grid.Column="5" Text="{Binding [Diagnostics_Layer], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
-                        <TextBlock Grid.Column="6" Text="Flags" Foreground="#6C7086"
+                        <TextBlock Grid.Column="6" Text="{Binding [Diagnostics_Flags], Source={StaticResource Loc}}" Foreground="#6C7086"
                                    FontSize="11" FontWeight="SemiBold" />
                     </Grid>
                 </Border>
@@ -86,7 +86,7 @@
 
                 <!-- Empty state -->
                 <TextBlock Grid.Row="1"
-                           Text="No keys pressed"
+                           Text="{Binding [Diagnostics_NoKeysPressed], Source={StaticResource Loc}}"
                            Foreground="#45475A" FontStyle="Italic"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Margin="0,12"
@@ -98,7 +98,7 @@
         <Border Grid.Row="2" Background="#11111B" CornerRadius="4"
                 BorderThickness="1" BorderBrush="#313244">
             <Grid RowDefinitions="Auto,*">
-                <TextBlock Grid.Row="0" Text="Event Log" Foreground="#6C7086"
+                <TextBlock Grid.Row="0" Text="{Binding [Diagnostics_EventLog], Source={StaticResource Loc}}" Foreground="#6C7086"
                            FontSize="11" FontWeight="SemiBold"
                            Margin="8,6" />
                 <ListBox Grid.Row="1" ItemsSource="{Binding LogEntries}"

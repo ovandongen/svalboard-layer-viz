@@ -11,7 +11,7 @@
                 Background="Transparent">
 
             <TextBlock Canvas.Left="600" Canvas.Top="220"
-                       Text="Connect your Svalboard to see the layout"
+                       Text="{Binding [Board_ConnectPrompt], Source={StaticResource Loc}}"
                        Foreground="#585B70"
                        FontSize="16"
                        IsVisible="{Binding !IsConnected}" />

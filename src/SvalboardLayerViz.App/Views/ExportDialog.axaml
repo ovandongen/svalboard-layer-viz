@@ -3,7 +3,7 @@
         xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
         x:Class="SvalboardLayerViz.App.Views.ExportDialog"
         x:DataType="vm:ExportDialogViewModel"
-        Title="Export Layers"
+        Title="{Binding [Title_Export], Source={StaticResource Loc}}"
         Width="420" Height="580"
         MinWidth="350" MinHeight="400"
         WindowStartupLocation="CenterOwner"
@@ -14,20 +14,20 @@
         <!-- Footer buttons — always visible at bottom -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                     HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" />
-            <Button Content="Export" Command="{Binding ExportCommand}" />
+            <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}" Command="{Binding CancelCommand}" />
+            <Button Content="{Binding [Common_Export], Source={StaticResource Loc}}" Command="{Binding ExportCommand}" />
         </StackPanel>
 
         <!-- Format + page size — pinned at top -->
         <StackPanel DockPanel.Dock="Top" Spacing="12">
-            <TextBlock Text="Format" FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4" />
+            <TextBlock Text="{Binding [Export_Format], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4" />
             <ComboBox ItemsSource="{Binding AvailableFormats}"
                       SelectedItem="{Binding SelectedFormat}"
                       HorizontalAlignment="Stretch" />
 
             <!-- Page size (PDF only) -->
             <StackPanel Spacing="4" IsVisible="{Binding IsPdfSelected}">
-                <TextBlock Text="Page Size" FontSize="12" Foreground="#A6ADC8" Margin="0,4,0,0" />
+                <TextBlock Text="{Binding [Export_PageSize], Source={StaticResource Loc}}" FontSize="12" Foreground="#A6ADC8" Margin="0,4,0,0" />
                 <ComboBox ItemsSource="{Binding AvailablePageSizes}"
                           SelectedItem="{Binding SelectedPageSize}"
                           HorizontalAlignment="Stretch" />
@@ -38,14 +38,14 @@
 
             <!-- Layer selection header -->
             <DockPanel>
-                <TextBlock DockPanel.Dock="Left" Text="Layers" FontSize="14"
+                <TextBlock DockPanel.Dock="Left" Text="{Binding [Export_Layers], Source={StaticResource Loc}}" FontSize="14"
                            FontWeight="SemiBold" Foreground="#CDD6F4"
                            VerticalAlignment="Center" />
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                             HorizontalAlignment="Right" Spacing="8">
-                    <Button Content="All" Command="{Binding SelectAllCommand}"
+                    <Button Content="{Binding [Common_All], Source={StaticResource Loc}}" Command="{Binding SelectAllCommand}"
                             Padding="8,2" FontSize="11" />
-                    <Button Content="None" Command="{Binding SelectNoneCommand}"
+                    <Button Content="{Binding [Common_None], Source={StaticResource Loc}}" Command="{Binding SelectNoneCommand}"
                             Padding="8,2" FontSize="11" />
                 </StackPanel>
             </DockPanel>
@@ -64,7 +64,7 @@
                                     VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="{Binding DisplayName}"
                                        VerticalAlignment="Center" Foreground="#CDD6F4" />
-                            <CheckBox Grid.Column="3" Content="Hide thumbs"
+                            <CheckBox Grid.Column="3" Content="{Binding [Export_HideThumbs], Source={StaticResource Loc}}"
                                       IsChecked="{Binding HideThumbCluster}"
                                       FontSize="11" Foreground="#A6ADC8"
                                       VerticalAlignment="Center" />

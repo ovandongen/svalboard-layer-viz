@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- ══════════════ Window Titles ══════════════ -->
+  <data name="Title_App" xml:space="preserve">
+    <value>Svalboard Layer Viz</value>
+  </data>
+  <data name="Title_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Title_Help" xml:space="preserve">
+    <value>Help — Svalboard Layer Viz</value>
+  </data>
+  <data name="Title_Export" xml:space="preserve">
+    <value>Export Layers</value>
+  </data>
+  <data name="Title_Diagnostics" xml:space="preserve">
+    <value>Matrix Diagnostics</value>
+  </data>
+  <data name="Title_SetLabelFormat" xml:space="preserve">
+    <value>Set Label — {0}</value>
+    <comment>{0} = hex keycode</comment>
+  </data>
+
+  <!-- ══════════════ Common Buttons ══════════════ -->
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Common_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+
+  <!-- ══════════════ Toolbar Tooltips ══════════════ -->
+  <data name="Tooltip_Quit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="Tooltip_Minimize" xml:space="preserve">
+    <value>Minimize</value>
+  </data>
+  <data name="Tooltip_LiveHighlighting" xml:space="preserve">
+    <value>Live key highlighting</value>
+  </data>
+  <data name="Tooltip_AutoLayerSwitch" xml:space="preserve">
+    <value>Auto-switch layer (follows held layer keys)</value>
+  </data>
+  <data name="Tooltip_ResetLayerTracking" xml:space="preserve">
+    <value>Reset layer tracking (back to base)</value>
+  </data>
+  <data name="Tooltip_Diagnostics" xml:space="preserve">
+    <value>Matrix diagnostics</value>
+  </data>
+  <data name="Tooltip_Export" xml:space="preserve">
+    <value>Export layers to image/PDF</value>
+  </data>
+  <data name="Tooltip_AlwaysOnTop" xml:space="preserve">
+    <value>Always on top</value>
+  </data>
+  <data name="Tooltip_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Tooltip_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tooltip_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Tooltip_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+
+  <!-- ══════════════ Status Messages ══════════════ -->
+  <data name="Status_LookingForDevice" xml:space="preserve">
+    <value>Looking for Svalboard...</value>
+  </data>
+  <data name="Status_NoDeviceFound" xml:space="preserve">
+    <value>No Svalboard found. Connect your device via USB.</value>
+  </data>
+  <data name="Status_ConnectingFormat" xml:space="preserve">
+    <value>Connecting to {0}...</value>
+    <comment>{0} = device product name</comment>
+  </data>
+  <data name="Status_ConnectedFormat" xml:space="preserve">
+    <value>Connected: {0} — {1} layers</value>
+    <comment>{0} = device product name, {1} = layer count</comment>
+  </data>
+  <data name="Status_ConnectionErrorFormat" xml:space="preserve">
+    <value>Connection error: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
+  <data name="Status_PollingErrorFormat" xml:space="preserve">
+    <value>Key polling error: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
+  <data name="Status_LiveKeysOn" xml:space="preserve">
+    <value> | Live keys ON</value>
+  </data>
+  <data name="Status_ExportedFormat" xml:space="preserve">
+    <value>Exported to {0}</value>
+    <comment>{0} = file name</comment>
+  </data>
+  <data name="Status_ExportErrorFormat" xml:space="preserve">
+    <value>Export error: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
+  <data name="Status_SettingsErrorFormat" xml:space="preserve">
+    <value>Settings error: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
+
+  <!-- ══════════════ Board View ══════════════ -->
+  <data name="Board_ConnectPrompt" xml:space="preserve">
+    <value>Connect your Svalboard to see the layout</value>
+  </data>
+
+  <!-- ══════════════ Key Context Menu ══════════════ -->
+  <data name="Key_SetCustomLabel" xml:space="preserve">
+    <value>Set Custom Label...</value>
+  </data>
+
+  <!-- ══════════════ Key Tooltips ══════════════ -->
+  <data name="Key_TooltipLayerFormat" xml:space="preserve">
+    <value>Layer {0}: {1}</value>
+    <comment>{0} = layer index, {1} = display label</comment>
+  </data>
+  <data name="Key_TooltipModifierFormat" xml:space="preserve">
+    <value>Modifier: {0}</value>
+    <comment>{0} = modifier label</comment>
+  </data>
+  <data name="Key_TooltipTransparent" xml:space="preserve">
+    <value>(Transparent — inherited from layer below)</value>
+  </data>
+  <data name="Key_TooltipTargetLayerFormat" xml:space="preserve">
+    <value>&#x2192; Layer {0}</value>
+    <comment>{0} = target layer index</comment>
+  </data>
+  <data name="Key_TooltipUnknown" xml:space="preserve">
+    <value>(Unknown keycode — assign a label in Settings)</value>
+  </data>
+  <data name="Key_TooltipRowColFormat" xml:space="preserve">
+    <value>Row: {0}, Col: {1}</value>
+    <comment>{0} = row, {1} = col</comment>
+  </data>
+
+  <!-- ══════════════ Key Label Dialog ══════════════ -->
+  <data name="Key_LabelWatermark" xml:space="preserve">
+    <value>Custom label</value>
+  </data>
+  <data name="Key_LabelInfoFormat" xml:space="preserve">
+    <value>Keycode: {0}  Current: {1}</value>
+    <comment>{0} = hex keycode, {1} = current label</comment>
+  </data>
+
+  <!-- ══════════════ Tray Menu ══════════════ -->
+  <data name="Tray_Tooltip" xml:space="preserve">
+    <value>Svalboard Layer Viz</value>
+  </data>
+  <data name="Tray_ShowLayers" xml:space="preserve">
+    <value>Show Layers</value>
+  </data>
+  <data name="Tray_Refresh" xml:space="preserve">
+    <value>Refresh from Device</value>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Settings...</value>
+  </data>
+  <data name="Tray_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Tray_Quit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+
+  <!-- ══════════════ Settings: Appearance Tab ══════════════ -->
+  <data name="Settings_TabAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="Settings_LayerColorsAndNames" xml:space="preserve">
+    <value>Layer Colors &amp; Names</value>
+  </data>
+  <data name="Settings_ResetColors" xml:space="preserve">
+    <value>Reset Colors</value>
+  </data>
+  <data name="Settings_LayerFormat" xml:space="preserve">
+    <value>Layer {0}</value>
+    <comment>{0} = layer index</comment>
+  </data>
+  <data name="Settings_NameWatermark" xml:space="preserve">
+    <value>Name (optional)</value>
+  </data>
+  <data name="Settings_BackgroundFill" xml:space="preserve">
+    <value>Background Fill</value>
+  </data>
+  <data name="Settings_BackgroundFillHint" xml:space="preserve">
+    <value>0% = transparent overlay, 100% = solid dark</value>
+  </data>
+
+  <!-- ══════════════ Settings: Behavior Tab ══════════════ -->
+  <data name="Settings_TabBehavior" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings_GlobalHotkey" xml:space="preserve">
+    <value>Global Hotkey</value>
+  </data>
+  <data name="Settings_HotkeyKey" xml:space="preserve">
+    <value>Key:</value>
+  </data>
+  <data name="Settings_HotkeyKeyWatermark" xml:space="preserve">
+    <value>e.g. F12</value>
+  </data>
+  <data name="Settings_HotkeyModifiers" xml:space="preserve">
+    <value>Modifiers:</value>
+  </data>
+  <data name="Settings_LayerHoldThreshold" xml:space="preserve">
+    <value>Layer Hold Threshold</value>
+  </data>
+  <data name="Settings_LayerHoldThresholdHint" xml:space="preserve">
+    <value>Min hold time before MO/LT keys switch the displayed layer. Prevents flicker from quick taps.</value>
+  </data>
+  <data name="Settings_DeviceTappingTermFormat" xml:space="preserve">
+    <value>Device tapping term: {0} ms</value>
+    <comment>{0} = tapping term value</comment>
+  </data>
+  <data name="Settings_DeviceTappingTermUnavailable" xml:space="preserve">
+    <value>Device tapping term not available</value>
+  </data>
+  <data name="Settings_CustomKeyLabels" xml:space="preserve">
+    <value>Custom Key Labels</value>
+  </data>
+  <data name="Settings_CustomKeyLabelsHint" xml:space="preserve">
+    <value>Assign labels to unknown keycodes from your board</value>
+  </data>
+  <data name="Settings_CustomLabelWatermark" xml:space="preserve">
+    <value>Custom label</value>
+  </data>
+  <data name="Settings_HexKeycodeWatermark" xml:space="preserve">
+    <value>Hex keycode (e.g. 0x5300)</value>
+  </data>
+  <data name="Settings_ManualLabel" xml:space="preserve">
+    <value>(manual)</value>
+  </data>
+
+  <!-- ══════════════ Export Dialog ══════════════ -->
+  <data name="Export_Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Export_PageSize" xml:space="preserve">
+    <value>Page Size</value>
+  </data>
+  <data name="Export_Layers" xml:space="preserve">
+    <value>Layers</value>
+  </data>
+  <data name="Export_HideThumbs" xml:space="preserve">
+    <value>Hide thumbs</value>
+  </data>
+  <data name="Export_SaveDialogTitle" xml:space="preserve">
+    <value>Export Layout</value>
+  </data>
+
+  <!-- ══════════════ Diagnostics Window ══════════════ -->
+  <data name="Diagnostics_Events" xml:space="preserve">
+    <value>Events: </value>
+  </data>
+  <data name="Diagnostics_Pressed" xml:space="preserve">
+    <value>Pressed: </value>
+  </data>
+  <data name="Diagnostics_ClearLog" xml:space="preserve">
+    <value>Clear Log</value>
+  </data>
+  <data name="Diagnostics_Row" xml:space="preserve">
+    <value>Row</value>
+  </data>
+  <data name="Diagnostics_Col" xml:space="preserve">
+    <value>Col</value>
+  </data>
+  <data name="Diagnostics_Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Diagnostics_Modifier" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Diagnostics_Keycode" xml:space="preserve">
+    <value>Keycode</value>
+  </data>
+  <data name="Diagnostics_Layer" xml:space="preserve">
+    <value>Layer</value>
+  </data>
+  <data name="Diagnostics_Flags" xml:space="preserve">
+    <value>Flags</value>
+  </data>
+  <data name="Diagnostics_NoKeysPressed" xml:space="preserve">
+    <value>No keys pressed</value>
+  </data>
+  <data name="Diagnostics_EventLog" xml:space="preserve">
+    <value>Event Log</value>
+  </data>
+  <data name="Diagnostics_AllReleased" xml:space="preserve">
+    <value>--- all released ---</value>
+  </data>
+
+  <!-- ══════════════ Help Window ══════════════ -->
+  <data name="Help_GotIt" xml:space="preserve">
+    <value>Got it!</value>
+  </data>
+  <data name="Help_DontShowOnStartup" xml:space="preserve">
+    <value>Don't show this on startup</value>
+  </data>
+  <data name="Help_WelcomeTitle" xml:space="preserve">
+    <value>Welcome to Svalboard Layer Viz</value>
+  </data>
+  <data name="Help_WelcomeSubtitle" xml:space="preserve">
+    <value>A live keyboard layer visualizer for the Svalboard.</value>
+  </data>
+  <data name="Help_GettingStarted" xml:space="preserve">
+    <value>Getting Started</value>
+  </data>
+  <data name="Help_GettingStartedText" xml:space="preserve">
+    <value>Connect your Svalboard via USB. The app detects it automatically and loads all layers. If you disconnect and reconnect, it will re-sync.</value>
+  </data>
+  <data name="Help_ToolbarButtons" xml:space="preserve">
+    <value>Toolbar Buttons</value>
+  </data>
+  <data name="Help_LiveHighlightingTitle" xml:space="preserve">
+    <value>Live Highlighting</value>
+  </data>
+  <data name="Help_LiveHighlightingText" xml:space="preserve">
+    <value>Shows which keys are physically pressed in real time. Dim = off, bright = on.</value>
+  </data>
+  <data name="Help_AutoLayerSwitchTitle" xml:space="preserve">
+    <value>Auto-Layer Switch</value>
+  </data>
+  <data name="Help_AutoLayerSwitchText" xml:space="preserve">
+    <value>Automatically follows which layer key you hold. See the important note below.</value>
+  </data>
+  <data name="Help_ResetLayerStateTitle" xml:space="preserve">
+    <value>Reset Layer State</value>
+  </data>
+  <data name="Help_ResetLayerStateText" xml:space="preserve">
+    <value>Resets layer tracking back to the base layer. Use this if toggle tracking gets out of sync.</value>
+  </data>
+  <data name="Help_DiagnosticsTitle" xml:space="preserve">
+    <value>Matrix Diagnostics</value>
+  </data>
+  <data name="Help_DiagnosticsText" xml:space="preserve">
+    <value>Opens a live view of matrix events — shows which keys fire and on which layer. Useful for debugging.</value>
+  </data>
+  <data name="Help_ExportTitle" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Help_ExportText" xml:space="preserve">
+    <value>Save your layout as PNG, PDF, or SVG. Choose which layers to include and whether to hide thumb clusters.</value>
+  </data>
+  <data name="Help_AlwaysOnTopTitle" xml:space="preserve">
+    <value>Always on Top</value>
+  </data>
+  <data name="Help_AlwaysOnTopText" xml:space="preserve">
+    <value>Pins the window above all other windows. Great for using as a floating reference while typing.</value>
+  </data>
+  <data name="Help_SettingsTitle" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Help_SettingsText" xml:space="preserve">
+    <value>Customize layer colors, names, global hotkey, background transparency, hold threshold, and custom key labels.</value>
+  </data>
+  <data name="Help_RefreshTitle" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Help_RefreshText" xml:space="preserve">
+    <value>Re-reads the keymap from the device. Use after flashing new firmware or changing your layout in Vial.</value>
+  </data>
+  <data name="Help_LayerTabs" xml:space="preserve">
+    <value>Layer Tabs</value>
+  </data>
+  <data name="Help_LayerTabsText" xml:space="preserve">
+    <value>Click a tab to view that layer's key assignments. Each layer has a unique color. Layers where every key is empty (KC_NO) are hidden automatically.</value>
+  </data>
+  <data name="Help_ImportantTitle" xml:space="preserve">
+    <value>Important: Auto-Layer Switch &amp; Svalboard Input</value>
+  </data>
+  <data name="Help_ImportantText1" xml:space="preserve">
+    <value>When auto-layer-switch is enabled (the default), the displayed layer follows whichever layer key you are physically holding down.</value>
+  </data>
+  <data name="Help_ImportantText2" xml:space="preserve">
+    <value>Since your Svalboard IS your mouse, clicking a layer tab counts as a keypress. The moment you click, no layer key is held, so the app switches back to the base layer. This is expected behavior!</value>
+  </data>
+  <data name="Help_ImportantText3" xml:space="preserve">
+    <value>To browse layers manually, turn off auto-layer-switch first (the checkmark button in the toolbar).</value>
+  </data>
+  <data name="Help_ImportantText4" xml:space="preserve">
+    <value>If toggle (TG) layer tracking gets out of sync with your actual keyboard state, use the Reset button to return to the base layer.</value>
+  </data>
+  <data name="Help_Tips" xml:space="preserve">
+    <value>Tips</value>
+  </data>
+  <data name="Help_Tip1" xml:space="preserve">
+    <value>&#x2022; Pin the window (always-on-top) to use as a floating reference while typing</value>
+  </data>
+  <data name="Help_Tip2" xml:space="preserve">
+    <value>&#x2022; Right-click any key to assign a custom label</value>
+  </data>
+  <data name="Help_Tip3" xml:space="preserve">
+    <value>&#x2022; Use the global hotkey (default: F12) to quickly show or hide the window</value>
+  </data>
+  <data name="Help_Tip4" xml:space="preserve">
+    <value>&#x2022; Adjust background transparency in Settings to use the app as a translucent overlay</value>
+  </data>
+  <data name="Help_Tip5" xml:space="preserve">
+    <value>&#x2022; The system tray icon provides quick access to show, refresh, and quit</value>
+  </data>
+
+</root>

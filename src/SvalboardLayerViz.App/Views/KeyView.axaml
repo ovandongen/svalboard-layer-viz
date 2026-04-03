@@ -23,7 +23,7 @@
 
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="Set Custom Label..." Command="{Binding SetLabelCommand}" />
+            <MenuItem Header="{Binding [Key_SetCustomLabel], Source={StaticResource Loc}}" Command="{Binding SetLabelCommand}" />
         </ContextMenu>
     </UserControl.ContextMenu>
 

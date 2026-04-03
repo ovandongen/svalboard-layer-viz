@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title_App" xml:space="preserve">
+    <value>Svalboard Laagweergave</value>
+    <comment/>
+  </data>
+  <data name="Title_Settings" xml:space="preserve">
+    <value>Instellingen</value>
+    <comment/>
+  </data>
+  <data name="Title_Help" xml:space="preserve">
+    <value>Help — Svalboard Layer Viz</value>
+    <comment/>
+  </data>
+  <data name="Title_Export" xml:space="preserve">
+    <value>Lagen exporteren</value>
+    <comment/>
+  </data>
+  <data name="Title_Diagnostics" xml:space="preserve">
+    <value>Matrix diagnostiek</value>
+    <comment/>
+  </data>
+  <data name="Title_SetLabelFormat" xml:space="preserve">
+    <value>Label instellen — {0}</value>
+    <comment/>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Annuleren</value>
+    <comment/>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Opslaan</value>
+    <comment/>
+  </data>
+  <data name="Common_Export" xml:space="preserve">
+    <value>Exporteren</value>
+    <comment/>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Toevoegen</value>
+    <comment/>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>Alles</value>
+    <comment/>
+  </data>
+  <data name="Common_None" xml:space="preserve">
+    <value>Geen</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Quit" xml:space="preserve">
+    <value>Afsluiten</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Minimize" xml:space="preserve">
+    <value>Minimaliseren</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_LiveHighlighting" xml:space="preserve">
+    <value>Live toetsmarkering</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_AutoLayerSwitch" xml:space="preserve">
+    <value>Automatisch layer wisselen (volgt ingedrukte layertoetsen)</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_ResetLayerTracking" xml:space="preserve">
+    <value>Layerstatus resetten (terug naar basis)</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Diagnostics" xml:space="preserve">
+    <value>Matrix diagnostiek</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Export" xml:space="preserve">
+    <value>Lagen exporteren als afbeelding/PDF</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_AlwaysOnTop" xml:space="preserve">
+    <value>Always on top</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Help" xml:space="preserve">
+    <value>Help</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Settings" xml:space="preserve">
+    <value>Instellingen</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Refresh" xml:space="preserve">
+    <value>Vernieuwen</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Remove" xml:space="preserve">
+    <value>Verwijderen</value>
+    <comment/>
+  </data>
+  <data name="Status_LookingForDevice" xml:space="preserve">
+    <value>Svalboard zoeken...</value>
+    <comment/>
+  </data>
+  <data name="Status_NoDeviceFound" xml:space="preserve">
+    <value>Geen Svalboard gevonden. Sluit je apparaat aan via USB.</value>
+    <comment/>
+  </data>
+  <data name="Status_ConnectingFormat" xml:space="preserve">
+    <value>Verbinden met {0}...</value>
+    <comment/>
+  </data>
+  <data name="Status_ConnectedFormat" xml:space="preserve">
+    <value>Verbonden: {0} — {1} layers</value>
+    <comment/>
+  </data>
+  <data name="Status_ConnectionErrorFormat" xml:space="preserve">
+    <value>Verbindingsfout: {0}</value>
+    <comment/>
+  </data>
+  <data name="Status_PollingErrorFormat" xml:space="preserve">
+    <value>Toets polling fout: {0}</value>
+    <comment/>
+  </data>
+  <data name="Status_LiveKeysOn" xml:space="preserve">
+    <value> | Live toetsen AAN</value>
+    <comment/>
+  </data>
+  <data name="Status_ExportedFormat" xml:space="preserve">
+    <value>Geëxporteerd naar {0}</value>
+    <comment/>
+  </data>
+  <data name="Status_ExportErrorFormat" xml:space="preserve">
+    <value>Exportfout: {0}</value>
+    <comment/>
+  </data>
+  <data name="Status_SettingsErrorFormat" xml:space="preserve">
+    <value>Instellingenfout: {0}</value>
+    <comment/>
+  </data>
+  <data name="Board_ConnectPrompt" xml:space="preserve">
+    <value>Sluit je Svalboard aan om de indeling te zien</value>
+    <comment/>
+  </data>
+  <data name="Key_SetCustomLabel" xml:space="preserve">
+    <value>Aangepast label instellen...</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipLayerFormat" xml:space="preserve">
+    <value>Laag {0}: {1}</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipModifierFormat" xml:space="preserve">
+    <value>Modifier: {0}</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipTransparent" xml:space="preserve">
+    <value>(Transparant — overgenomen van onderliggende laag)</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipTargetLayerFormat" xml:space="preserve">
+    <value>→ Laag {0}</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipUnknown" xml:space="preserve">
+    <value>(Onbekende toetscode — wijs een label toe in Instellingen)</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipRowColFormat" xml:space="preserve">
+    <value>Rij: {0}, Kolom: {1}</value>
+    <comment/>
+  </data>
+  <data name="Key_LabelWatermark" xml:space="preserve">
+    <value>Aangepast label</value>
+    <comment/>
+  </data>
+  <data name="Key_LabelInfoFormat" xml:space="preserve">
+    <value>Toetscode: {0}  Huidig: {1}</value>
+    <comment/>
+  </data>
+  <data name="Tray_Tooltip" xml:space="preserve">
+    <value>Svalboard Laagweergave</value>
+    <comment/>
+  </data>
+  <data name="Tray_ShowLayers" xml:space="preserve">
+    <value>Lagen tonen</value>
+    <comment/>
+  </data>
+  <data name="Tray_Refresh" xml:space="preserve">
+    <value>Vernieuwen vanaf apparaat</value>
+    <comment/>
+  </data>
+  <data name="Tray_Settings" xml:space="preserve">
+    <value>Instellingen...</value>
+    <comment/>
+  </data>
+  <data name="Tray_Help" xml:space="preserve">
+    <value>Help</value>
+    <comment/>
+  </data>
+  <data name="Tray_Quit" xml:space="preserve">
+    <value>Afsluiten</value>
+    <comment/>
+  </data>
+  <data name="Settings_TabAppearance" xml:space="preserve">
+    <value>Uiterlijk</value>
+    <comment/>
+  </data>
+  <data name="Settings_LayerColorsAndNames" xml:space="preserve">
+    <value>Laagkleuren &amp; namen</value>
+    <comment/>
+  </data>
+  <data name="Settings_ResetColors" xml:space="preserve">
+    <value>Kleuren resetten</value>
+    <comment/>
+  </data>
+  <data name="Settings_LayerFormat" xml:space="preserve">
+    <value>Laag {0}</value>
+    <comment/>
+  </data>
+  <data name="Settings_NameWatermark" xml:space="preserve">
+    <value>Naam (optioneel)</value>
+    <comment/>
+  </data>
+  <data name="Settings_BackgroundFill" xml:space="preserve">
+    <value>Achtergrondvulling</value>
+    <comment/>
+  </data>
+  <data name="Settings_BackgroundFillHint" xml:space="preserve">
+    <value>0% = transparante overlay, 100% = volledig donker</value>
+    <comment/>
+  </data>
+  <data name="Settings_TabBehavior" xml:space="preserve">
+    <value>Gedrag</value>
+    <comment/>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Taal</value>
+    <comment/>
+  </data>
+  <data name="Settings_GlobalHotkey" xml:space="preserve">
+    <value>Globale sneltoets</value>
+    <comment/>
+  </data>
+  <data name="Settings_HotkeyKey" xml:space="preserve">
+    <value>Toets:</value>
+    <comment/>
+  </data>
+  <data name="Settings_HotkeyKeyWatermark" xml:space="preserve">
+    <value>bijv. F12</value>
+    <comment/>
+  </data>
+  <data name="Settings_HotkeyModifiers" xml:space="preserve">
+    <value>Modifiers:</value>
+    <comment/>
+  </data>
+  <data name="Settings_LayerHoldThreshold" xml:space="preserve">
+    <value>Laag vasthouddrempel</value>
+    <comment/>
+  </data>
+  <data name="Settings_LayerHoldThresholdHint" xml:space="preserve">
+    <value>Minimale vasthoudtijd voordat MO/LT-toetsen de weergegeven laag tonen. Voorkomt flikkering bij snelle invoer.</value>
+    <comment/>
+  </data>
+  <data name="Settings_DeviceTappingTermFormat" xml:space="preserve">
+    <value>Apparaat 'tapping term': {0} ms</value>
+    <comment/>
+  </data>
+  <data name="Settings_DeviceTappingTermUnavailable" xml:space="preserve">
+    <value>Apparaat 'tapping term' niet beschikbaar</value>
+    <comment/>
+  </data>
+  <data name="Settings_CustomKeyLabels" xml:space="preserve">
+    <value>Aangepaste toetslabels</value>
+    <comment/>
+  </data>
+  <data name="Settings_CustomKeyLabelsHint" xml:space="preserve">
+    <value>Wijs labels toe aan onbekende toetscodes van je bord</value>
+    <comment/>
+  </data>
+  <data name="Settings_CustomLabelWatermark" xml:space="preserve">
+    <value>Aangepast label</value>
+    <comment/>
+  </data>
+  <data name="Settings_HexKeycodeWatermark" xml:space="preserve">
+    <value>Hex toetscode (bijv. 0x5300)</value>
+    <comment/>
+  </data>
+  <data name="Settings_ManualLabel" xml:space="preserve">
+    <value>(handmatig)</value>
+    <comment/>
+  </data>
+  <data name="Export_Format" xml:space="preserve">
+    <value>Formaat</value>
+    <comment/>
+  </data>
+  <data name="Export_PageSize" xml:space="preserve">
+    <value>Paginaformaat</value>
+    <comment/>
+  </data>
+  <data name="Export_Layers" xml:space="preserve">
+    <value>Lagen</value>
+    <comment/>
+  </data>
+  <data name="Export_HideThumbs" xml:space="preserve">
+    <value>Duimclusters verbergen</value>
+    <comment/>
+  </data>
+  <data name="Export_SaveDialogTitle" xml:space="preserve">
+    <value>Indeling exporteren</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Events" xml:space="preserve">
+    <value>Gebeurtenissen: </value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Pressed" xml:space="preserve">
+    <value>Ingedrukt: </value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_ClearLog" xml:space="preserve">
+    <value>Log wissen</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Row" xml:space="preserve">
+    <value>Rij</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Col" xml:space="preserve">
+    <value>Kolom</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Label" xml:space="preserve">
+    <value>Label</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Modifier" xml:space="preserve">
+    <value>Modifier</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Keycode" xml:space="preserve">
+    <value>Toetscode</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Layer" xml:space="preserve">
+    <value>Laag</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_Flags" xml:space="preserve">
+    <value>Vlaggen</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_NoKeysPressed" xml:space="preserve">
+    <value>Geen toetsen ingedrukt</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_EventLog" xml:space="preserve">
+    <value>Gebeurtenislog</value>
+    <comment/>
+  </data>
+  <data name="Diagnostics_AllReleased" xml:space="preserve">
+    <value>--- alles losgelaten ---</value>
+    <comment/>
+  </data>
+  <data name="Help_GotIt" xml:space="preserve">
+    <value>Begrepen!</value>
+    <comment/>
+  </data>
+  <data name="Help_DontShowOnStartup" xml:space="preserve">
+    <value>Niet meer tonen bij opstarten</value>
+    <comment/>
+  </data>
+  <data name="Help_WelcomeTitle" xml:space="preserve">
+    <value>Welkom bij Svalboard Laagweergave</value>
+    <comment/>
+  </data>
+  <data name="Help_WelcomeSubtitle" xml:space="preserve">
+    <value>Een live toetsenbordlaag-visualisatie voor Svalboard.</value>
+    <comment/>
+  </data>
+  <data name="Help_GettingStarted" xml:space="preserve">
+    <value>Aan de slag</value>
+    <comment/>
+  </data>
+  <data name="Help_GettingStartedText" xml:space="preserve">
+    <value>Sluit je Svalboard aan via USB. De app detecteert het automatisch en laadt alle lagen. Als je het loskoppelt en weer aansluit, synchroniseert het opnieuw.</value>
+    <comment/>
+  </data>
+  <data name="Help_ToolbarButtons" xml:space="preserve">
+    <value>Werkbalkknoppen</value>
+    <comment/>
+  </data>
+  <data name="Help_LiveHighlightingTitle" xml:space="preserve">
+    <value>Live markering</value>
+    <comment/>
+  </data>
+  <data name="Help_LiveHighlightingText" xml:space="preserve">
+    <value>Toont welke toetsen fysiek worden ingedrukt in realtime. Gedimd = uit, helder = aan.</value>
+    <comment/>
+  </data>
+  <data name="Help_AutoLayerSwitchTitle" xml:space="preserve">
+    <value>Automatisch laag wisselen</value>
+    <comment/>
+  </data>
+  <data name="Help_AutoLayerSwitchText" xml:space="preserve">
+    <value>Volgt automatisch welke 'layertoets' je ingedrukt houdt. Zie de belangrijke opmerking hieronder.</value>
+    <comment/>
+  </data>
+  <data name="Help_ResetLayerStateTitle" xml:space="preserve">
+    <value>Laagstatus resetten</value>
+    <comment/>
+  </data>
+  <data name="Help_ResetLayerStateText" xml:space="preserve">
+    <value>Reset de laagstatus terug naar de basislaag. Gebruik dit als de schakelstatus niet meer synchroon loopt.</value>
+    <comment/>
+  </data>
+  <data name="Help_DiagnosticsTitle" xml:space="preserve">
+    <value>Matrix diagnostiek</value>
+    <comment/>
+  </data>
+  <data name="Help_DiagnosticsText" xml:space="preserve">
+    <value>Opent een live weergave van matrixgebeurtenissen — toont welke toetsen worden geactiveerd en op welke laag. Handig voor foutopsporing.</value>
+    <comment/>
+  </data>
+  <data name="Help_ExportTitle" xml:space="preserve">
+    <value>Exporteren</value>
+    <comment/>
+  </data>
+  <data name="Help_ExportText" xml:space="preserve">
+    <value>Sla je indeling op als PNG, PDF of SVG. Kies welke lagen je wilt opnemen en of je duimclusters wilt verbergen.</value>
+    <comment/>
+  </data>
+  <data name="Help_AlwaysOnTopTitle" xml:space="preserve">
+    <value>Always on Top</value>
+    <comment/>
+  </data>
+  <data name="Help_AlwaysOnTopText" xml:space="preserve">
+    <value>Houdt het venster boven alle andere vensters. Handig als zwevende referentie tijdens het typen.</value>
+    <comment/>
+  </data>
+  <data name="Help_SettingsTitle" xml:space="preserve">
+    <value>Instellingen</value>
+    <comment/>
+  </data>
+  <data name="Help_SettingsText" xml:space="preserve">
+    <value>Pas laagkleuren, namen, globale sneltoets, achtergrondtransparantie, vasthouddrempel en aangepaste toetslabels aan.</value>
+    <comment/>
+  </data>
+  <data name="Help_RefreshTitle" xml:space="preserve">
+    <value>Vernieuwen</value>
+    <comment/>
+  </data>
+  <data name="Help_RefreshText" xml:space="preserve">
+    <value>Leest de keymap opnieuw van het apparaat. Gebruik na het flashen van nieuwe firmware of het wijzigen van je indeling in Vial.</value>
+    <comment/>
+  </data>
+  <data name="Help_LayerTabs" xml:space="preserve">
+    <value>Layertabs</value>
+    <comment/>
+  </data>
+  <data name="Help_LayerTabsText" xml:space="preserve">
+    <value>Klik op een tab om de toetsindeling van die laag te bekijken. Elke laag heeft een unieke kleur. Lagen waar elke toets leeg is (KC_NO) worden automatisch verborgen.</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantTitle" xml:space="preserve">
+    <value>Belangrijk: Automatisch laag wisselen &amp; Svalboard invoer</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantText1" xml:space="preserve">
+    <value>Wanneer automatisch laag wisselen is ingeschakeld (standaard), volgt de weergegeven laag de laagtoets die je fysiek ingedrukt houdt.</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantText2" xml:space="preserve">
+    <value>Omdat je Svalboard ook je muis IS, telt het klikken op een laagtab als een toetsaanslag. Op het moment dat je klikt, is er geen laagtoets ingedrukt, dus schakelt de app terug naar de basislaag. Dit is verwacht gedrag!</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantText3" xml:space="preserve">
+    <value>Om handmatig door lagen te bladeren, schakel je eerst automatisch laag wisselen uit (de vinkjeknop in de werkbalk).</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantText4" xml:space="preserve">
+    <value>Als de schakelstatus (TG) niet meer synchroon loopt met je werkelijke toetsenbordstatus, gebruik dan de Reset-knop om terug te keren naar de basislaag.</value>
+    <comment/>
+  </data>
+  <data name="Help_Tips" xml:space="preserve">
+    <value>Tips</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip1" xml:space="preserve">
+    <value>• Maak het venster vast (altijd bovenop) om het als zwevende referentie te gebruiken tijdens het typen</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip2" xml:space="preserve">
+    <value>• Klik met de rechtermuisknop op een toets om een aangepast label toe te wijzen</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip3" xml:space="preserve">
+    <value>• Gebruik de globale sneltoets (standaard: F12) om het venster snel te tonen of verbergen</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip4" xml:space="preserve">
+    <value>• Pas de achtergrondtransparantie aan in Instellingen om de app als transparante overlay te gebruiken</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip5" xml:space="preserve">
+    <value>• Het systeemvakpictogram biedt snelle toegang tot tonen, vernieuwen en afsluiten</value>
+    <comment/>
+  </data>
+</root>
