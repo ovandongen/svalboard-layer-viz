@@ -38,7 +38,7 @@ public class Loc : INotifyPropertyChanged
     public void SetCulture(string cultureCode)
     {
         _culture = string.IsNullOrEmpty(cultureCode) || cultureCode == "en"
-            ? null
+            ? CultureInfo.InvariantCulture   // Force default (English) resources regardless of OS locale
             : new CultureInfo(cultureCode);
 
         // Notify all Loc instances (AXAML StaticResource creates a separate instance)
