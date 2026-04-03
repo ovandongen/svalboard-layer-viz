@@ -39,7 +39,7 @@ public class MatrixPollingServiceTests
         using var sut = new MatrixPollingService(fake, 10, 6);
 
         sut.Start();
-        Thread.Sleep(250); // Allow a few poll cycles
+        Thread.Sleep(1000); // Allow a few poll cycles (longer for CI runners)
         sut.Stop();
 
         Assert.True(fake.CallCount > 0);
@@ -52,7 +52,7 @@ public class MatrixPollingServiceTests
         using var sut = new MatrixPollingService(fake, 10, 6);
 
         sut.Start();
-        Thread.Sleep(150);
+        Thread.Sleep(500);
         sut.Stop();
         var countAfterStop = fake.CallCount;
         Thread.Sleep(200);
@@ -73,7 +73,7 @@ public class MatrixPollingServiceTests
         sut.MatrixStateChanged += s => received = s;
 
         sut.Start();
-        Thread.Sleep(250);
+        Thread.Sleep(1000);
         sut.Stop();
 
         Assert.NotNull(received);

@@ -30,7 +30,9 @@ public class BoardRendererTests
         BoardRenderer.RenderLayer(canvas, layer, totalLayers: 8, userLayerColors: null, yOffset: 0);
 
         // Verify the canvas was drawn to (not all black)
-        var pixel = bitmap.GetPixel(730, 28); // Header area, roughly center
+        // Check key area instead of header text (text may not render on headless CI runners)
+        // Key B at (7.0, 1.0) → pixel center (7.0*60+30, 1.0*60+30+40) = (450, 130)
+        var pixel = bitmap.GetPixel(450, 130);
         Assert.NotEqual(SKColors.Black, pixel);
     }
 
