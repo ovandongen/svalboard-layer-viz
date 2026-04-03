@@ -405,6 +405,26 @@
     <value>(handmatig)</value>
     <comment/>
   </data>
+  <data name="Settings_CheckForUpdates" xml:space="preserve">
+    <value>Controleer op updates</value>
+    <comment/>
+  </data>
+  <data name="Settings_Checking" xml:space="preserve">
+    <value>Controleren...</value>
+    <comment/>
+  </data>
+  <data name="Settings_UpdateAvailable" xml:space="preserve">
+    <value>{0} beschikbaar</value>
+    <comment/>
+  </data>
+  <data name="Settings_UpToDate" xml:space="preserve">
+    <value>Je hebt de nieuwste versie</value>
+    <comment/>
+  </data>
+  <data name="Settings_UpdateCheckFailed" xml:space="preserve">
+    <value>Controle mislukt</value>
+    <comment/>
+  </data>
   <data name="Export_Format" xml:space="preserve">
     <value>Formaat</value>
     <comment/>

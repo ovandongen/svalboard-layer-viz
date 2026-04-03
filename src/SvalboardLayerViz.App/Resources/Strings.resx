@@ -292,6 +292,21 @@
   <data name="Settings_ManualLabel" xml:space="preserve">
     <value>(manual)</value>
   </data>
+  <data name="Settings_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Settings_Checking" xml:space="preserve">
+    <value>Checking...</value>
+  </data>
+  <data name="Settings_UpdateAvailable" xml:space="preserve">
+    <value>{0} available</value>
+  </data>
+  <data name="Settings_UpToDate" xml:space="preserve">
+    <value>You're up to date</value>
+  </data>
+  <data name="Settings_UpdateCheckFailed" xml:space="preserve">
+    <value>Check failed</value>
+  </data>
 
   <!-- ══════════════ Export Dialog ══════════════ -->
   <data name="Export_Format" xml:space="preserve">

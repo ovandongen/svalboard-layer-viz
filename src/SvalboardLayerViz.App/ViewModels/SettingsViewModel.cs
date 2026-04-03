@@ -1,4 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Reflection;
+using System.Text.Json;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -62,6 +66,87 @@ public partial class SettingsViewModel : ObservableObject
     public string ThresholdDisplay => $"{LayerHoldThresholdMs} ms";
 
     partial void OnLayerHoldThresholdMsChanged(int value) => OnPropertyChanged(nameof(ThresholdDisplay));
+
+    // ── Version & Update Check ──
+
+    private const string GitHubReleasesApi = "https://api.github.com/repos/ovandongen/svalboard-layer-viz/releases/latest";
+    private const string GitHubReleasesPage = "https://github.com/ovandongen/svalboard-layer-viz/releases/latest";
+    private static readonly HttpClient _httpClient = new();
+
+    public string AppVersion
+    {
+        get
+        {
+            var info = Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            // Strip the +commitHash suffix that .NET adds
+            if (info is not null)
+            {
+                var plus = info.IndexOf('+');
+                return "v" + (plus >= 0 ? info[..plus] : info);
+            }
+            return "v" + (Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "?");
+        }
+    }
+
+    [ObservableProperty]
+    private string? _updateMessage;
+
+    [ObservableProperty]
+    private bool _isCheckingForUpdates;
+
+    /// <summary>URL to open when the user clicks the update link. Null if no update available.</summary>
+    public string? UpdateUrl { get; private set; }
+
+    [RelayCommand]
+    private async Task CheckForUpdatesAsync()
+    {
+        IsCheckingForUpdates = true;
+        UpdateMessage = null;
+        UpdateUrl = null;
+
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, GitHubReleasesApi);
+            request.Headers.Add("User-Agent", "SvalboardLayerViz");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            using var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var tagName = doc.RootElement.GetProperty("tag_name").GetString();
+            var htmlUrl = doc.RootElement.GetProperty("html_url").GetString();
+
+            if (tagName is null)
+            {
+                UpdateMessage = Loc.Instance["Settings_UpdateCheckFailed"];
+                return;
+            }
+
+            var latestStr = tagName.TrimStart('v');
+            var currentStr = AppVersion.TrimStart('v');
+
+            if (Version.TryParse(latestStr, out var latest) &&
+                Version.TryParse(currentStr, out var current) &&
+                latest > current)
+            {
+                UpdateMessage = Loc.Instance.Format("Settings_UpdateAvailable", tagName);
+                UpdateUrl = htmlUrl ?? GitHubReleasesPage;
+            }
+            else
+            {
+                UpdateMessage = Loc.Instance["Settings_UpToDate"];
+            }
+        }
+        catch
+        {
+            UpdateMessage = Loc.Instance["Settings_UpdateCheckFailed"];
+        }
+        finally
+        {
+            IsCheckingForUpdates = false;
+        }
+    }
 
     /// <summary>Fired when the user saves settings successfully.</summary>
     public Action? SettingsSaved { get; set; }

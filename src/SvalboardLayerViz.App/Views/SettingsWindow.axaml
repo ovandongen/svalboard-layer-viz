@@ -20,6 +20,29 @@
             <Button Content="{Binding [Common_Save], Source={StaticResource Loc}}" Command="{Binding SaveCommand}" />
         </StackPanel>
 
+        <!-- Version & update check -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0" Spacing="8">
+            <TextBlock Text="{Binding AppVersion}" Foreground="#6C7086" FontSize="11"
+                       VerticalAlignment="Center" />
+            <Button Content="{Binding [Settings_CheckForUpdates], Source={StaticResource Loc}}"
+                    Command="{Binding CheckForUpdatesCommand}"
+                    IsVisible="{Binding !IsCheckingForUpdates}"
+                    Padding="4,1" FontSize="11" Background="Transparent"
+                    Foreground="#89B4FA" BorderThickness="0" Cursor="Hand" />
+            <TextBlock Text="{Binding [Settings_Checking], Source={StaticResource Loc}}"
+                       IsVisible="{Binding IsCheckingForUpdates}"
+                       Foreground="#6C7086" FontSize="11" FontStyle="Italic"
+                       VerticalAlignment="Center" />
+            <TextBlock Text="{Binding UpdateMessage}" Foreground="#A6E3A1" FontSize="11"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding UpdateMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                       Cursor="Hand" TextDecorations="Underline"
+                       Name="UpdateLink" PointerPressed="OnUpdateLinkClick" />
+        </StackPanel>
+
+        <!-- Separator above version/buttons footer -->
+        <Border DockPanel.Dock="Bottom" Height="1" Background="#45475A" Margin="0,10,0,0" />
+
         <TabControl>
 
             <!-- ══════════════ Appearance Tab ══════════════ -->
