@@ -17,4 +17,7 @@ public record ExportOptions
 
     /// <summary>Page size for PDF export. Defaults to A4 landscape.</summary>
     public PdfPageSize PdfPageSize { get; init; } = PdfPageSize.A4Landscape;
+
+    /// <summary>Use creative thumb cluster layout (custom positions/overlaps) instead of grid.</summary>
+    public bool CreativeThumbLayout { get; init; }
 }

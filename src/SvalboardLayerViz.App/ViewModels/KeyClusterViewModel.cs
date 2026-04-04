@@ -11,6 +11,7 @@ public class KeyClusterViewModel
 {
     public string Name { get; }
     public IReadOnlyList<KeyViewModel> Keys { get; }
+    public bool IsRightHand { get; }
 
     /// <summary>Cluster position within the hand (hand-relative, pixels).</summary>
     public double Left { get; }
@@ -22,11 +23,13 @@ public class KeyClusterViewModel
         PositionedCluster cluster,
         Layer layer,
         double handOriginPx,
+        bool isRightHand = false,
         int totalLayers = 8,
         Dictionary<int, string>? userLayerColors = null,
         Action<KeyViewModel>? setLabelRequested = null)
     {
         Name = cluster.Name;
+        IsRightHand = isRightHand;
 
         // Hand-relative position (subtract hand origin from board-absolute)
         Left = cluster.Left - handOriginPx;

@@ -5,9 +5,9 @@
              x:Class="SvalboardLayerViz.App.Views.BoardView"
              x:DataType="vm:MainWindowViewModel">
 
-    <Viewbox Stretch="Uniform" StretchDirection="Both">
+    <Viewbox Stretch="Uniform" StretchDirection="Both" ClipToBounds="False">
         <Canvas Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
-                Background="Transparent">
+                Background="Transparent" ClipToBounds="False">
 
             <!-- Connect prompt centered in canvas -->
             <Panel Canvas.Left="0" Canvas.Top="0"
@@ -22,14 +22,14 @@
 
             <!-- Left hand — Border keeps MainWindowViewModel DataContext for positioning -->
             <Border Canvas.Left="{Binding LeftHandX}" Canvas.Top="{Binding LeftHandY}"
-                    IsVisible="{Binding IsConnected}">
-                <views:HandView DataContext="{Binding SelectedLayer.LeftHand}" />
+                    IsVisible="{Binding IsConnected}" ClipToBounds="False">
+                <views:HandView DataContext="{Binding SelectedLayer.LeftHand}" ClipToBounds="False" />
             </Border>
 
             <!-- Right hand -->
             <Border Canvas.Left="{Binding RightHandX}" Canvas.Top="{Binding RightHandY}"
-                    IsVisible="{Binding IsConnected}">
-                <views:HandView DataContext="{Binding SelectedLayer.RightHand}" />
+                    IsVisible="{Binding IsConnected}" ClipToBounds="False">
+                <views:HandView DataContext="{Binding SelectedLayer.RightHand}" ClipToBounds="False" />
             </Border>
 
         </Canvas>

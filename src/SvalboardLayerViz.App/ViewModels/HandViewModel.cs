@@ -41,13 +41,13 @@ public class HandViewModel
 
         // Wrap each PositionedCluster in a KeyClusterViewModel
         var fingers = hand.FingerClusters.Select(c =>
-            new KeyClusterViewModel(c, layer, handOriginPx, totalLayers, userLayerColors, setLabelRequested)).ToList();
+            new KeyClusterViewModel(c, layer, handOriginPx, isRightHand, totalLayers, userLayerColors, setLabelRequested)).ToList();
 
         KeyClusterViewModel? thumb = null;
         if (hand.ThumbCluster is not null)
         {
             thumb = new KeyClusterViewModel(hand.ThumbCluster, layer, handOriginPx,
-                totalLayers, userLayerColors, setLabelRequested);
+                isRightHand, totalLayers, userLayerColors, setLabelRequested);
         }
 
         ThumbCluster = thumb!;

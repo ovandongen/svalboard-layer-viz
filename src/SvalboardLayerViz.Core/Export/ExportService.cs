@@ -87,7 +87,8 @@ public static class ExportService
             pageCanvas.Translate(0, yOnPage);
             pageCanvas.Scale(scale);
             BoardRenderer.RenderLayer(pageCanvas, layer, totalLayers, userLayerColors,
-                yOffset: 0, hideThumbClusters: hideThumb);
+                yOffset: 0, hideThumbClusters: hideThumb,
+                creativeThumbLayout: options.CreativeThumbLayout);
             pageCanvas.Restore();
 
             yOnPage += layerHeight;
@@ -138,7 +139,8 @@ public static class ExportService
 
             var hideThumb = options.HideThumbClusters.GetValueOrDefault(idx);
             BoardRenderer.RenderLayer(canvas, layer, totalLayers, userLayerColors,
-                yOffset, hideThumbClusters: hideThumb);
+                yOffset, hideThumbClusters: hideThumb,
+                creativeThumbLayout: options.CreativeThumbLayout);
 
             yOffset += BoardRenderer.GetLayerBlockHeight(hideThumb);
         }

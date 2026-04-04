@@ -3,9 +3,10 @@
              xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
              xmlns:views="using:SvalboardLayerViz.App.Views"
              x:Class="SvalboardLayerViz.App.Views.HandView"
-             x:DataType="vm:HandViewModel">
+             x:DataType="vm:HandViewModel"
+             ClipToBounds="False">
 
-    <Canvas Width="{Binding Width}" Height="{Binding Height}">
+    <Canvas Width="{Binding Width}" Height="{Binding Height}" ClipToBounds="False">
         <!-- Thumb cluster -->
         <views:ThumbClusterView DataContext="{Binding ThumbCluster}"
                                 Width="{Binding Width}"

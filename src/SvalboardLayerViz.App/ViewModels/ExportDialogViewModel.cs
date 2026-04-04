@@ -74,6 +74,7 @@ public partial class ExportDialogViewModel : ObservableObject
             .Where(l => l.IsSelected && l.HideThumbCluster)
             .ToDictionary(l => l.Index, _ => true),
         PdfPageSize = SelectedPageSize,
+        CreativeThumbLayout = ThumbRenderSettings.Mode == ThumbRenderMode.Creative,
     };
 }
 
