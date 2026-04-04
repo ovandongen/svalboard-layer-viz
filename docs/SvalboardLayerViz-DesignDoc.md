@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 3 Complete + i18n + Layout Refactor
+**Status:** Phase 3 Complete + i18n + Layout Refactor + Creative Thumb Layout
 
 ---
 
@@ -345,6 +345,8 @@ Implemented features:
 - [x] 3-level component hierarchy — `HandViewModel → KeyClusterViewModel → KeyViewModel` with coordinate system: board-absolute → hand-relative → cluster-relative
 - [x] Export content margin — 4px inset prevents border strokes from being clipped at image edges
 - [x] Settings window scrollbar fix — both Appearance and Behavior tabs now wrapped in `ScrollViewer`
+- [x] Creative thumb cluster layout — custom thumb key positions, sizes, overlaps, and trapezoid shapes matching the physical Svalboard thumb cluster. Keys use Z-ordering with EvenOdd clip paths for bite/hole cutouts. 1.4× scale with edge-anchored transform origin. Renders in both UI (Avalonia Viewbox + Border.Clip PathGeometry) and export (SkiaSharp trapezoid paths with scale-compensated strokes). Switchable via `ThumbRenderSettings.Mode` (Default/Creative)
+- [x] SVG export truncation fix — `File.Create` replaces `File.OpenWrite` to prevent stale data when re-exporting
 - [x] 299 unit tests
 
 ### Localization (i18n) — COMPLETE
@@ -381,7 +383,7 @@ SvalboardLayerViz/
 │   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas, hand positioning)
 │   │   │   ├── HandView.axaml              # One hand: Canvas with finger + thumb clusters
 │   │   │   ├── FingerClusterView.axaml     # Finger cluster: Canvas with positioned KeyViews
-│   │   │   ├── ThumbClusterView.axaml      # Thumb cluster: Canvas with positioned KeyViews
+│   │   │   ├── ThumbClusterView.axaml(.cs)  # Thumb cluster: default grid or creative layout (trapezoid keys, overlaps, clip paths)
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
 │   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (tabbed: Appearance + Behavior)
 │   │   │   ├── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
@@ -397,6 +399,7 @@ SvalboardLayerViz/
 │   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
 │   │   │   ├── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
 │   │   │   ├── ExportDialogViewModel.cs    # Export dialog: layer checkboxes, format/page size pickers
+│   │   │   ├── ThumbRenderMode.cs         # ThumbRenderMode enum + ThumbRenderSettings (Default/Creative switch)
 │   │   │   └── HelpWindowViewModel.cs     # Help dialog: close + don't-show-again
 │   │   ├── Localization/
 │   │   │   └── Loc.cs                  # i18n singleton — INotifyPropertyChanged, runtime culture switch
@@ -483,7 +486,8 @@ SvalboardLayerViz/
 │   ├── 02-04-26-d.md                       # Change log (day 2, session 4)
 │   ├── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
 │   ├── 03-04-26.md                         # Change log (day 3 — i18n/localization)
-│   └── 04-04-26.md                         # Change log (day 4 — shared layout, export fixes, UI polish)
+│   ├── 04-04-26.md                         # Change log (day 4 — shared layout, export fixes, UI polish)
+│   └── 04-04-26-b.md                      # Change log (day 4, session 2 — creative thumb layout, trapezoid shapes, export fixes)
 ├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```
