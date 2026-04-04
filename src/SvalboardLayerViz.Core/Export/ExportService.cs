@@ -43,7 +43,7 @@ public static class ExportService
 
         using var image = SKImage.FromBitmap(bitmap);
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var stream = File.OpenWrite(options.OutputPath);
+        using var stream = File.Create(options.OutputPath);
         data.SaveTo(stream);
     }
 
@@ -56,7 +56,7 @@ public static class ExportService
         var usableHeight = pageHeight - 2 * margin;
         var scale = usableWidth / BoardRenderer.BoardWidth;
 
-        using var stream = File.OpenWrite(options.OutputPath);
+        using var stream = File.Create(options.OutputPath);
         using var document = SKDocument.CreatePdf(stream);
 
         var bgColor = BoardRenderer.ParseColor(options.BoardBackground);
@@ -112,7 +112,7 @@ public static class ExportService
     {
         var (width, height) = ComputeCanvasSize(options, layers);
 
-        using var stream = File.OpenWrite(options.OutputPath);
+        using var stream = File.Create(options.OutputPath);
         using var canvas = SKSvgCanvas.Create(new SKRect(0, 0, width, height), stream);
 
         // SVG canvas doesn't support Clear, draw a background rect
