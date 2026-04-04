@@ -8,25 +8,18 @@ namespace SvalboardLayerViz.Core.Export;
 /// <summary>
 /// Renders a single keyboard layer to an SKCanvas using SkiaSharp.
 /// Replicates the visual output of KeyView.axaml for export to PNG/PDF/SVG.
+/// Uses BoardLayoutComputer for positioning (single source of truth shared with UI).
 /// </summary>
 public static class BoardRenderer
 {
     private const float Scale = (float)SvalboardLayout.Scale;
-    public const float BoardWidth = 24.3f * Scale;  // 1458px
-    public const float BoardHeight = 7f * Scale;     // 420px
+    /// <summary>Margin around content to prevent border strokes from being clipped.</summary>
+    public const float Margin = 4f;
+    public const float BoardWidth = 24.3f * Scale + 2 * Margin;  // content + margins
+    public const float BoardHeight = 7f * Scale + 2 * Margin;  // content + margins
     public const float HeaderHeight = 40f;
     public const float Spacing = 20f;
-    public const float LayerBlockHeight = HeaderHeight + BoardHeight + Spacing; // 480px
-
-    private static readonly HashSet<string> BottomClusters = ["L-Thumb", "R-Thumb", "L-Mod"];
-
-    private static readonly Dictionary<(int, int), KeyPosition> _positionLookup;
-
-    static BoardRenderer()
-    {
-        _positionLookup = SvalboardLayout.GetKeyPositions()
-            .ToDictionary(p => (p.Row, p.Col));
-    }
+    public const float LayerBlockHeight = HeaderHeight + BoardHeight + Spacing;
 
     /// <summary>
     /// Computes the height of a layer block, accounting for hidden thumb clusters.
@@ -36,23 +29,7 @@ public static class BoardRenderer
         if (!hideThumbClusters)
             return LayerBlockHeight;
 
-        return HeaderHeight + GetBoardHeight(hideThumbClusters: true) + Spacing;
-    }
-
-    private static float GetBoardHeight(bool hideThumbClusters)
-    {
-        if (!hideThumbClusters)
-            return BoardHeight;
-
-        float maxY = 0;
-        foreach (var pos in SvalboardLayout.GetKeyPositions())
-        {
-            if (BottomClusters.Contains(pos.Cluster))
-                continue;
-            var bottom = (float)(pos.Y + pos.Height);
-            if (bottom > maxY) maxY = bottom;
-        }
-        return maxY * Scale;
+        return HeaderHeight + (float)BoardLayoutComputer.GetBoardHeightExcludingBottomClusters() + 2 * Margin + Spacing;
     }
 
     /// <summary>
@@ -68,28 +45,48 @@ public static class BoardRenderer
 
         RenderHeader(canvas, layer, colors, yOffset);
 
-        var keysY = yOffset + HeaderHeight;
-        foreach (var key in layer.Keys)
+        var layout = BoardLayoutComputer.Compute(layer);
+        var keysY = yOffset + HeaderHeight + Margin;
+
+        RenderHand(canvas, layout.LeftHand, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly);
+        RenderHand(canvas, layout.RightHand, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly);
+    }
+
+    private static void RenderHand(SKCanvas canvas, PositionedHand hand,
+        int layerIndex, int totalLayers, Dictionary<int, string>? userLayerColors,
+        LayerColors colors, float keysY, bool hideThumbClusters, bool printFriendly)
+    {
+        // Render finger clusters
+        foreach (var cluster in hand.FingerClusters)
         {
-            if (hideThumbClusters && IsThumbKey(key))
+            if (hideThumbClusters && BoardLayoutComputer.BottomClusters.Contains(cluster.Name))
                 continue;
+            RenderCluster(canvas, cluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly);
+        }
 
-            LayerColors? targetColors = null;
-            if (key.IsLayerSwitch && key.TargetLayer.HasValue)
-            {
-                var targetColor = userLayerColors?.GetValueOrDefault(key.TargetLayer.Value);
-                targetColors = LayerColorService.GetLayerColors(key.TargetLayer.Value, totalLayers,
-                    userHexColor: targetColor, printFriendly: printFriendly);
-            }
-
-            RenderKey(canvas, key, layer.Index, colors, targetColors, keysY);
+        // Render thumb cluster
+        if (hand.ThumbCluster is not null && !hideThumbClusters)
+        {
+            RenderCluster(canvas, hand.ThumbCluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly);
         }
     }
 
-    private static bool IsThumbKey(Key key)
+    private static void RenderCluster(SKCanvas canvas, PositionedCluster cluster,
+        int layerIndex, int totalLayers, Dictionary<int, string>? userLayerColors,
+        LayerColors colors, float keysY, bool printFriendly)
     {
-        return _positionLookup.TryGetValue((key.Row, key.Col), out var pos)
-               && BottomClusters.Contains(pos.Cluster);
+        foreach (var posKey in cluster.Keys)
+        {
+            LayerColors? targetColors = null;
+            if (posKey.Key.IsLayerSwitch && posKey.Key.TargetLayer.HasValue)
+            {
+                var targetColor = userLayerColors?.GetValueOrDefault(posKey.Key.TargetLayer.Value);
+                targetColors = LayerColorService.GetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
+                    userHexColor: targetColor, printFriendly: printFriendly);
+            }
+
+            RenderKey(canvas, posKey, layerIndex, colors, targetColors, keysY);
+        }
     }
 
     private static void RenderHeader(SKCanvas canvas, Layer layer, LayerColors colors, float yOffset)
@@ -101,15 +98,16 @@ public static class BoardRenderer
             SKTextAlign.Center, font, paint);
     }
 
-    private static void RenderKey(SKCanvas canvas, Key key, int layerIndex,
+    private static void RenderKey(SKCanvas canvas, PositionedKey posKey, int layerIndex,
         LayerColors colors, LayerColors? targetColors, float keysY)
     {
+        var key = posKey.Key;
         var style = KeyStyleResolver.Resolve(key, layerIndex, colors, targetColors);
 
-        var x = (float)key.X * Scale;
-        var y = keysY + (float)key.Y * Scale;
-        var w = (float)key.Width * Scale;
-        var h = (float)key.Height * Scale;
+        var x = Margin + (float)posKey.BoardX;
+        var y = keysY + (float)posKey.BoardY;
+        var w = (float)posKey.Width;
+        var h = (float)posKey.Height;
         var rect = new SKRect(x, y, x + w, y + h);
         var rrect = new SKRoundRect(rect, 6);
 

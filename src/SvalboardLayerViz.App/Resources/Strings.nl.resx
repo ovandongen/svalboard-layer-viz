@@ -209,6 +209,10 @@
     <value>Vernieuwen</value>
     <comment/>
   </data>
+  <data name="Tooltip_VerticalLayout" xml:space="preserve">
+    <value>Helften verticaal stapelen</value>
+    <comment/>
+  </data>
   <data name="Tooltip_Remove" xml:space="preserve">
     <value>Verwijderen</value>
     <comment/>
@@ -343,6 +347,18 @@
   </data>
   <data name="Settings_BackgroundFillHint" xml:space="preserve">
     <value>0% = transparante overlay, 100% = volledig donker</value>
+    <comment/>
+  </data>
+  <data name="Settings_Layout" xml:space="preserve">
+    <value>Indeling</value>
+    <comment/>
+  </data>
+  <data name="Settings_VerticalLayout" xml:space="preserve">
+    <value>Helften verticaal stapelen</value>
+    <comment/>
+  </data>
+  <data name="Settings_TopHand" xml:space="preserve">
+    <value>Bovenste hand:</value>
     <comment/>
   </data>
   <data name="Settings_TabBehavior" xml:space="preserve">
@@ -563,6 +579,14 @@
   </data>
   <data name="Help_ExportText" xml:space="preserve">
     <value>Sla je indeling op als PNG, PDF of SVG. Kies welke lagen je wilt opnemen en of je duimclusters wilt verbergen.</value>
+    <comment/>
+  </data>
+  <data name="Help_StackLayoutTitle" xml:space="preserve">
+    <value>Gestapelde weergave</value>
+    <comment/>
+  </data>
+  <data name="Help_StackLayoutText" xml:space="preserve">
+    <value>Stapelt de twee handhelften verticaal in plaats van naast elkaar. Handig op smalle of staande schermen. In Instellingen kun je kiezen welke hand bovenaan staat.</value>
     <comment/>
   </data>
   <data name="Help_AlwaysOnTopTitle" xml:space="preserve">

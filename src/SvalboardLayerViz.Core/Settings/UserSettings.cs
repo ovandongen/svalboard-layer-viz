@@ -44,4 +44,10 @@ public record UserSettings
 
     /// <summary>UI language code (e.g. "en", "nl"). Default follows system locale, falls back to English.</summary>
     public string Language { get; init; } = "en";
+
+    /// <summary>Whether to stack keyboard halves vertically (left on top, right below) instead of side-by-side.</summary>
+    public bool VerticalLayout { get; init; } = false;
+
+    /// <summary>Which hand appears on top in vertical layout. Values: "Left" or "Right".</summary>
+    public string VerticalLayoutTopHand { get; init; } = "Left";
 }

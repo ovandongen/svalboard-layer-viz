@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.Core.Keymap;
+using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
 
 namespace SvalboardLayerViz.App.ViewModels;
@@ -17,6 +18,13 @@ public partial class LayerViewModel : ObservableObject
     /// <summary>Accent color for the layer tab indicator.</summary>
     public string TabColor { get; }
 
+    /// <summary>Left hand (rows 0-4): thumb + 4 finger clusters.</summary>
+    public HandViewModel LeftHand { get; }
+
+    /// <summary>Right hand (rows 5-9): thumb + 4 finger clusters.</summary>
+    public HandViewModel RightHand { get; }
+
+    /// <summary>Flat list of all KeyViewModels for matrix polling.</summary>
     [ObservableProperty]
     private ObservableCollection<KeyViewModel> _keys = [];
 
@@ -32,10 +40,13 @@ public partial class LayerViewModel : ObservableObject
             layer.ColorHue, layer.ColorSat, layer.ColorVal, userColor);
         TabColor = colors.Accent;
 
-        foreach (var key in layer.Keys)
-        {
-            Keys.Add(new KeyViewModel(key, layer, totalLayers, userLayerColors, setLabelRequested));
-        }
+        var layout = BoardLayoutComputer.Compute(layer);
+
+        LeftHand = new HandViewModel(layout.LeftHand, false, layer, totalLayers, userLayerColors, setLabelRequested);
+        RightHand = new HandViewModel(layout.RightHand, true, layer, totalLayers, userLayerColors, setLabelRequested);
+
+        foreach (var keyVm in LeftHand.AllKeys.Concat(RightHand.AllKeys))
+            Keys.Add(keyVm);
     }
 
     [RelayCommand]

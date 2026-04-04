@@ -24,5 +24,5 @@ public record Layer
     public byte? ColorVal { get; init; }
 
     /// <summary>Get the display name: user name if set, otherwise "Layer N".</summary>
-    public string DisplayName => Name ?? $"Layer {Index}";
+    public string DisplayName => Name ?? $"L{Index}";
 }

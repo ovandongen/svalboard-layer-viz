@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 3 Complete + i18n
+**Status:** Phase 3 Complete + i18n + Layout Refactor
 
 ---
 
@@ -341,8 +341,11 @@ Implemented features:
 - [x] Toolbar export button — download icon in toolbar, visible when connected
 - [x] SkiaSharp rendering pipeline — single `BoardRenderer` draws to `SKCanvas`, which backs all three formats (bitmap, PDF document, SVG canvas). Layer header with name in accent color above each board
 - [x] `KeyStyleResolver` — shared color/opacity logic extracted from `KeyViewModel` into Core, used by both UI and export renderer. Eliminates duplication
+- [x] `BoardLayoutComputer` — shared layout computation in Core. Single source of truth for hand splitting, cluster grouping, thumb detection, and position scaling. Consumed by both `BoardRenderer` (export) and ViewModels (UI). Eliminates duplicated coordinate logic
+- [x] 3-level component hierarchy — `HandViewModel → KeyClusterViewModel → KeyViewModel` with coordinate system: board-absolute → hand-relative → cluster-relative
+- [x] Export content margin — 4px inset prevents border strokes from being clipped at image edges
 - [x] Settings window scrollbar fix — both Appearance and Behavior tabs now wrapped in `ScrollViewer`
-- [x] 243 unit tests
+- [x] 299 unit tests
 
 ### Localization (i18n) — COMPLETE
 
@@ -375,7 +378,10 @@ SvalboardLayerViz/
 │   │   ├── App.axaml(.cs)                  # Application entry, tray menu, hotkey wiring, settings/label/export dialogs
 │   │   ├── Views/
 │   │   │   ├── MainWindow.axaml(.cs)       # Transparent overlay window, auto-flipping bars, custom drag
-│   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas)
+│   │   │   ├── BoardView.axaml             # Full board visualization (Viewbox + Canvas, hand positioning)
+│   │   │   ├── HandView.axaml              # One hand: Canvas with finger + thumb clusters
+│   │   │   ├── FingerClusterView.axaml     # Finger cluster: Canvas with positioned KeyViews
+│   │   │   ├── ThumbClusterView.axaml      # Thumb cluster: Canvas with positioned KeyViews
 │   │   │   ├── KeyView.axaml               # Single key visual (UserControl, right-click context menu)
 │   │   │   ├── SettingsWindow.axaml(.cs)   # Settings UI (tabbed: Appearance + Behavior)
 │   │   │   ├── DiagnosticsWindow.axaml(.cs) # Matrix diagnostics popup (live grid + log)
@@ -383,8 +389,10 @@ SvalboardLayerViz/
 │   │   │   └── HelpWindow.axaml(.cs)      # First-launch help dialog
 │   │   ├── ViewModels/
 │   │   │   ├── MainWindowViewModel.cs      # Root state, device lifecycle, layer selection, matrix polling
-│   │   │   ├── KeyViewModel.cs             # Per-key display: positioning, colors, tooltips, IsPressed
-│   │   │   ├── LayerViewModel.cs           # Per-layer: keys collection, tab color
+│   │   │   ├── KeyViewModel.cs             # Per-key display: cluster-relative positioning, colors, tooltips, IsPressed
+│   │   │   ├── KeyClusterViewModel.cs      # Per-cluster: wraps PositionedCluster, hand-relative coords
+│   │   │   ├── HandViewModel.cs            # Per-hand: wraps PositionedHand, groups clusters
+│   │   │   ├── LayerViewModel.cs           # Per-layer: computes layout via BoardLayoutComputer, creates HandViewModels
 │   │   │   ├── ClusterViewModel.cs         # Cluster background bounding boxes
 │   │   │   ├── DiagnosticsViewModel.cs     # Matrix diagnostics: live grid + event log
 │   │   │   ├── SettingsViewModel.cs        # Settings page: layers, labels, hotkey, threshold, bg fill
@@ -431,6 +439,8 @@ SvalboardLayerViz/
 │   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, auto-contrast text, print-friendly mode
 │   │   ├── Layout/
 │   │   │   ├── SvalboardLayout.cs          # Physical key positions (52 keys)
+│   │   │   ├── BoardLayoutComputer.cs      # Shared layout computation (hand/cluster/key grouping + positioning)
+│   │   │   ├── ComputedBoardLayout.cs      # Layout model records (PositionedKey, PositionedCluster, PositionedHand)
 │   │   │   └── LayoutDefinition.cs         # Parsed definition from device
 │   │   └── Models/
 │   │       ├── KeyboardConfig.cs           # Full loaded config
@@ -438,7 +448,7 @@ SvalboardLayerViz/
 │   │       ├── Key.cs                      # Key position + keycode + labels + IsLayerSwitch/SwitchType/IsUnknown
 │   │       └── CustomKeycode.cs            # Custom keycode from device definition
 │   │
-│   └── SvalboardLayerViz.Tests/            # Unit tests (243 tests)
+│   └── SvalboardLayerViz.Tests/            # Unit tests (299 tests)
 │       ├── Export/
 │       │   ├── KeyStyleResolverTests.cs    # Color/opacity logic for normal, transparent, layer-switch keys
 │       │   ├── BoardRendererTests.cs       # Rendering to bitmap, hide thumbs, user colors, color parsing
@@ -449,13 +459,17 @@ SvalboardLayerViz/
 │       │   ├── TransparentKeyResolverTests.cs
 │       │   └── LayerColorServiceTests.cs
 │       ├── Layout/
-│       │   └── SvalboardLayoutTests.cs
+│       │   ├── SvalboardLayoutTests.cs
+│       │   ├── BoardLayoutComputerTests.cs # Hand splitting, cluster grouping, bounds, positioning
+│       │   └── LayoutConsistencyTests.cs   # Export/UI parity, cluster uniqueness, coordinate reconstruction
 │       ├── Protocol/
 │       │   └── MatrixPollingServiceTests.cs # Polling lifecycle tests
 │       ├── Settings/
 │       │   └── SettingsServiceTests.cs     # Round-trip, defaults, corrupt file fallback
 │       └── ViewModels/
 │           ├── KeyViewModelTests.cs        # Incl. IsPressed, border glow, notifications
+│           ├── KeyClusterViewModelTests.cs # Cluster bounding box, hand-relative coords
+│           ├── HandViewModelTests.cs       # Hand assembly from PositionedHand
 │           ├── AutoLayerSwitchTests.cs     # Cache building, momentary/toggle resolve, edge detection
 │           ├── ClusterViewModelTests.cs
 │           └── MainWindowViewModelShowTests.cs
@@ -468,7 +482,8 @@ SvalboardLayerViz/
 │   ├── 02-04-26-c.md                       # Change log (day 2, session 3)
 │   ├── 02-04-26-d.md                       # Change log (day 2, session 4)
 │   ├── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
-│   └── 03-04-26.md                         # Change log (day 3 — i18n/localization)
+│   ├── 03-04-26.md                         # Change log (day 3 — i18n/localization)
+│   └── 04-04-26.md                         # Change log (day 4 — shared layout, export fixes, UI polish)
 ├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```

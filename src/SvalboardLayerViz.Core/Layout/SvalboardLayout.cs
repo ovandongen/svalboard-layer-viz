@@ -20,6 +20,21 @@ public static class SvalboardLayout
     /// <summary>Pixels per layout unit. All layout coordinates use this scale factor.</summary>
     public const double Scale = 60.0;
 
+    /// <summary>X origin for right-hand keys (subtracted to get hand-relative coordinates).</summary>
+    public const double RightHandOriginX = 12.5;
+
+    /// <summary>Width of each hand in layout units (max key X + width - min key X).</summary>
+    public const double HandWidth = 11.8;
+
+    /// <summary>Height of each hand in layout units.</summary>
+    public const double HandHeight = 7.0;
+
+    /// <summary>Horizontal gap between hands in layout units.</summary>
+    public const double HandGap = 0.7;
+
+    /// <summary>Returns true if the given row belongs to the right hand (rows 5-9: R-Thumb + R-fingers).</summary>
+    public static bool IsRightHand(int row) => row >= 5;
+
     private static readonly KeyPosition[] _positions =
     [
         // Row 0 — left inner modifiers

@@ -132,6 +132,21 @@
                         </StackPanel>
                     </DockPanel>
 
+                    <!-- Stack layout -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M4 2h16v8H4V2zm4 12h8v8H4v-8z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_StackLayoutTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_StackLayoutText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
                     <!-- Pin -->
                     <DockPanel>
                         <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"

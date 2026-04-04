@@ -8,7 +8,7 @@
         x:Name="MainWin"
         Title="{Binding [Title_App], Source={StaticResource Loc}}"
         Width="1200" Height="600"
-        MinWidth="600" MinHeight="300"
+        MinWidth="480" MinHeight="200"
         WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="Transparent"
         Background="Transparent"
@@ -46,10 +46,6 @@
                         <PathIcon Width="12" Height="12"
                                   Data="M20 14H4v-2h16v2z" />
                     </Button>
-                    <TextBlock DockPanel.Dock="Left"
-                               Text="{Binding StatusMessage}"
-                               Foreground="#CDD6F4"
-                               VerticalAlignment="Center" />
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
                                 HorizontalAlignment="Right" Spacing="4">
                         <StackPanel.Styles>
@@ -111,6 +107,24 @@
                             <PathIcon Width="14" Height="14"
                                       Data="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
                         </Button>
+                        <Button x:Name="VerticalLayoutButton"
+                                Command="{Binding ToggleVerticalLayoutCommand}"
+                                Padding="8,4"
+                                IsVisible="{Binding IsConnected}">
+                            <Button.Styles>
+                                <Style Selector="Button#VerticalLayoutButton">
+                                    <Setter Property="Opacity" Value="0.4" />
+                                </Style>
+                                <Style Selector="Button#VerticalLayoutButton[Tag=True]">
+                                    <Setter Property="Opacity" Value="1.0" />
+                                </Style>
+                            </Button.Styles>
+                            <Button.Tag>
+                                <Binding Path="IsVerticalLayout" />
+                            </Button.Tag>
+                            <PathIcon Width="14" Height="14"
+                                      Data="M4 2h16v8H4V2zm4 12h8v8H4v-8z" />
+                        </Button>
                         <Button x:Name="PinButton"
                                 Command="{Binding TogglePinCommand}"
                                 Padding="8,4">
@@ -144,6 +158,12 @@
                                       Data="M18.537 19.567A9.961 9.961 0 0 1 12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10c0 2.136-.67 4.116-1.81 5.74L17 12h3a8 8 0 1 0-2.46 5.77z" />
                         </Button>
                     </StackPanel>
+                    <!-- Fill child: takes remaining space, truncates with ellipsis -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="#CDD6F4"
+                               VerticalAlignment="Center"
+                               MinWidth="20"
+                               TextTrimming="CharacterEllipsis" />
                 </DockPanel>
             </Border>
 
@@ -160,9 +180,9 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:LayerViewModel">
                             <Button Command="{Binding SelectCommand}"
-                                    MinWidth="80"
+                                    MinWidth="48"
                                     HorizontalContentAlignment="Center"
-                                    Padding="12,4">
+                                    Padding="8,4">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Border Width="10" Height="10" CornerRadius="5"
                                             Background="{Binding TabColor}" />

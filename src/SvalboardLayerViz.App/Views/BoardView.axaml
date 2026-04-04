@@ -6,37 +6,31 @@
              x:DataType="vm:MainWindowViewModel">
 
     <Viewbox Stretch="Uniform" StretchDirection="Both">
-        <!-- Canvas sized to fit board: 24.3 units wide × 7 units tall @ 60 px/unit -->
-        <Canvas Width="1458" Height="420"
+        <Canvas Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
                 Background="Transparent">
 
-            <TextBlock Canvas.Left="600" Canvas.Top="220"
-                       Text="{Binding [Board_ConnectPrompt], Source={StaticResource Loc}}"
-                       Foreground="#585B70"
-                       FontSize="16"
-                       IsVisible="{Binding !IsConnected}" />
+            <!-- Connect prompt centered in canvas -->
+            <Panel Canvas.Left="0" Canvas.Top="0"
+                   Width="{Binding CanvasWidth}" Height="{Binding CanvasHeight}"
+                   IsVisible="{Binding !IsConnected}">
+                <TextBlock Text="{Binding [Board_ConnectPrompt], Source={StaticResource Loc}}"
+                           Foreground="#585B70"
+                           FontSize="16"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Panel>
 
-            <!-- Keys -->
-            <ItemsControl ItemsSource="{Binding SelectedLayer.Keys}"
-                          IsVisible="{Binding IsConnected}"
-                          Width="1458" Height="420">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerTheme>
-                    <ControlTheme TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                    </ControlTheme>
-                </ItemsControl.ItemContainerTheme>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:KeyViewModel">
-                        <views:KeyView />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- Left hand — Border keeps MainWindowViewModel DataContext for positioning -->
+            <Border Canvas.Left="{Binding LeftHandX}" Canvas.Top="{Binding LeftHandY}"
+                    IsVisible="{Binding IsConnected}">
+                <views:HandView DataContext="{Binding SelectedLayer.LeftHand}" />
+            </Border>
+
+            <!-- Right hand -->
+            <Border Canvas.Left="{Binding RightHandX}" Canvas.Top="{Binding RightHandY}"
+                    IsVisible="{Binding IsConnected}">
+                <views:HandView DataContext="{Binding SelectedLayer.RightHand}" />
+            </Border>
 
         </Canvas>
     </Viewbox>

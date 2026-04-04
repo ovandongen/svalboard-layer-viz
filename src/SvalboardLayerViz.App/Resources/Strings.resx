@@ -115,6 +115,9 @@
   <data name="Tooltip_Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
+  <data name="Tooltip_VerticalLayout" xml:space="preserve">
+    <value>Stack halves vertically</value>
+  </data>
   <data name="Tooltip_Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
@@ -243,6 +246,16 @@
   </data>
   <data name="Settings_BackgroundFillHint" xml:space="preserve">
     <value>0% = transparent overlay, 100% = solid dark</value>
+  </data>
+
+  <data name="Settings_Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Settings_VerticalLayout" xml:space="preserve">
+    <value>Stack halves vertically</value>
+  </data>
+  <data name="Settings_TopHand" xml:space="preserve">
+    <value>Top hand:</value>
   </data>
 
   <!-- ══════════════ Settings: Behavior Tab ══════════════ -->
@@ -417,6 +430,12 @@
   </data>
   <data name="Help_ExportText" xml:space="preserve">
     <value>Save your layout as PNG, PDF, or SVG. Choose which layers to include and whether to hide thumb clusters.</value>
+  </data>
+  <data name="Help_StackLayoutTitle" xml:space="preserve">
+    <value>Stack Layout</value>
+  </data>
+  <data name="Help_StackLayoutText" xml:space="preserve">
+    <value>Stacks the two hand halves vertically instead of side by side. Useful on narrow or portrait displays. You can choose which hand appears on top in Settings.</value>
   </data>
   <data name="Help_AlwaysOnTopTitle" xml:space="preserve">
     <value>Always on Top</value>

@@ -34,6 +34,7 @@ public partial class MainWindow : Window
         ToolTip.SetTip(ResetButton, loc["Tooltip_ResetLayerTracking"]);
         ToolTip.SetTip(DiagnosticsButton, loc["Tooltip_Diagnostics"]);
         ToolTip.SetTip(ExportButton, loc["Tooltip_Export"]);
+        ToolTip.SetTip(VerticalLayoutButton, loc["Tooltip_VerticalLayout"]);
         ToolTip.SetTip(PinButton, loc["Tooltip_AlwaysOnTop"]);
         ToolTip.SetTip(HelpButton, loc["Tooltip_Help"]);
         ToolTip.SetTip(SettingsButton, loc["Tooltip_Settings"]);

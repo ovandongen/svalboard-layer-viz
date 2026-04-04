@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Device;
 using SvalboardLayerViz.Core.Keymap;
+using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
 using SvalboardLayerViz.Core.Protocol;
 using SvalboardLayerViz.Core.Settings;
@@ -107,6 +108,22 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _isAutoLayerSwitchEnabled;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanvasWidth))]
+    [NotifyPropertyChangedFor(nameof(CanvasHeight))]
+    [NotifyPropertyChangedFor(nameof(LeftHandX))]
+    [NotifyPropertyChangedFor(nameof(LeftHandY))]
+    [NotifyPropertyChangedFor(nameof(RightHandX))]
+    [NotifyPropertyChangedFor(nameof(RightHandY))]
+    private bool _isVerticalLayout;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LeftHandX))]
+    [NotifyPropertyChangedFor(nameof(LeftHandY))]
+    [NotifyPropertyChangedFor(nameof(RightHandX))]
+    [NotifyPropertyChangedFor(nameof(RightHandY))]
+    private string _verticalLayoutTopHand = "Left";
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BoardBackground))]
     [NotifyPropertyChangedFor(nameof(TabBackground))]
     private double _backgroundOpacity;
@@ -132,6 +149,32 @@ public partial class MainWindowViewModel : ObservableObject
             return $"#{alpha:X2}181825";
         }
     }
+
+    /// <summary>Canvas width in pixels, changes based on vertical layout mode.</summary>
+    public double CanvasWidth => IsVerticalLayout
+        ? SvalboardLayout.HandWidth * SvalboardLayout.Scale
+        : (SvalboardLayout.HandWidth * 2 + SvalboardLayout.HandGap) * SvalboardLayout.Scale;
+
+    /// <summary>Canvas height in pixels, changes based on vertical layout mode.</summary>
+    public double CanvasHeight => IsVerticalLayout
+        ? (SvalboardLayout.HandHeight * 2 + 1.0) * SvalboardLayout.Scale
+        : SvalboardLayout.HandHeight * SvalboardLayout.Scale;
+
+    // --- Hand container positioning (in pixels) ---
+
+    public double LeftHandX => 0;
+
+    public double LeftHandY => IsVerticalLayout && VerticalLayoutTopHand == "Right"
+        ? (SvalboardLayout.HandHeight + 1.0) * SvalboardLayout.Scale
+        : 0;
+
+    public double RightHandX => IsVerticalLayout
+        ? 0
+        : SvalboardLayout.RightHandOriginX * SvalboardLayout.Scale;
+
+    public double RightHandY => IsVerticalLayout && VerticalLayoutTopHand != "Right"
+        ? (SvalboardLayout.HandHeight + 1.0) * SvalboardLayout.Scale
+        : 0;
 
     [ObservableProperty]
     private ObservableCollection<LayerViewModel> _layers = [];
@@ -165,6 +208,8 @@ public partial class MainWindowViewModel : ObservableObject
         var initialSettings = _settingsService.Load();
         IsAlwaysOnTop = initialSettings.AlwaysOnTop;
         BackgroundOpacity = Math.Clamp(initialSettings.BackgroundOpacity, 0.0, 1.0);
+        VerticalLayoutTopHand = initialSettings.VerticalLayoutTopHand ?? "Left";
+        IsVerticalLayout = initialSettings.VerticalLayout;
 
         // Try to connect on startup
         TryConnect();
@@ -252,6 +297,7 @@ public partial class MainWindowViewModel : ObservableObject
             Layers.Add(new LayerViewModel(layer, i => SelectedLayerIndex = i, totalLayers, userColors,
                 keyVm => SetKeyLabelRequested?.Invoke(keyVm)));
         }
+
     }
 
     /// <summary>
@@ -267,6 +313,8 @@ public partial class MainWindowViewModel : ObservableObject
         HotkeyChangeRequested?.Invoke(settings.HotkeyKey, settings.HotkeyModifiers);
         BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
         LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
+        VerticalLayoutTopHand = settings.VerticalLayoutTopHand ?? "Left";
+        IsVerticalLayout = settings.VerticalLayout;
 
         if (KeyboardConfig is null) return;
 
@@ -579,6 +627,14 @@ public partial class MainWindowViewModel : ObservableObject
     private void OpenHelp()
     {
         OpenHelpRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void ToggleVerticalLayout()
+    {
+        IsVerticalLayout = !IsVerticalLayout;
+        var settings = _settingsService.Load();
+        _settingsService.Save(settings with { VerticalLayout = IsVerticalLayout });
     }
 
     [RelayCommand]

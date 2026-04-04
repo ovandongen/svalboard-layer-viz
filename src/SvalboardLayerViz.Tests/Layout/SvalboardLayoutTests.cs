@@ -108,4 +108,20 @@ public class SvalboardLayoutTests
             Assert.Equal(1.0, p.Height);
         });
     }
+
+    [Theory]
+    [InlineData(0, false)]  // L-Thumb
+    [InlineData(1, false)]  // L-Index
+    [InlineData(2, false)]  // L-Middle
+    [InlineData(3, false)]  // L-Ring
+    [InlineData(4, false)]  // L-Pinky
+    [InlineData(5, true)]   // R-Thumb
+    [InlineData(6, true)]   // R-Index
+    [InlineData(7, true)]   // R-Middle
+    [InlineData(8, true)]   // R-Ring
+    [InlineData(9, true)]   // R-Pinky
+    public void IsRightHand_CorrectForRow(int row, bool expected)
+    {
+        Assert.Equal(expected, SvalboardLayout.IsRightHand(row));
+    }
 }

@@ -65,6 +65,15 @@ public partial class SettingsViewModel : ObservableObject
 
     public string ThresholdDisplay => $"{LayerHoldThresholdMs} ms";
 
+    [ObservableProperty]
+    private bool _verticalLayout;
+
+    /// <summary>Available top-hand choices for vertical layout.</summary>
+    public IReadOnlyList<string> AvailableTopHands { get; } = ["Left", "Right"];
+
+    [ObservableProperty]
+    private string _verticalLayoutTopHand = "Left";
+
     partial void OnLayerHoldThresholdMsChanged(int value) => OnPropertyChanged(nameof(ThresholdDisplay));
 
     // ── Version & Update Check ──
@@ -208,9 +217,11 @@ public partial class SettingsViewModel : ObservableObject
                 AddCustomKeyLabelVm(hex, Loc.Instance["Settings_ManualLabel"], label, isManual: true);
         }
 
-        // Populate opacity and threshold
+        // Populate opacity, threshold, and layout
         BackgroundOpacity = settings.BackgroundOpacity;
         LayerHoldThresholdMs = settings.LayerHoldThresholdMs;
+        VerticalLayout = settings.VerticalLayout;
+        VerticalLayoutTopHand = settings.VerticalLayoutTopHand ?? "Left";
 
         // Populate language
         SelectedLanguage = AvailableLanguages.FirstOrDefault(l => l.Code == settings.Language)
@@ -263,6 +274,8 @@ public partial class SettingsViewModel : ObservableObject
             BackgroundOpacity = Math.Clamp(BackgroundOpacity, 0.0, 1.0),
             LayerHoldThresholdMs = Math.Clamp(LayerHoldThresholdMs, 0, 1000),
             Language = SelectedLanguage.Code,
+            VerticalLayout = VerticalLayout,
+            VerticalLayoutTopHand = VerticalLayoutTopHand,
         };
 
         // Apply language change immediately

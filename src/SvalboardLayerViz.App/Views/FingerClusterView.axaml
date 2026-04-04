@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+             xmlns:views="using:SvalboardLayerViz.App.Views"
+             x:Class="SvalboardLayerViz.App.Views.FingerClusterView"
+             x:DataType="vm:KeyClusterViewModel"
+             Width="{Binding Width}"
+             Height="{Binding Height}">
+
+    <ItemsControl ItemsSource="{Binding Keys}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <Canvas />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemContainerTheme>
+            <ControlTheme TargetType="ContentPresenter">
+                <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                <Setter Property="Canvas.Top" Value="{Binding Top}" />
+            </ControlTheme>
+        </ItemsControl.ItemContainerTheme>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:KeyViewModel">
+                <views:KeyView />
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+</UserControl>

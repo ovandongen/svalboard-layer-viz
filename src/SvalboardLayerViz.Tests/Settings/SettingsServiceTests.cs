@@ -80,6 +80,32 @@ public class SettingsServiceTests : IDisposable
     }
 
     [Fact]
+    public void SaveAndLoad_VerticalLayout_RoundTrip()
+    {
+        var original = new UserSettings
+        {
+            VerticalLayout = true,
+            VerticalLayoutTopHand = "Right",
+        };
+
+        _service.Save(original);
+        var loaded = _service.Load();
+
+        Assert.True(loaded.VerticalLayout);
+        Assert.Equal("Right", loaded.VerticalLayoutTopHand);
+    }
+
+    [Fact]
+    public void Load_MissingVerticalLayout_DefaultsFalseAndLeft()
+    {
+        File.WriteAllText(_tempFile, """{"HotkeyKey": "F5"}""");
+        var settings = _service.Load();
+
+        Assert.False(settings.VerticalLayout);
+        Assert.Equal("Left", settings.VerticalLayoutTopHand);
+    }
+
+    [Fact]
     public void Save_CreatesDirectoryIfNeeded()
     {
         var nestedDir = Path.Combine(_tempDir, "sub", "dir");

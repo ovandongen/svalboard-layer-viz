@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+             xmlns:views="using:SvalboardLayerViz.App.Views"
+             x:Class="SvalboardLayerViz.App.Views.HandView"
+             x:DataType="vm:HandViewModel">
+
+    <Canvas Width="{Binding Width}" Height="{Binding Height}">
+        <!-- Thumb cluster -->
+        <views:ThumbClusterView DataContext="{Binding ThumbCluster}"
+                                Width="{Binding Width}"
+                                Height="{Binding Height}"
+                                Canvas.Left="{Binding Left}"
+                                Canvas.Top="{Binding Top}" />
+
+        <!-- Finger clusters -->
+        <ItemsControl ItemsSource="{Binding FingerClusters}"
+                      Width="{Binding Width}" Height="{Binding Height}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerTheme>
+                <ControlTheme TargetType="ContentPresenter">
+                    <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Top}" />
+                </ControlTheme>
+            </ItemsControl.ItemContainerTheme>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:KeyClusterViewModel">
+                    <views:FingerClusterView Width="{Binding Width}" Height="{Binding Height}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Canvas>
+
+</UserControl>

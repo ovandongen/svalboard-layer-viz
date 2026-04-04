@@ -76,37 +76,47 @@ public partial class KeyViewModel : ObservableObject
     /// <summary>Opacity: reduced for transparent keys, full for layer activators.</summary>
     public double KeyOpacity => _style.Opacity;
 
-    // --- Layout positioning (in pixels, scaled from layout units) ---
+    // --- Layout positioning (cluster-relative, in pixels) ---
 
-    public double Left => Key.X * SvalboardLayout.Scale;
-    public double Top => Key.Y * SvalboardLayout.Scale;
-    public double Width => Key.Width * SvalboardLayout.Scale;
-    public double Height => Key.Height * SvalboardLayout.Scale;
+    public double Left { get; }
+    public double Top { get; }
+    public double Width { get; }
+    public double Height { get; }
 
     /// <summary>Hex keycode string for display (e.g. "0x5300").</summary>
     public string HexKeycode => $"0x{Key.RawKeycode:X4}";
 
-    public KeyViewModel(Key key, Layer layer, int totalLayers = 8,
-        Dictionary<int, string>? userLayerColors = null,
+    /// <summary>
+    /// Creates a KeyViewModel from a pre-computed PositionedKey with cluster-relative offsets.
+    /// </summary>
+    public KeyViewModel(PositionedKey posKey, Layer layer,
+        double clusterOriginX, double clusterOriginY,
+        int totalLayers = 8, Dictionary<int, string>? userLayerColors = null,
         Action<KeyViewModel>? setLabelRequested = null)
     {
-        Key = key;
+        Key = posKey.Key;
         Layer = layer;
         _setLabelRequested = setLabelRequested;
+
+        // Cluster-relative positioning (pixels)
+        Left = posKey.BoardX - clusterOriginX;
+        Top = posKey.BoardY - clusterOriginY;
+        Width = posKey.Width;
+        Height = posKey.Height;
 
         var userColor = userLayerColors?.GetValueOrDefault(layer.Index);
         var colors = LayerColorService.GetLayerColors(layer.Index, totalLayers,
             layer.ColorHue, layer.ColorSat, layer.ColorVal, userColor);
 
         LayerColors? targetLayerColors = null;
-        if (key.IsLayerSwitch && key.TargetLayer.HasValue)
+        if (posKey.Key.IsLayerSwitch && posKey.Key.TargetLayer.HasValue)
         {
-            var targetColor = userLayerColors?.GetValueOrDefault(key.TargetLayer.Value);
-            targetLayerColors = LayerColorService.GetLayerColors(key.TargetLayer.Value, totalLayers,
+            var targetColor = userLayerColors?.GetValueOrDefault(posKey.Key.TargetLayer.Value);
+            targetLayerColors = LayerColorService.GetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
                 userHexColor: targetColor);
         }
 
-        _style = KeyStyleResolver.Resolve(key, layer.Index, colors, targetLayerColors);
+        _style = KeyStyleResolver.Resolve(posKey.Key, layer.Index, colors, targetLayerColors);
     }
 
     [RelayCommand]
