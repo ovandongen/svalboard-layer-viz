@@ -50,4 +50,16 @@ public record UserSettings
 
     /// <summary>Which hand appears on top in vertical layout. Values: "Left" or "Right".</summary>
     public string VerticalLayoutTopHand { get; init; } = "Left";
+
+    /// <summary>Last window X position (pixels). Null = first launch, center on screen.</summary>
+    public double? WindowX { get; init; }
+
+    /// <summary>Last window Y position (pixels). Null = first launch, center on screen.</summary>
+    public double? WindowY { get; init; }
+
+    /// <summary>Last window width (pixels). Null = use default (1200).</summary>
+    public double? WindowWidth { get; init; }
+
+    /// <summary>Last window height (pixels). Null = use default (600).</summary>
+    public double? WindowHeight { get; init; }
 }

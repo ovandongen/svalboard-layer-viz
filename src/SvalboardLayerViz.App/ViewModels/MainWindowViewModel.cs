@@ -202,6 +202,9 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>Callback to show a label editor for a key. Wired up by App.axaml.cs. Args: KeyViewModel.</summary>
     public Action<KeyViewModel>? SetKeyLabelRequested { get; set; }
 
+    /// <summary>Invoked by QuitCommand so the App layer can save window state and shut down cleanly.</summary>
+    public Action? QuitRequested { get; set; }
+
     public MainWindowViewModel(ISettingsService? settingsService = null)
     {
         _settingsService = settingsService ?? new SettingsService();
@@ -657,6 +660,9 @@ public partial class MainWindowViewModel : ObservableObject
         StopMatrixPolling();
         _deviceSubscription?.Dispose();
         _protocolService.Dispose();
-        Environment.Exit(0);
+        if (QuitRequested is not null)
+            QuitRequested.Invoke();
+        else
+            Environment.Exit(0);
     }
 }

@@ -32,6 +32,57 @@ public partial class App : Application
             var mainWindow = new MainWindow { DataContext = viewModel };
             desktop.MainWindow = mainWindow;
 
+            // Restore saved window position/size (or center on first launch)
+            var windowSettings = settingsService.Load();
+            if (windowSettings.WindowX.HasValue && windowSettings.WindowY.HasValue)
+            {
+                mainWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+                mainWindow.Position = new PixelPoint((int)windowSettings.WindowX.Value, (int)windowSettings.WindowY.Value);
+            }
+            else
+            {
+                mainWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            }
+            if (windowSettings.WindowWidth.HasValue)
+                mainWindow.Width = windowSettings.WindowWidth.Value;
+            if (windowSettings.WindowHeight.HasValue)
+                mainWindow.Height = windowSettings.WindowHeight.Value;
+
+            // Validate restored position is on a visible screen
+            mainWindow.Opened += (_, _) =>
+            {
+                if (mainWindow.Screens.ScreenFromWindow(mainWindow) is null)
+                {
+                    mainWindow.Position = new PixelPoint(0, 0);
+                }
+            };
+
+            // Helper to persist current window geometry
+            void SaveWindowState()
+            {
+                if (mainWindow.WindowState != WindowState.Minimized)
+                {
+                    var s = settingsService.Load();
+                    settingsService.Save(s with
+                    {
+                        WindowX = mainWindow.Position.X,
+                        WindowY = mainWindow.Position.Y,
+                        WindowWidth = mainWindow.Width,
+                        WindowHeight = mainWindow.Height,
+                    });
+                }
+            }
+
+            // Save on normal window close
+            mainWindow.Closing += (_, _) => SaveWindowState();
+
+            // QuitCommand uses Environment.Exit which skips Closing — intercept it
+            viewModel.QuitRequested = () =>
+            {
+                SaveWindowState();
+                Environment.Exit(0);
+            };
+
             // Set tray icon from embedded PNG and localize tray menu
             var trayIcons = TrayIcon.GetIcons(this);
             if (trayIcons?.Count > 0)

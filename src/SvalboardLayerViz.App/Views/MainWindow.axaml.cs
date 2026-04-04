@@ -7,13 +7,14 @@ namespace SvalboardLayerViz.App.Views;
 
 public partial class MainWindow : Window
 {
-    private bool _barsOnBottom;
+    private bool? _barsOnBottom;
     private const double ResizeEdge = 6;
 
     public MainWindow()
     {
         InitializeComponent();
         PositionChanged += OnPositionChanged;
+        Opened += (_, _) => UpdateBarPosition();
 
         if (OperatingSystem.IsMacOS())
             SystemDecorations = SystemDecorations.Full;
@@ -41,12 +42,14 @@ public partial class MainWindow : Window
         ToolTip.SetTip(RefreshButton, loc["Tooltip_Refresh"]);
     }
 
-    private void OnPositionChanged(object? sender, PixelPointEventArgs e)
+    private void OnPositionChanged(object? sender, PixelPointEventArgs e) => UpdateBarPosition();
+
+    private void UpdateBarPosition()
     {
         var screen = Screens.ScreenFromWindow(this);
         if (screen is null) return;
 
-        var windowMidY = e.Point.Y + (Height / 2);
+        var windowMidY = Position.Y + (Height / 2);
         var screenMidY = screen.WorkingArea.Height / 2;
         var shouldBeBottom = windowMidY > screenMidY;
 
@@ -96,7 +99,7 @@ public partial class MainWindow : Window
         if (edge.HasValue) { BeginResizeDrag(edge.Value, e); return; }
 
         var barsHeight = BarsPanel.Bounds.Height;
-        bool inBars = _barsOnBottom
+        bool inBars = _barsOnBottom == true
             ? pos.Y > Bounds.Height - barsHeight
             : pos.Y < barsHeight;
 
