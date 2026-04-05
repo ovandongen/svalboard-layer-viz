@@ -4,7 +4,8 @@
              x:Class="SvalboardLayerViz.App.Views.KeyView"
              x:DataType="vm:KeyViewModel"
              Width="{Binding Width}"
-             Height="{Binding Height}">
+             Height="{Binding Height}"
+             Background="Transparent">
 
     <!--
     Single key visual representation.
@@ -35,7 +36,7 @@
             BorderBrush="{Binding BorderColor}"
             Opacity="{Binding KeyOpacity}">
 
-        <Grid>
+        <Grid Background="Transparent">
             <!-- Centered primary + secondary labels -->
             <StackPanel VerticalAlignment="Center"
                         HorizontalAlignment="Center"

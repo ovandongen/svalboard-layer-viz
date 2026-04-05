@@ -125,7 +125,7 @@ public partial class App : Application
                 var settingsVm = new SettingsViewModel(settingsService, totalLayers, unknowns,
                     viewModel.DeviceTappingTermMs);
 
-                var settingsWindow = new SettingsWindow { DataContext = settingsVm };
+                var settingsWindow = new SettingsWindow { DataContext = settingsVm, Topmost = viewModel.IsAlwaysOnTop };
                 settingsVm.SettingsSaved = () =>
                 {
                     try
@@ -152,6 +152,7 @@ public partial class App : Application
                     Height = 150,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                     CanResize = false,
+                    Topmost = viewModel.IsAlwaysOnTop,
                 };
 
                 var textBox = new TextBox
@@ -195,7 +196,7 @@ public partial class App : Application
                 }
 
                 viewModel.Diagnostics.IsActive = true;
-                diagnosticsWindow = new DiagnosticsWindow { DataContext = viewModel.Diagnostics };
+                diagnosticsWindow = new DiagnosticsWindow { DataContext = viewModel.Diagnostics, Topmost = viewModel.IsAlwaysOnTop };
                 diagnosticsWindow.Closed += (_, _) =>
                 {
                     viewModel.Diagnostics.IsActive = false;
@@ -209,7 +210,7 @@ public partial class App : Application
                 if (viewModel.KeyboardConfig is null) return;
 
                 var exportVm = new ExportDialogViewModel(viewModel.Layers.ToList());
-                var exportDialog = new ExportDialog { DataContext = exportVm };
+                var exportDialog = new ExportDialog { DataContext = exportVm, Topmost = viewModel.IsAlwaysOnTop };
 
                 exportVm.Cancelled = () => exportDialog.Close();
                 exportVm.ExportRequested = async () =>
@@ -275,7 +276,7 @@ public partial class App : Application
                 }
 
                 var helpVm = new HelpWindowViewModel();
-                helpWindow = new HelpWindow { DataContext = helpVm };
+                helpWindow = new HelpWindow { DataContext = helpVm, Topmost = viewModel.IsAlwaysOnTop };
                 helpVm.Closed = () =>
                 {
                     if (helpVm.DontShowAgain)

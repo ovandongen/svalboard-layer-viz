@@ -31,7 +31,17 @@ Pre-built binaries are available on the [Releases](../../releases/latest) page:
 
 ## Screenshots
 
-*Coming soon*
+<p>
+<a href="docs/screenshots/Screenshot1.png"><img src="docs/screenshots/Screenshot1.png" width="280"></a>
+<a href="docs/screenshots/Screenshot2.png"><img src="docs/screenshots/Screenshot2.png" width="280"></a>
+<a href="docs/screenshots/Screenshot3.png"><img src="docs/screenshots/Screenshot3.png" width="280"></a>
+<a href="docs/screenshots/Screenshot4.png"><img src="docs/screenshots/Screenshot4.png" width="280"></a>
+<a href="docs/screenshots/Screenshot5.png"><img src="docs/screenshots/Screenshot5.png" width="280"></a>
+<a href="docs/screenshots/Screenshot6.png"><img src="docs/screenshots/Screenshot6.png" width="280"></a>
+<a href="docs/screenshots/Screenshot7.png"><img src="docs/screenshots/Screenshot7.png" width="280"></a>
+<a href="docs/screenshots/Screenshot8.png"><img src="docs/screenshots/Screenshot8.png" width="280"></a>
+<a href="docs/screenshots/Screenshot9.png"><img src="docs/screenshots/Screenshot9.png" width="280"></a>
+</p>
 
 ---
 

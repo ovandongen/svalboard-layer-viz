@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using SvalboardLayerViz.App.Localization;
+using Avalonia.VisualTree;
 
 namespace SvalboardLayerViz.App.Views;
 
@@ -21,25 +21,6 @@ public partial class MainWindow : Window
 
         MinimizeButton.Click += (_, _) => WindowState = WindowState.Minimized;
 
-        ApplyToolbarTooltips();
-        Loc.CultureChanged += ApplyToolbarTooltips;
-    }
-
-    private void ApplyToolbarTooltips()
-    {
-        var loc = Loc.Instance;
-        ToolTip.SetTip(QuitButton, loc["Tooltip_Quit"]);
-        ToolTip.SetTip(MinimizeButton, loc["Tooltip_Minimize"]);
-        ToolTip.SetTip(LiveButton, loc["Tooltip_LiveHighlighting"]);
-        ToolTip.SetTip(AutoLayerButton, loc["Tooltip_AutoLayerSwitch"]);
-        ToolTip.SetTip(ResetButton, loc["Tooltip_ResetLayerTracking"]);
-        ToolTip.SetTip(DiagnosticsButton, loc["Tooltip_Diagnostics"]);
-        ToolTip.SetTip(ExportButton, loc["Tooltip_Export"]);
-        ToolTip.SetTip(VerticalLayoutButton, loc["Tooltip_VerticalLayout"]);
-        ToolTip.SetTip(PinButton, loc["Tooltip_AlwaysOnTop"]);
-        ToolTip.SetTip(HelpButton, loc["Tooltip_Help"]);
-        ToolTip.SetTip(SettingsButton, loc["Tooltip_Settings"]);
-        ToolTip.SetTip(RefreshButton, loc["Tooltip_Refresh"]);
     }
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e) => UpdateBarPosition();
@@ -76,13 +57,6 @@ public partial class MainWindow : Window
         }
     }
 
-    protected override void OnPointerMoved(PointerEventArgs e)
-    {
-        base.OnPointerMoved(e);
-        var pos = e.GetPosition(this);
-        Cursor = GetResizeCursor(pos) ?? new Cursor(StandardCursorType.Arrow);
-    }
-
     /// <summary>
     /// Handles window drag (bars area) and resize (edges).
     /// SystemDecorations="None" removes OS title bar and resize handles — we replace both here.
@@ -92,11 +66,20 @@ public partial class MainWindow : Window
         base.OnPointerPressed(e);
 
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
+        if (e.Handled) return;
 
         var pos = e.GetPosition(this);
 
         var edge = GetResizeEdge(pos);
         if (edge.HasValue) { BeginResizeDrag(edge.Value, e); return; }
+
+        // Only drag from the bars background, not from interactive controls
+        var source = e.Source as Visual;
+        while (source != null && source != this)
+        {
+            if (source is Button) return;
+            source = source.GetVisualParent();
+        }
 
         var barsHeight = BarsPanel.Bounds.Height;
         bool inBars = _barsOnBottom == true
@@ -125,14 +108,4 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private Cursor? GetResizeCursor(Point pos) => GetResizeEdge(pos) switch
-    {
-        WindowEdge.NorthWest => new Cursor(StandardCursorType.TopLeftCorner),
-        WindowEdge.NorthEast => new Cursor(StandardCursorType.TopRightCorner),
-        WindowEdge.SouthWest => new Cursor(StandardCursorType.BottomLeftCorner),
-        WindowEdge.SouthEast => new Cursor(StandardCursorType.BottomRightCorner),
-        WindowEdge.West or WindowEdge.East  => new Cursor(StandardCursorType.SizeWestEast),
-        WindowEdge.North or WindowEdge.South => new Cursor(StandardCursorType.SizeNorthSouth),
-        _ => null
-    };
 }

@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <!-- Shared label content for creative thumb keys -->
         <DataTemplate x:Key="ThumbKeyContent" x:DataType="vm:KeyViewModel">
-            <Grid>
+            <Grid Background="Transparent">
                 <ToolTip.Tip>
                     <TextBlock Text="{Binding Tooltip}" />
                 </ToolTip.Tip>
