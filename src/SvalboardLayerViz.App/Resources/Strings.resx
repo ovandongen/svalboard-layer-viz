@@ -129,6 +129,9 @@
   <data name="Status_NoDeviceFound" xml:space="preserve">
     <value>No Svalboard found. Connect your device via USB.</value>
   </data>
+  <data name="Status_DeviceSearchTimedOut" xml:space="preserve">
+    <value>Device search timed out — click Refresh to retry.</value>
+  </data>
   <data name="Status_ConnectingFormat" xml:space="preserve">
     <value>Connecting to {0}...</value>
     <comment>{0} = device product name</comment>

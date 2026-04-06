@@ -1,4 +1,5 @@
 using HidSharp;
+using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Protocol;
 
 namespace SvalboardLayerViz.Core.Device;
@@ -17,12 +18,24 @@ public class DeviceConnectionService
     {
         var devices = new List<DeviceInfo>();
 
-        foreach (var device in DeviceList.Local.GetHidDevices())
+        StartupLogger.Log("HID: getting device list...");
+        var hidDevices = DeviceList.Local.GetHidDevices();
+        StartupLogger.Log($"HID: {hidDevices.Count()} device(s) found, scanning descriptors...");
+
+        foreach (var device in hidDevices)
         {
+            // Log VID/PID before any USB I/O — if the next call hangs,
+            // this line identifies which device is the culprit.
+            StartupLogger.Log($"HID: checking VID={device.VendorID:X4} PID={device.ProductID:X4}");
             try
             {
+                string friendlyName;
+                try { friendlyName = device.GetFriendlyName(); }
+                catch { friendlyName = "(name unavailable)"; }
+
                 var reportDescriptor = device.GetReportDescriptor();
 
+                bool matched = false;
                 foreach (var deviceItem in reportDescriptor.DeviceItems)
                 {
                     uint usage1 = ((uint)VialCommands.VialUsagePage << 16) | VialCommands.VialUsage1;
@@ -31,20 +44,26 @@ public class DeviceConnectionService
                     if (deviceItem.Usages.ContainsValue(usage1) ||
                         deviceItem.Usages.ContainsValue(usage2))
                     {
+                        matched = true;
+                        var name = device.GetProductName() ?? "Unknown";
+                        StartupLogger.Log($"HID:   -> Vial device \"{name}\"");
                         devices.Add(new DeviceInfo
                         {
                             DevicePath = device.DevicePath,
-                            ProductName = device.GetProductName() ?? "Unknown",
+                            ProductName = name,
                             VendorId = device.VendorID,
                             ProductId = device.ProductID,
                             HidDevice = device
                         });
                     }
                 }
+
+                if (!matched)
+                    StartupLogger.Log($"HID:   skip \"{friendlyName}\"");
             }
-            catch
+            catch (Exception ex)
             {
-                // Skip devices we can't read descriptors from
+                StartupLogger.Log($"HID:   error: {ex.Message}");
             }
         }
 

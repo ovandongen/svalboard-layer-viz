@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Device;
+using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Keymap;
 using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
@@ -21,6 +22,8 @@ public partial class MainWindowViewModel : ObservableObject
     private IDisposable? _deviceSubscription;
     private MatrixPollingService? _matrixPolling;
     private string? _connectedDeviceName;
+    private CancellationTokenSource? _connectCts;
+    private bool _isConnecting;
 
     /// <summary>
     /// Cached lookup: (row, col) → target layer for momentary layer-switch keys (MO, LT, TT).
@@ -213,22 +216,54 @@ public partial class MainWindowViewModel : ObservableObject
         BackgroundOpacity = Math.Clamp(initialSettings.BackgroundOpacity, 0.0, 1.0);
         VerticalLayoutTopHand = initialSettings.VerticalLayoutTopHand ?? "Left";
         IsVerticalLayout = initialSettings.VerticalLayout;
-
-        // Try to connect on startup
-        TryConnect();
-
-        // Monitor for device changes (store subscription to prevent GC)
-        _deviceSubscription = _deviceService.OnDeviceListChanged(TryConnect);
     }
 
-    private void TryConnect()
+    /// <summary>
+    /// Deferred initialization: connects to device and starts monitoring.
+    /// Call after the window is shown to avoid blocking the UI thread during HID enumeration.
+    /// </summary>
+    public void InitializeDeviceConnection()
     {
+        _ = TryConnectAsync();
+        _deviceSubscription = _deviceService.OnDeviceListChanged(() => _ = TryConnectAsync());
+    }
+
+    private async Task TryConnectAsync()
+    {
+        // Prevent concurrent connection attempts — HidSharp fires bursts of
+        // device-changed events and concurrent HID reads corrupt each other.
+        if (_isConnecting) return;
+        _isConnecting = true;
+        _connectCts?.Cancel();
+        _connectCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var ct = _connectCts.Token;
+
         try
         {
             StopMatrixPolling();
 
             var settings = _settingsService.Load();
-            var devices = _deviceService.FindVialDevices();
+            StatusMessage = Loc.Instance["Status_LookingForDevice"];
+            StartupLogger.Log("Device enumeration starting...");
+
+            // Run HID enumeration on a background thread with a timeout.
+            // HidSharp's DeviceList.Local.GetHidDevices() can hang indefinitely
+            // on some Windows configurations.
+            IReadOnlyList<DeviceInfo> devices;
+            try
+            {
+                devices = await Task.Run(() => _deviceService.FindVialDevices(), ct);
+            }
+            catch (OperationCanceledException)
+            {
+                StartupLogger.Log("Device enumeration timed out after 10s");
+                StatusMessage = Loc.Instance["Status_DeviceSearchTimedOut"];
+                IsConnected = false;
+                return;
+            }
+
+            StartupLogger.Log($"Device enumeration complete: {devices.Count} device(s) found");
+
             if (devices.Count == 0)
             {
                 StatusMessage = Loc.Instance["Status_NoDeviceFound"];
@@ -245,6 +280,9 @@ public partial class MainWindowViewModel : ObservableObject
             BuildLayerViewModels(settings);
             BuildLayerSwitchCache();
 
+            // Force property change notification even if already 0 (default),
+            // so the UI picks up the now-valid SelectedLayer after async connect.
+            SelectedLayerIndex = -1;
             SelectedLayerIndex = 0;
             IsConnected = true;
             IsLiveHighlightingEnabled = settings.LiveKeyHighlighting;
@@ -278,8 +316,13 @@ public partial class MainWindowViewModel : ObservableObject
         catch (Exception ex)
         {
             StopMatrixPolling();
+            StartupLogger.Log($"Device connection error: {ex.Message}");
             StatusMessage = Loc.Instance.Format("Status_ConnectionErrorFormat", ex.Message);
             IsConnected = false;
+        }
+        finally
+        {
+            _isConnecting = false;
         }
     }
 
@@ -649,9 +692,9 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Refresh()
+    private async Task Refresh()
     {
-        TryConnect();
+        await TryConnectAsync();
     }
 
     [RelayCommand]

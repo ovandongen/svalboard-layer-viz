@@ -341,6 +341,11 @@ public partial class App : Application
                     DispatcherPriority.Background);
             }
 
+            // Connect to device after the window is shown — HID enumeration can hang
+            // on some Windows systems, so it must not block window creation.
+            Dispatcher.UIThread.Post(() => viewModel.InitializeDeviceConnection(),
+                DispatcherPriority.Background);
+
             // Bind tray icon commands to the main view model
             DataContext = viewModel;
             StartupLogger.Log("OnFrameworkInitializationCompleted done");

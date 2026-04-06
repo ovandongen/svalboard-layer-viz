@@ -225,6 +225,10 @@
     <value>Geen Svalboard gevonden. Sluit je apparaat aan via USB.</value>
     <comment/>
   </data>
+  <data name="Status_DeviceSearchTimedOut" xml:space="preserve">
+    <value>Apparaat zoeken verlopen — klik op Vernieuwen om opnieuw te proberen.</value>
+    <comment/>
+  </data>
   <data name="Status_ConnectingFormat" xml:space="preserve">
     <value>Verbinden met {0}...</value>
     <comment/>
