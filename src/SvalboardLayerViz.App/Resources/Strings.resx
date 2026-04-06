@@ -495,7 +495,7 @@
     <value>&#x2022; Adjust background transparency in Settings to use the app as a translucent overlay</value>
   </data>
   <data name="Help_Tip5" xml:space="preserve">
-    <value>&#x2022; The system tray icon provides quick access to show, refresh, and quit</value>
+    <value>&#x2022; The system tray icon provides quick access to show and quit</value>
   </data>
 
 </root>
