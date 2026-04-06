@@ -1,5 +1,6 @@
 using Avalonia;
 using SvalboardLayerViz.Core.Diagnostics;
+using SvalboardLayerViz.Core.Settings;
 
 namespace SvalboardLayerViz.App;
 
@@ -21,14 +22,30 @@ class Program
             .UsePlatformDetect()
             .LogToTrace();
 
-        // Allow users to force software rendering via environment variable
-        // (workaround for GPU driver issues on some NVIDIA/AMD configurations).
+        // Allow users to force software rendering via environment variable or settings.json.
+        // Env var takes precedence over settings file.
         if (OperatingSystem.IsWindows())
         {
             var renderMode = Environment.GetEnvironmentVariable("SVALBOARD_RENDER_MODE");
+            var source = "SVALBOARD_RENDER_MODE env";
+
+            if (string.IsNullOrEmpty(renderMode))
+            {
+                try
+                {
+                    renderMode = new SettingsService().Load().RenderingMode;
+                    source = "settings.json";
+                }
+                catch
+                {
+                    renderMode = "auto";
+                    source = "default (settings read failed)";
+                }
+            }
+
             if (renderMode?.Equals("software", StringComparison.OrdinalIgnoreCase) == true)
             {
-                StartupLogger.Log("Rendering mode: software (forced via SVALBOARD_RENDER_MODE)");
+                StartupLogger.Log($"Rendering mode: software (via {source})");
                 builder = builder.With(new Win32PlatformOptions
                 {
                     RenderingMode = [Win32RenderingMode.Software]
@@ -36,7 +53,7 @@ class Program
             }
             else
             {
-                StartupLogger.Log($"Rendering mode: auto (SVALBOARD_RENDER_MODE={renderMode ?? "unset"})");
+                StartupLogger.Log($"Rendering mode: {renderMode ?? "auto"} (via {source})");
             }
         }
 

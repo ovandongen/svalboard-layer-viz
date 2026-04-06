@@ -51,6 +51,13 @@ public record UserSettings
     /// <summary>Which hand appears on top in vertical layout. Values: "Left" or "Right".</summary>
     public string VerticalLayoutTopHand { get; init; } = "Left";
 
+    /// <summary>
+    /// Rendering mode override. "auto" (default) uses the platform default GPU pipeline.
+    /// "software" forces software rendering (workaround for GPU driver issues).
+    /// The SVALBOARD_RENDER_MODE environment variable takes precedence over this setting.
+    /// </summary>
+    public string RenderingMode { get; init; } = "auto";
+
     /// <summary>Last window X position (pixels). Null = first launch, center on screen.</summary>
     public double? WindowX { get; init; }
 

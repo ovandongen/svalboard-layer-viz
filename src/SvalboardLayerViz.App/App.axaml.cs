@@ -8,6 +8,7 @@ using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.App.Services;
 using SvalboardLayerViz.App.ViewModels;
 using SvalboardLayerViz.App.Views;
+using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Export;
 using SvalboardLayerViz.Core.Settings;
 
@@ -28,8 +29,11 @@ public partial class App : Application
         {
             var settingsService = new SettingsService();
             Loc.Instance.SetCulture(settingsService.Load().Language);
+            StartupLogger.Log("Creating MainWindowViewModel...");
             var viewModel = new MainWindowViewModel(settingsService);
+            StartupLogger.Log("MainWindowViewModel created");
             var mainWindow = new MainWindow { DataContext = viewModel };
+            StartupLogger.Log("MainWindow created");
             desktop.MainWindow = mainWindow;
 
             // Restore saved window position/size (or center on first launch)
@@ -47,6 +51,8 @@ public partial class App : Application
                 mainWindow.Width = windowSettings.WindowWidth.Value;
             if (windowSettings.WindowHeight.HasValue)
                 mainWindow.Height = windowSettings.WindowHeight.Value;
+
+            StartupLogger.Log($"Window position: {mainWindow.Position.X},{mainWindow.Position.Y} size: {mainWindow.Width}x{mainWindow.Height} startup: {mainWindow.WindowStartupLocation}");
 
             // Validate restored position is on a visible screen
             mainWindow.Opened += (_, _) =>
@@ -303,6 +309,7 @@ public partial class App : Application
             };
 
             // Global hotkey — not supported on Linux (Wayland blocks hooks from unfocused windows)
+            StartupLogger.Log("Starting global hotkey service...");
             if (!OperatingSystem.IsLinux())
             {
                 var settings = settingsService.Load();
@@ -336,6 +343,7 @@ public partial class App : Application
 
             // Bind tray icon commands to the main view model
             DataContext = viewModel;
+            StartupLogger.Log("OnFrameworkInitializationCompleted done");
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
         PositionChanged += OnPositionChanged;
         Opened += (_, _) =>
         {
+            StartupLogger.Log("MainWindow.Opened event fired");
             ApplyTransparencyFallback();
             UpdateBarPosition();
         };
