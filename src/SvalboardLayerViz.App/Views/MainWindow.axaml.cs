@@ -14,7 +14,19 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         PositionChanged += OnPositionChanged;
-        Opened += (_, _) => UpdateBarPosition();
+        Opened += (_, _) =>
+        {
+            // If the system can't provide transparency, the window would be invisible
+            // (Background="Transparent" + no compositing = nothing rendered).
+            // Fall back to a solid background and re-enable system decorations.
+            if (ActualTransparencyLevel == WindowTransparencyLevel.None)
+            {
+                Background = Avalonia.Media.Brushes.Black;
+                SystemDecorations = SystemDecorations.Full;
+            }
+
+            UpdateBarPosition();
+        };
 
         if (OperatingSystem.IsMacOS())
             SystemDecorations = SystemDecorations.Full;
