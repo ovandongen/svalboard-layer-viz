@@ -9,7 +9,7 @@
         Title="{Binding [Title_App], Source={StaticResource Loc}}"
         Width="1200" Height="600"
         MinWidth="480" MinHeight="200"
-        TransparencyLevelHint="Transparent"
+        TransparencyLevelHint="Transparent,AcrylicBlur,None"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"

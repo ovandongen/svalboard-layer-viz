@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.VisualTree;
+using SvalboardLayerViz.Core.Diagnostics;
 
 namespace SvalboardLayerViz.App.Views;
 
@@ -16,15 +17,7 @@ public partial class MainWindow : Window
         PositionChanged += OnPositionChanged;
         Opened += (_, _) =>
         {
-            // If the system can't provide transparency, the window would be invisible
-            // (Background="Transparent" + no compositing = nothing rendered).
-            // Fall back to a solid background and re-enable system decorations.
-            if (ActualTransparencyLevel == WindowTransparencyLevel.None)
-            {
-                Background = Avalonia.Media.Brushes.Black;
-                SystemDecorations = SystemDecorations.Full;
-            }
-
+            ApplyTransparencyFallback();
             UpdateBarPosition();
         };
 
@@ -33,6 +26,37 @@ public partial class MainWindow : Window
 
         MinimizeButton.Click += (_, _) => WindowState = WindowState.Minimized;
 
+    }
+
+    /// <summary>
+    /// Validates that window transparency is actually working and falls back gracefully.
+    /// On some GPU configurations (especially NVIDIA on Windows), Avalonia reports transparency
+    /// as available but the compositing doesn't render correctly, producing an invisible window.
+    /// </summary>
+    private void ApplyTransparencyFallback()
+    {
+        StartupLogger.Log($"Transparency: ActualTransparencyLevel={ActualTransparencyLevel}");
+
+        if (ActualTransparencyLevel == WindowTransparencyLevel.None)
+        {
+            // Platform explicitly says no transparency — use solid background with system chrome.
+            StartupLogger.Log("Transparency: fallback to solid background + system decorations");
+            Background = Avalonia.Media.SolidColorBrush.Parse("#1E1E2E");
+            SystemDecorations = SystemDecorations.Full;
+            ExtendClientAreaToDecorationsHint = false;
+            return;
+        }
+
+        // On Windows, some NVIDIA drivers report Transparent as supported but the compositor
+        // doesn't actually render the surface. A near-transparent background (alpha=1/255)
+        // is invisible to humans but prevents the GPU from discarding the surface entirely.
+        if (ActualTransparencyLevel == WindowTransparencyLevel.Transparent &&
+            OperatingSystem.IsWindows())
+        {
+            StartupLogger.Log("Transparency: applied near-transparent safety background (Windows + Transparent)");
+            Background = new Avalonia.Media.SolidColorBrush(
+                Avalonia.Media.Color.FromArgb(1, 0, 0, 0));
+        }
     }
 
     private void OnPositionChanged(object? sender, PixelPointEventArgs e) => UpdateBarPosition();
