@@ -235,7 +235,7 @@ public partial class MainWindowViewModel : ObservableObject
         if (_isConnecting) return;
         _isConnecting = true;
         _connectCts?.Cancel();
-        _connectCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        _connectCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var ct = _connectCts.Token;
 
         try
@@ -246,36 +246,39 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = Loc.Instance["Status_LookingForDevice"];
             StartupLogger.Log("Device enumeration starting...");
 
-            // Run HID enumeration on a background thread with a timeout.
-            // HidSharp's DeviceList.Local.GetHidDevices() can hang indefinitely
-            // on some Windows configurations.
-            IReadOnlyList<DeviceInfo> devices;
-            try
+            // Run ALL heavy I/O on a background thread with a timeout.
+            // HidSharp enumeration can hang on some Windows configurations,
+            // and the Vial protocol exchange (connect, read keymap, decompress)
+            // can also block for extended periods with certain devices.
+            var result = await Task.Run(() =>
             {
-                devices = await Task.Run(() => _deviceService.FindVialDevices(), ct);
-            }
-            catch (OperationCanceledException)
-            {
-                StartupLogger.Log("Device enumeration timed out after 10s");
-                StatusMessage = Loc.Instance["Status_DeviceSearchTimedOut"];
-                IsConnected = false;
-                return;
-            }
+                var devices = _deviceService.FindVialDevices();
+                StartupLogger.Log($"Device enumeration complete: {devices.Count} device(s) found");
 
-            StartupLogger.Log($"Device enumeration complete: {devices.Count} device(s) found");
+                if (devices.Count == 0) return null;
 
-            if (devices.Count == 0)
+                var device = PickPreferredDevice(devices);
+                StartupLogger.Log($"Selected device: {device.ProductName} (out of {devices.Count})");
+
+                var loader = new KeymapLoader(_protocolService, _keycodeService);
+                StartupLogger.Log($"Loading keymap from {device.ProductName}...");
+                var config = loader.Load(device, settings);
+                StartupLogger.Log("Keymap loaded successfully");
+
+                var tappingTerm = _protocolService.GetQmkSetting(VialCommands.QmkSettingTappingTerm);
+
+                return new { Device = device, Config = config, TappingTerm = tappingTerm };
+            }, ct);
+
+            // Back on UI thread — safe to update observable properties and collections
+            if (result is null)
             {
                 StatusMessage = Loc.Instance["Status_NoDeviceFound"];
                 IsConnected = false;
                 return;
             }
 
-            var device = devices[0];
-            StatusMessage = Loc.Instance.Format("Status_ConnectingFormat", device.ProductName);
-
-            var loader = new KeymapLoader(_protocolService, _keycodeService);
-            KeyboardConfig = loader.Load(device, settings);
+            KeyboardConfig = result.Config;
 
             BuildLayerViewModels(settings);
             BuildLayerSwitchCache();
@@ -288,15 +291,11 @@ public partial class MainWindowViewModel : ObservableObject
             IsLiveHighlightingEnabled = settings.LiveKeyHighlighting;
             IsAutoLayerSwitchEnabled = settings.AutoLayerSwitch;
 
-            // Try to read the device's tapping term via QMK Settings protocol.
-            // If available, use it as the hold threshold (unless user has customized it).
-            var deviceTappingTerm = _protocolService.GetQmkSetting(VialCommands.QmkSettingTappingTerm);
-            if (deviceTappingTerm.HasValue && deviceTappingTerm.Value is > 0 and <= 1000)
+            if (result.TappingTerm.HasValue && result.TappingTerm.Value is > 0 and <= 1000)
             {
-                DeviceTappingTermMs = deviceTappingTerm.Value;
-                // Use device value if user setting is still at the default (200ms)
+                DeviceTappingTermMs = result.TappingTerm.Value;
                 if (settings.LayerHoldThresholdMs == 200)
-                    LayerHoldThresholdMs = deviceTappingTerm.Value;
+                    LayerHoldThresholdMs = result.TappingTerm.Value;
                 else
                     LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
             }
@@ -307,11 +306,17 @@ public partial class MainWindowViewModel : ObservableObject
             }
 
             BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
-            _connectedDeviceName = device.ProductName;
-            StatusMessage = Loc.Instance.Format("Status_ConnectedFormat", device.ProductName, KeyboardConfig.Layers.Count);
+            _connectedDeviceName = result.Device.ProductName;
+            StatusMessage = Loc.Instance.Format("Status_ConnectedFormat", result.Device.ProductName, KeyboardConfig.Layers.Count);
 
             if (IsLiveHighlightingEnabled)
                 StartMatrixPolling();
+        }
+        catch (OperationCanceledException)
+        {
+            StartupLogger.Log("Device connection timed out after 30s");
+            StatusMessage = Loc.Instance["Status_DeviceSearchTimedOut"];
+            IsConnected = false;
         }
         catch (Exception ex)
         {
@@ -324,6 +329,17 @@ public partial class MainWindowViewModel : ObservableObject
         {
             _isConnecting = false;
         }
+    }
+
+    /// <summary>
+    /// Prefers a Svalboard ("lightly") device when multiple Vial devices are connected.
+    /// Falls back to the first device if no Svalboard is found.
+    /// </summary>
+    private static DeviceInfo PickPreferredDevice(IReadOnlyList<DeviceInfo> devices)
+    {
+        var preferred = devices.FirstOrDefault(d =>
+            d.ProductName.StartsWith("lightly", StringComparison.OrdinalIgnoreCase));
+        return preferred ?? devices[0];
     }
 
     private void BuildLayerViewModels(UserSettings settings)
@@ -463,7 +479,7 @@ public partial class MainWindowViewModel : ObservableObject
         _matrixPolling.PollError += msg =>
             Dispatcher.UIThread.Post(() => StatusMessage = Loc.Instance.Format("Status_PollingErrorFormat", msg));
         _matrixPolling.Start();
-        StatusMessage += Loc.Instance["Status_LiveKeysOn"];
+        RefreshStatusMessage();
     }
 
     private void StopMatrixPolling()
@@ -631,6 +647,8 @@ public partial class MainWindowViewModel : ObservableObject
             StartMatrixPolling();
         else
             StopMatrixPolling();
+
+        RefreshStatusMessage();
 
         var settings = _settingsService.Load();
         _settingsService.Save(settings with { LiveKeyHighlighting = IsLiveHighlightingEnabled });

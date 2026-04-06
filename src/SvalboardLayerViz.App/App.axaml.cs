@@ -358,9 +358,6 @@ public partial class App : Application
     private static readonly (string Key, string ResKey)[] TrayMenuKeys =
     [
         ("Show", "Tray_ShowLayers"),
-        ("Refresh", "Tray_Refresh"),
-        ("Settings", "Tray_Settings"),
-        ("Help", "Tray_Help"),
         ("Quit", "Tray_Quit"),
     ];
 
