@@ -13,6 +13,7 @@ public class VialProtocolService : IVialProtocolService
     private HidStream? _stream;
     private int _maxOutputLength;
     private int _maxInputLength;
+    private readonly object _sendLock = new();
 
     /// <summary>
     /// Opens a connection to the given HID device.
@@ -37,21 +38,29 @@ public class VialProtocolService : IVialProtocolService
         if (_stream is null)
             throw new InvalidOperationException("Not connected to a device.");
 
-        // HidSharp expects [reportId, ...payload] for writes
-        var writeBuffer = new byte[_maxOutputLength];
-        writeBuffer[0] = 0x00; // Report ID
-        Array.Copy(command, 0, writeBuffer, 1, Math.Min(command.Length, _maxOutputLength - 1));
+        // Lock guarantees that the write→read pair is atomic. Without this,
+        // concurrent callers (e.g. MatrixPollingService + LedPollingService on
+        // separate threads) can interleave their writes and reads, causing one
+        // service to receive the other's response — manifesting as phantom key
+        // presses or missed LED color changes.
+        lock (_sendLock)
+        {
+            // HidSharp expects [reportId, ...payload] for writes
+            var writeBuffer = new byte[_maxOutputLength];
+            writeBuffer[0] = 0x00; // Report ID
+            Array.Copy(command, 0, writeBuffer, 1, Math.Min(command.Length, _maxOutputLength - 1));
 
-        _stream.Write(writeBuffer);
+            _stream.Write(writeBuffer);
 
-        var readBuffer = new byte[_maxInputLength];
-        var bytesRead = _stream.Read(readBuffer);
+            var readBuffer = new byte[_maxInputLength];
+            var bytesRead = _stream.Read(readBuffer);
 
-        // Extract the 32-byte payload, skipping report ID if present
-        var response = new byte[VialCommands.ReportSize];
-        var dataOffset = bytesRead > VialCommands.ReportSize ? 1 : 0;
-        Array.Copy(readBuffer, dataOffset, response, 0, VialCommands.ReportSize);
-        return response;
+            // Extract the 32-byte payload, skipping report ID if present
+            var response = new byte[VialCommands.ReportSize];
+            var dataOffset = bytesRead > VialCommands.ReportSize ? 1 : 0;
+            Array.Copy(readBuffer, dataOffset, response, 0, VialCommands.ReportSize);
+            return response;
+        }
     }
 
     /// <summary>
