@@ -25,7 +25,8 @@ public class HandViewModel
         Layer layer,
         int totalLayers = 8,
         Dictionary<int, string>? userLayerColors = null,
-        Action<KeyViewModel>? setLabelRequested = null)
+        Action<KeyViewModel>? setLabelRequested = null,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
     {
         var handOriginPx = isRightHand ? SvalboardLayout.RightHandOriginX * SvalboardLayout.Scale : 0.0;
 
@@ -41,13 +42,13 @@ public class HandViewModel
 
         // Wrap each PositionedCluster in a KeyClusterViewModel
         var fingers = hand.FingerClusters.Select(c =>
-            new KeyClusterViewModel(c, layer, handOriginPx, isRightHand, totalLayers, userLayerColors, setLabelRequested)).ToList();
+            new KeyClusterViewModel(c, layer, handOriginPx, isRightHand, totalLayers, userLayerColors, setLabelRequested, deviceLayerColors)).ToList();
 
         KeyClusterViewModel? thumb = null;
         if (hand.ThumbCluster is not null)
         {
             thumb = new KeyClusterViewModel(hand.ThumbCluster, layer, handOriginPx,
-                isRightHand, totalLayers, userLayerColors, setLabelRequested);
+                isRightHand, totalLayers, userLayerColors, setLabelRequested, deviceLayerColors);
         }
 
         ThumbCluster = thumb!;

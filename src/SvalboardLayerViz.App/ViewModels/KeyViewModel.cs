@@ -92,7 +92,8 @@ public partial class KeyViewModel : ObservableObject
     public KeyViewModel(PositionedKey posKey, Layer layer,
         double clusterOriginX, double clusterOriginY,
         int totalLayers = 8, Dictionary<int, string>? userLayerColors = null,
-        Action<KeyViewModel>? setLabelRequested = null)
+        Action<KeyViewModel>? setLabelRequested = null,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
     {
         Key = posKey.Key;
         Layer = layer;
@@ -111,9 +112,13 @@ public partial class KeyViewModel : ObservableObject
         LayerColors? targetLayerColors = null;
         if (posKey.Key.IsLayerSwitch && posKey.Key.TargetLayer.HasValue)
         {
-            var targetColor = userLayerColors?.GetValueOrDefault(posKey.Key.TargetLayer.Value);
-            targetLayerColors = LayerColorService.GetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
-                userHexColor: targetColor);
+            var targetIdx = posKey.Key.TargetLayer.Value;
+            var targetColor = userLayerColors?.GetValueOrDefault(targetIdx);
+            var targetHsv = deviceLayerColors is not null && deviceLayerColors.TryGetValue(targetIdx, out var hsv)
+                ? hsv
+                : (null, null, null);
+            targetLayerColors = LayerColorService.GetLayerColors(targetIdx, totalLayers,
+                targetHsv.Item1, targetHsv.Item2, targetHsv.Item3, targetColor);
         }
 
         _style = KeyStyleResolver.Resolve(posKey.Key, layer.Index, colors, targetLayerColors);

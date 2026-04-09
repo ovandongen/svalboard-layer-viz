@@ -23,6 +23,12 @@ public static class VialCommands
     public const byte LightingSetValue = 0x07;
     public const byte LightingGetValue = 0x08;
     public const byte LightingSave = 0x09;
+
+    /// <summary>
+    /// Sub-command for LightingGetValue that returns current QMK rgblight hue+sat.
+    /// Response: [0x08, 0x83, H, S, ...]. Confirmed working on Svalboard firmware.
+    /// </summary>
+    public const byte QmkRgblightColor = 0x83;
     public const byte MacroGetCount = 0x0C;
     public const byte MacroGetBufferSize = 0x0D;
     public const byte MacroGetBuffer = 0x0E;
@@ -49,6 +55,19 @@ public static class VialCommands
     public const byte VialQmkSettingsSet = 0x0B;
     public const byte VialQmkSettingsReset = 0x0C;
     public const byte VialDynamicEntryOp = 0x0D;
+
+    // --- Svalboard custom sub-protocol (identifier 0xEE) ---
+    // Reference: keybard-ng/pages/js/vial/sval.js
+    // Confirmed against Svalboard Lightly firmware (sval proto version 3).
+
+    /// <summary>Svalboard custom-protocol identifier. All sval commands are prefixed with this byte.</summary>
+    public const byte SvalPrefix = 0xEE;
+
+    /// <summary>Returns ASCII "sval" (4 bytes) followed by a u32 LE proto version.</summary>
+    public const byte SvalGetProtoVersion = 0x01;
+
+    /// <summary>Read per-layer stored color. Args: [layer]. Returns: [H, S, V].</summary>
+    public const byte SvalLayerColorGet = 0x10;
 
     // --- QMK Settings IDs (from Vial QMK Settings protocol) ---
 

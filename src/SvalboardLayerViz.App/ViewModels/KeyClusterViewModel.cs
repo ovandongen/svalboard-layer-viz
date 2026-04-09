@@ -26,7 +26,8 @@ public class KeyClusterViewModel
         bool isRightHand = false,
         int totalLayers = 8,
         Dictionary<int, string>? userLayerColors = null,
-        Action<KeyViewModel>? setLabelRequested = null)
+        Action<KeyViewModel>? setLabelRequested = null,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
     {
         Name = cluster.Name;
         IsRightHand = isRightHand;
@@ -40,6 +41,6 @@ public class KeyClusterViewModel
         // Keys positioned relative to cluster origin
         Keys = cluster.Keys.Select(pk => new KeyViewModel(pk, layer,
             cluster.Left, cluster.Top,
-            totalLayers, userLayerColors, setLabelRequested)).ToList();
+            totalLayers, userLayerColors, setLabelRequested, deviceLayerColors)).ToList();
     }
 }

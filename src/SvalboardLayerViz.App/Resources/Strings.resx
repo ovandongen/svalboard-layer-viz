@@ -237,6 +237,9 @@
   <data name="Settings_ResetColors" xml:space="preserve">
     <value>Reset Colors</value>
   </data>
+  <data name="Settings_ClearColorTooltip" xml:space="preserve">
+    <value>Clear override (use device / default color)</value>
+  </data>
   <data name="Settings_LayerFormat" xml:space="preserve">
     <value>Layer {0}</value>
     <comment>{0} = layer index</comment>

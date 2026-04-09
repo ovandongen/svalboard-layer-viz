@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.App.Localization;
 using SvalboardLayerViz.Core.Keymap;
+using SvalboardLayerViz.Core.Models;
 using SvalboardLayerViz.Core.Settings;
 
 namespace SvalboardLayerViz.App.ViewModels;
@@ -172,7 +173,8 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(ISettingsService settingsService, int totalLayers,
         IReadOnlyList<(string HexKeycode, string CurrentLabel)>? unknownKeycodes = null,
-        int? deviceTappingTermMs = null)
+        int? deviceTappingTermMs = null,
+        IReadOnlyList<Layer>? layers = null)
     {
         _settingsService = settingsService;
         _totalLayers = totalLayers;
@@ -180,12 +182,22 @@ public partial class SettingsViewModel : ObservableObject
 
         var settings = settingsService.Load();
 
+        // Build layer-index → device HSV map so the default swatch reflects what
+        // the app will actually fall through to when no override is set.
+        var deviceColors = layers?
+            .Where(l => l.ColorHue.HasValue && l.ColorSat.HasValue && l.ColorVal.HasValue)
+            .ToDictionary(l => l.Index, l => (l.ColorHue!.Value, l.ColorSat!.Value, l.ColorVal!.Value));
+
         // Populate layer settings
         for (var i = 0; i < totalLayers; i++)
         {
             var name = settings.LayerNames.GetValueOrDefault(i, "");
             var color = settings.LayerColors.GetValueOrDefault(i, "");
-            var defaultColor = LayerColorService.GetLayerColors(i, totalLayers).Accent;
+            var deviceHsv = deviceColors is not null && deviceColors.TryGetValue(i, out var hsv)
+                ? ((byte?)hsv.Item1, (byte?)hsv.Item2, (byte?)hsv.Item3)
+                : (null, null, null);
+            var defaultColor = LayerColorService.GetLayerColors(i, totalLayers,
+                deviceHsv.Item1, deviceHsv.Item2, deviceHsv.Item3).Accent;
 
             var layerSetting = new LayerSettingViewModel
             {
@@ -358,9 +370,20 @@ public partial class LayerSettingViewModel : ObservableObject
     /// <summary>The effective color: user override or default.</summary>
     public string EffectiveColor => string.IsNullOrWhiteSpace(HexColor) ? DefaultColor : HexColor;
 
+    /// <summary>True when the user has set an override on top of the default color.</summary>
+    public bool HasOverride => !string.IsNullOrWhiteSpace(HexColor);
+
+    [RelayCommand]
+    private void ClearColor()
+    {
+        HexColor = "";
+        SyncPickerFromHex();
+    }
+
     partial void OnHexColorChanged(string value)
     {
         OnPropertyChanged(nameof(EffectiveColor));
+        OnPropertyChanged(nameof(HasOverride));
         if (_updating) return;
         _updating = true;
         try

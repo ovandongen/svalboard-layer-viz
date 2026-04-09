@@ -47,6 +47,14 @@ public static class ExportService
         data.SaveTo(stream);
     }
 
+    /// <summary>
+    /// Builds a layer-index → device HSV map so renderers can honor firmware colors
+    /// when no user override is set. Keyed by Layer.Index, not list position.
+    /// </summary>
+    private static IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)> BuildDeviceLayerColors(
+        IReadOnlyList<Layer> layers) =>
+        layers.ToDictionary(l => l.Index, l => (l.ColorHue, l.ColorSat, l.ColorVal));
+
     private static void ExportPdf(ExportOptions options, IReadOnlyList<Layer> layers, int totalLayers,
         Dictionary<int, string>? userLayerColors)
     {
@@ -59,6 +67,7 @@ public static class ExportService
         using var stream = File.Create(options.OutputPath);
         using var document = SKDocument.CreatePdf(stream);
 
+        var deviceLayerColors = BuildDeviceLayerColors(layers);
         var bgColor = BoardRenderer.ParseColor(options.BoardBackground);
         float yOnPage = 0;
         SKCanvas? pageCanvas = null;
@@ -88,7 +97,8 @@ public static class ExportService
             pageCanvas.Scale(scale);
             BoardRenderer.RenderLayer(pageCanvas, layer, totalLayers, userLayerColors,
                 yOffset: 0, hideThumbClusters: hideThumb,
-                creativeThumbLayout: options.CreativeThumbLayout);
+                creativeThumbLayout: options.CreativeThumbLayout,
+                deviceLayerColors: deviceLayerColors);
             pageCanvas.Restore();
 
             yOnPage += layerHeight;
@@ -131,6 +141,7 @@ public static class ExportService
     private static void RenderLayers(SKCanvas canvas, ExportOptions options,
         IReadOnlyList<Layer> layers, int totalLayers, Dictionary<int, string>? userLayerColors)
     {
+        var deviceLayerColors = BuildDeviceLayerColors(layers);
         float yOffset = 0;
         foreach (var idx in options.SelectedLayerIndices)
         {
@@ -140,7 +151,8 @@ public static class ExportService
             var hideThumb = options.HideThumbClusters.GetValueOrDefault(idx);
             BoardRenderer.RenderLayer(canvas, layer, totalLayers, userLayerColors,
                 yOffset, hideThumbClusters: hideThumb,
-                creativeThumbLayout: options.CreativeThumbLayout);
+                creativeThumbLayout: options.CreativeThumbLayout,
+                deviceLayerColors: deviceLayerColors);
 
             yOffset += BoardRenderer.GetLayerBlockHeight(hideThumb);
         }

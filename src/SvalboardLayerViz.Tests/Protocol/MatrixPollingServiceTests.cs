@@ -27,6 +27,10 @@ public class FakeVialProtocolService : IVialProtocolService
 
     public ushort? GetQmkSetting(ushort settingId) => null;
 
+    public uint? GetSvalProtoVersion() => null;
+    public (byte H, byte S, byte V)? GetLayerColor(int layer) => null;
+    public (byte H, byte S)? GetCurrentLedHueSat() => null;
+
     public void Dispose() { }
 }
 

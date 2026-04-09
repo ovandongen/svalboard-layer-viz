@@ -27,4 +27,24 @@ public interface IVialProtocolService : IDisposable
     /// doesn't support QMK settings.
     /// </summary>
     ushort? GetQmkSetting(ushort settingId);
+
+    /// <summary>
+    /// Probes the Svalboard custom sub-protocol (0xEE). Returns the protocol version
+    /// if the device responds with the "sval" handshake, otherwise null.
+    /// </summary>
+    uint? GetSvalProtoVersion();
+
+    /// <summary>
+    /// Reads the stored HSV color for a single layer via the Svalboard custom
+    /// sub-protocol (0xEE, 0x10). Returns null if the device doesn't support it.
+    /// </summary>
+    (byte H, byte S, byte V)? GetLayerColor(int layer);
+
+    /// <summary>
+    /// Reads the currently displayed rgblight hue+sat via standard VIA lighting
+    /// command (0x08, 0x83). Used as a live indicator of the active layer on
+    /// Svalboards where the layer indicator LED is driven through rgblight.
+    /// Returns null if the firmware doesn't implement this VIA command.
+    /// </summary>
+    (byte H, byte S)? GetCurrentLedHueSat();
 }

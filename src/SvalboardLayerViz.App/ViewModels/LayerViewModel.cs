@@ -30,7 +30,8 @@ public partial class LayerViewModel : ObservableObject
 
     public LayerViewModel(Layer layer, Action<int>? selectLayer = null, int totalLayers = 8,
         Dictionary<int, string>? userLayerColors = null,
-        Action<KeyViewModel>? setLabelRequested = null)
+        Action<KeyViewModel>? setLabelRequested = null,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
     {
         Layer = layer;
         _selectLayer = selectLayer;
@@ -42,8 +43,8 @@ public partial class LayerViewModel : ObservableObject
 
         var layout = BoardLayoutComputer.Compute(layer);
 
-        LeftHand = new HandViewModel(layout.LeftHand, false, layer, totalLayers, userLayerColors, setLabelRequested);
-        RightHand = new HandViewModel(layout.RightHand, true, layer, totalLayers, userLayerColors, setLabelRequested);
+        LeftHand = new HandViewModel(layout.LeftHand, false, layer, totalLayers, userLayerColors, setLabelRequested, deviceLayerColors);
+        RightHand = new HandViewModel(layout.RightHand, true, layer, totalLayers, userLayerColors, setLabelRequested, deviceLayerColors);
 
         foreach (var keyVm in LeftHand.AllKeys.Concat(RightHand.AllKeys))
             Keys.Add(keyVm);

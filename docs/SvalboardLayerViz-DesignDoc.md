@@ -2,7 +2,7 @@
 
 **Author:** Olaf van Dongen
 **Date:** April 2026
-**Status:** Phase 3 Complete + i18n + Layout Refactor + Creative Thumb Layout
+**Status:** Phase 3 Complete + i18n + Layout Refactor + Creative Thumb Layout + LED Layer Detection
 
 ---
 
@@ -324,8 +324,13 @@ Implemented features:
 - [x] Comprehensive README — getting started guide, macOS bundle setup, usage docs, troubleshooting. Written for users with no .NET experience
 - [x] 216 unit tests
 
+- [x] LED-based active layer detection — polls the keyboard's rgblight hue+sat at ~10Hz via standard VIA command (`0x08, 0x83`). Matches against per-layer stored colors (read via Svalboard custom sub-protocol `0xEE 0x10`) to resolve the active layer. Supersedes the matrix-based MO/TG heuristic when supported — catches layers the heuristic can't see (mouse layer, firmware-internal switches)
+- [x] Device layer colors — per-layer HSV read from firmware on connect. Used as default colors in UI, exports, and settings page (user hex > device HSV > algorithmic). Settings page "default preview" swatch shows device color when no override is set
+- [x] Color override clear — per-row × button in settings to clear a user-picked color, letting it fall through to device HSV or algorithmic default. Visible only when an override exists
+- [x] 309 unit tests
+
 Still planned:
-- [ ] True layer state query — requires firmware support (`layer_state` via Raw HID or custom Vial command). Would replace heuristic MO/TG tracking with 100% reliable detection. Firmware team is focused on Vial replacement; blocked for now
+- [ ] True layer state query — requires firmware support (`layer_state` via Raw HID or custom Vial command). Would replace heuristic MO/TG tracking with 100% reliable detection. Firmware team is focused on Vial replacement; blocked for now. LED-based detection is a solid workaround for most use cases
 
 ### Phase 3: Export & Print — COMPLETE
 
@@ -417,10 +422,11 @@ SvalboardLayerViz/
 │   │
 │   ├── SvalboardLayerViz.Core/             # Business logic (no UI dependency)
 │   │   ├── Protocol/
-│   │   │   ├── VialCommands.cs             # Command ID constants (incl. SwitchMatrixState, QmkSettingTappingTerm)
+│   │   │   ├── VialCommands.cs             # Command ID constants (incl. SwitchMatrixState, QmkSettingTappingTerm, Sval sub-protocol)
 │   │   │   ├── IVialProtocolService.cs     # Protocol interface (for testability)
-│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages, QMK Settings reads
+│   │   │   ├── VialProtocolService.cs      # Encode/decode Vial HID messages, QMK Settings reads, Sval layer colors, LED hue/sat
 │   │   │   ├── MatrixPollingService.cs     # ~10Hz switch matrix polling, fires while keys held
+│   │   │   ├── LedPollingService.cs        # ~10Hz rgblight hue+sat polling for LED-based layer detection
 │   │   │   └── XzDecompressor.cs           # XZ decompression for definitions
 │   │   ├── Device/
 │   │   │   ├── DeviceConnectionService.cs  # HidSharp wrapper, connect/disconnect
@@ -439,7 +445,8 @@ SvalboardLayerViz/
 │   │   │   ├── KeycodeService.cs           # Translate 16-bit codes to labels (user labels checked first)
 │   │   │   ├── KeymapLoader.cs             # Orchestrate full config load
 │   │   │   ├── TransparentKeyResolver.cs   # Walk layer stack for KC_TRNS
-│   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, auto-contrast text, print-friendly mode
+│   │   │   ├── LedColorLayerResolver.cs    # LED hue+sat → layer matching (tolerance, collision handling)
+│   │   │   └── LayerColorService.cs        # HLS-based color gen, user override, device HSV, auto-contrast text, print-friendly mode
 │   │   ├── Layout/
 │   │   │   ├── SvalboardLayout.cs          # Physical key positions (52 keys)
 │   │   │   ├── BoardLayoutComputer.cs      # Shared layout computation (hand/cluster/key grouping + positioning)
@@ -469,6 +476,8 @@ SvalboardLayerViz/
 │       │   └── MatrixPollingServiceTests.cs # Polling lifecycle tests
 │       ├── Settings/
 │       │   └── SettingsServiceTests.cs     # Round-trip, defaults, corrupt file fallback
+│       ├── Keymap/
+│       │   └── LedColorLayerResolverTests.cs # LED hue/sat → layer matching, tolerance, collisions
 │       └── ViewModels/
 │           ├── KeyViewModelTests.cs        # Incl. IsPressed, border glow, notifications
 │           ├── KeyClusterViewModelTests.cs # Cluster bounding box, hand-relative coords
@@ -487,7 +496,9 @@ SvalboardLayerViz/
 │   ├── 02-04-26-e.md                       # Change log (day 2, session 5 — Phase 3 export)
 │   ├── 03-04-26.md                         # Change log (day 3 — i18n/localization)
 │   ├── 04-04-26.md                         # Change log (day 4 — shared layout, export fixes, UI polish)
-│   └── 04-04-26-b.md                      # Change log (day 4, session 2 — creative thumb layout, trapezoid shapes, export fixes)
+│   ├── 04-04-26-b.md                      # Change log (day 4, session 2 — creative thumb layout, trapezoid shapes, export fixes)
+│   ├── 06-04-26.md                         # Change log (day 6 — transparency/NVIDIA fix, deferred connection, async HID)
+│   └── 09-04-26.md                         # Change log (day 9 — LED layer detection, device colors, color override clear)
 ├── SvalboardLayerViz.app/                  # macOS app bundle (dock icon + self-contained publish)
 └── README.md
 ```
@@ -601,7 +612,7 @@ Screen
 
 2. **HidSharp device filtering** — Filtering by UsagePage requires iterating `DeviceList` and checking `Indexes.ContainsValue()` with packed 32-bit HID usage values (`(usagePage << 16) | usageId`).
 
-3. **Svalboard-specific extensions** — Custom keycodes are in the `QK_KB` range (0x7E00+), defined in the device's Vial definition JSON. The Svalboard has 20 custom keycodes (DPI controls, scroll toggles, sniper modes, etc.). Layer colors are stored as HSV in firmware but not yet exposed via protocol — using algorithmic HLS generation for now.
+3. **Svalboard-specific extensions** — Custom keycodes are in the `QK_KB` range (0x7E00+), defined in the device's Vial definition JSON. The Svalboard has 20 custom keycodes (DPI controls, scroll toggles, sniper modes, etc.). Layer colors are stored as HSV in firmware and read via the `0xEE` Svalboard custom sub-protocol (`SvalLayerColorGet = 0x10`). Device colors are the middle tier in the precedence chain: user hex override > device HSV > algorithmic HLS.
 
 4. **Config change detection** — Manual refresh button implemented. The Refresh command re-reads the full config from the device.
 
@@ -611,7 +622,7 @@ Screen
 
 7. **Layer names** — Resolved in Phase 1.5. Users can name layers in the settings page; names are stored locally in `settings.json`.
 
-8. **Layer color configuration** — Resolved in Phase 1.5. Users pick colors per layer via ColorView in settings. User-picked colors render faithfully; algorithmic colors used as defaults.
+8. **Layer color configuration** — Resolved in Phase 1.5, enhanced with device HSV. Three-tier precedence: user-picked hex (settings) > device HSV (read via Svalboard `0xEE` sub-protocol) > algorithmic HLS. Per-layer override can be cleared via × button in settings to fall through to device/algorithmic color.
 
 9. **Global hotkey configuration** — Resolved in Phase 1.5. Key + modifier combo (Ctrl/Shift/Alt/GUI) configurable in settings.
 

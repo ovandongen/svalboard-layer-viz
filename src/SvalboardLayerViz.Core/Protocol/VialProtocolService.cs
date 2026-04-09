@@ -216,6 +216,75 @@ public class VialProtocolService : IVialProtocolService
     }
 
     /// <summary>
+    /// Probes the Svalboard custom sub-protocol. Sends [0xEE, 0x01] and checks
+    /// for the ASCII "sval" handshake followed by a u32 LE proto version.
+    /// Returns null if the handshake fails or the command isn't supported.
+    /// </summary>
+    public uint? GetSvalProtoVersion()
+    {
+        try
+        {
+            var response = SendCommand([VialCommands.SvalPrefix, VialCommands.SvalGetProtoVersion]);
+            if (response[0] != (byte)'s' || response[1] != (byte)'v' ||
+                response[2] != (byte)'a' || response[3] != (byte)'l')
+                return null;
+            return BitConverter.ToUInt32(response, 4);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Reads the stored HSV color for a single layer via [0xEE, 0x10, layer].
+    /// Returns null if the device doesn't respond or responds with all zeros.
+    /// </summary>
+    public (byte H, byte S, byte V)? GetLayerColor(int layer)
+    {
+        try
+        {
+            var response = SendCommand([
+                VialCommands.SvalPrefix,
+                VialCommands.SvalLayerColorGet,
+                (byte)layer
+            ]);
+            // All-zero response is treated as "unsupported" — a legitimate
+            // layer color never has V=0 because the LED would be off.
+            if (response[0] == 0 && response[1] == 0 && response[2] == 0)
+                return null;
+            return (response[0], response[1], response[2]);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Reads the current rgblight hue+sat via standard VIA [0x08, 0x83].
+    /// Response format: [0x08, 0x83, H, S, ...]. Returns null if the firmware
+    /// doesn't implement this lighting sub-command.
+    /// </summary>
+    public (byte H, byte S)? GetCurrentLedHueSat()
+    {
+        try
+        {
+            var response = SendCommand([VialCommands.LightingGetValue, VialCommands.QmkRgblightColor]);
+            // Non-supporting firmware returns all zeros or doesn't echo the
+            // command bytes. A valid response echoes [0x08, 0x83, H, S].
+            if (response[0] != VialCommands.LightingGetValue ||
+                response[1] != VialCommands.QmkRgblightColor)
+                return null;
+            return (response[2], response[3]);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Finds the offset of XZ magic bytes in a response buffer.
     /// The device may echo the command prefix before the actual data.
     /// </summary>

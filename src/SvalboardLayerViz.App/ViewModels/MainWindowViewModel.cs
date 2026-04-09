@@ -21,6 +21,16 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private IDisposable? _deviceSubscription;
     private MatrixPollingService? _matrixPolling;
+    private LedPollingService? _ledPolling;
+
+    /// <summary>
+    /// True if the firmware responds to the standard VIA rgblight color query
+    /// (0x08, 0x83). When true, we drive SelectedLayerIndex from the polled LED
+    /// color instead of the matrix-based MO/TG heuristic — this catches layers
+    /// the heuristic can't see (e.g. the mouse layer).
+    /// </summary>
+    private bool _ledPollSupported;
+
     private string? _connectedDeviceName;
     private CancellationTokenSource? _connectCts;
     private bool _isConnecting;
@@ -241,6 +251,7 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             StopMatrixPolling();
+            StopLedPolling();
 
             var settings = _settingsService.Load();
             StatusMessage = Loc.Instance["Status_LookingForDevice"];
@@ -267,7 +278,18 @@ public partial class MainWindowViewModel : ObservableObject
 
                 var tappingTerm = _protocolService.GetQmkSetting(VialCommands.QmkSettingTappingTerm);
 
-                return new { Device = device, Config = config, TappingTerm = tappingTerm };
+                // Capability check: does the firmware respond to VIA rgblight
+                // color queries? If yes, we can drive the active layer from the
+                // LED instead of the matrix-based heuristic.
+                var ledProbe = _protocolService.GetCurrentLedHueSat();
+
+                return new
+                {
+                    Device = device,
+                    Config = config,
+                    TappingTerm = tappingTerm,
+                    LedPollSupported = ledProbe is not null
+                };
             }, ct);
 
             // Back on UI thread — safe to update observable properties and collections
@@ -279,6 +301,7 @@ public partial class MainWindowViewModel : ObservableObject
             }
 
             KeyboardConfig = result.Config;
+            _ledPollSupported = result.LedPollSupported;
 
             BuildLayerViewModels(settings);
             BuildLayerSwitchCache();
@@ -311,6 +334,9 @@ public partial class MainWindowViewModel : ObservableObject
 
             if (IsLiveHighlightingEnabled)
                 StartMatrixPolling();
+
+            if (_ledPollSupported && IsAutoLayerSwitchEnabled)
+                StartLedPolling();
         }
         catch (OperationCanceledException)
         {
@@ -350,6 +376,12 @@ public partial class MainWindowViewModel : ObservableObject
         var totalLayers = KeyboardConfig.Layers.Count;
         var userColors = settings.LayerColors.Count > 0 ? settings.LayerColors : null;
 
+        // Device-HSV map keyed by Layer.Index, so KeyViewModel can resolve the
+        // *target* layer's firmware color when rendering layer-switch keys.
+        var deviceLayerColors = KeyboardConfig.Layers
+            .ToDictionary(l => l.Index, l => (l.ColorHue, l.ColorSat, l.ColorVal))
+            as IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>;
+
         foreach (var layer in KeyboardConfig.Layers)
         {
             // Skip layers where every key is empty (KC_NO)
@@ -357,7 +389,7 @@ public partial class MainWindowViewModel : ObservableObject
                 continue;
 
             Layers.Add(new LayerViewModel(layer, i => SelectedLayerIndex = i, totalLayers, userColors,
-                keyVm => SetKeyLabelRequested?.Invoke(keyVm)));
+                keyVm => SetKeyLabelRequested?.Invoke(keyVm), deviceLayerColors));
         }
 
     }
@@ -493,6 +525,46 @@ public partial class MainWindowViewModel : ObservableObject
         ClearPressedStates();
     }
 
+    private void StartLedPolling()
+    {
+        StopLedPolling();
+        if (KeyboardConfig is null || !_ledPollSupported) return;
+
+        _ledPolling = new LedPollingService(_protocolService);
+        _ledPolling.LedColorChanged += OnLedColorChanged;
+        _ledPolling.PollError += msg =>
+            Dispatcher.UIThread.Post(() => StatusMessage = Loc.Instance.Format("Status_PollingErrorFormat", msg));
+        _ledPolling.Start();
+    }
+
+    private void StopLedPolling()
+    {
+        if (_ledPolling is null) return;
+        _ledPolling.LedColorChanged -= OnLedColorChanged;
+        _ledPolling.Dispose();
+        _ledPolling = null;
+    }
+
+    /// <summary>
+    /// Called on the polling thread whenever the device's rgblight hue+sat
+    /// changes. Resolves the closest matching layer and, if auto-switch is on,
+    /// updates SelectedLayerIndex on the UI thread.
+    /// </summary>
+    private void OnLedColorChanged(byte hue, byte sat)
+    {
+        if (KeyboardConfig is null) return;
+
+        var match = LedColorLayerResolver.Resolve(
+            KeyboardConfig.Layers, hue, sat, SelectedLayerIndex);
+        if (match is null) return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (IsAutoLayerSwitchEnabled && match.Value != SelectedLayerIndex)
+                SelectedLayerIndex = match.Value;
+        });
+    }
+
     /// <summary>
     /// Builds lookups of (row, col) → target layer from layer-switch keys on layer 0.
     /// Separates momentary (hold) keys from toggle (press) keys.
@@ -547,8 +619,11 @@ public partial class MainWindowViewModel : ObservableObject
 
             Diagnostics.LogMatrixEvent(pressedKeys);
 
-            // Auto-switch layer based on held/toggled layer-switch keys
-            if (IsAutoLayerSwitchEnabled)
+            // Auto-switch layer based on held/toggled layer-switch keys.
+            // Skipped when LED polling is active — the LED is authoritative
+            // and catches layers the matrix heuristic can't see (mouse layer,
+            // firmware-internal switches, etc.).
+            if (IsAutoLayerSwitchEnabled && !_ledPollSupported)
             {
                 // 1. Detect toggle edges: TG key was NOT pressed last poll, IS pressed now → flip
                 if (_previousMatrixState is not null)
@@ -633,6 +708,14 @@ public partial class MainWindowViewModel : ObservableObject
     private void ToggleAutoLayerSwitch()
     {
         IsAutoLayerSwitchEnabled = !IsAutoLayerSwitchEnabled;
+
+        if (IsConnected && _ledPollSupported)
+        {
+            if (IsAutoLayerSwitchEnabled)
+                StartLedPolling();
+            else
+                StopLedPolling();
+        }
 
         var settings = _settingsService.Load();
         _settingsService.Save(settings with { AutoLayerSwitch = IsAutoLayerSwitchEnabled });
@@ -719,6 +802,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void Quit()
     {
         StopMatrixPolling();
+        StopLedPolling();
         _deviceSubscription?.Dispose();
         _protocolService.Dispose();
         if (QuitRequested is not null)

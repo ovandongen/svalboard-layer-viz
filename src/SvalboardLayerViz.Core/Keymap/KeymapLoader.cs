@@ -60,7 +60,12 @@ public class KeymapLoader
         // 6. Get physical layout positions
         var physicalLayout = SvalboardLayout.GetKeyPositions();
 
-        // 7. Build layer models
+        // 7. Probe Svalboard custom sub-protocol for per-layer colors.
+        //    Null result means older firmware; LayerColorService falls back to
+        //    algorithmic colors automatically.
+        var hasSvalColors = _protocol.GetSvalProtoVersion() is not null;
+
+        // 8. Build layer models
         var layers = new List<Layer>();
         for (var layerIdx = 0; layerIdx < layerCount; layerIdx++)
         {
@@ -100,15 +105,30 @@ public class KeymapLoader
             string? layerName = null;
             settings?.LayerNames.TryGetValue(layerIdx, out layerName);
 
+            byte? hue = null, sat = null, val = null;
+            if (hasSvalColors)
+            {
+                var color = _protocol.GetLayerColor(layerIdx);
+                if (color is not null)
+                {
+                    hue = color.Value.H;
+                    sat = color.Value.S;
+                    val = color.Value.V;
+                }
+            }
+
             layers.Add(new Layer
             {
                 Index = layerIdx,
                 Name = layerName,
                 Keys = keys,
+                ColorHue = hue,
+                ColorSat = sat,
+                ColorVal = val,
             });
         }
 
-        // 8. Resolve transparent keys (KC_TRNS falls through to layer below)
+        // 9. Resolve transparent keys (KC_TRNS falls through to layer below)
         TransparentKeyResolver.Resolve(layers);
 
         return new KeyboardConfig

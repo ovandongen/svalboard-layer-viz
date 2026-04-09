@@ -337,6 +337,10 @@
     <value>Kleuren resetten</value>
     <comment/>
   </data>
+  <data name="Settings_ClearColorTooltip" xml:space="preserve">
+    <value>Override wissen (apparaat- / standaardkleur gebruiken)</value>
+    <comment/>
+  </data>
   <data name="Settings_LayerFormat" xml:space="preserve">
     <value>Laag {0}</value>
     <comment/>

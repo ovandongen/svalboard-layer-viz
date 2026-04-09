@@ -38,7 +38,8 @@ public static class BoardRenderer
     public static void RenderLayer(SKCanvas canvas, Layer layer, int totalLayers,
         Dictionary<int, string>? userLayerColors, float yOffset,
         bool hideThumbClusters = false, bool printFriendly = true,
-        bool creativeThumbLayout = false)
+        bool creativeThumbLayout = false,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
     {
         var userColor = userLayerColors?.GetValueOrDefault(layer.Index);
         var colors = LayerColorService.GetLayerColors(layer.Index, totalLayers,
@@ -49,45 +50,63 @@ public static class BoardRenderer
         var layout = BoardLayoutComputer.Compute(layer);
         var keysY = yOffset + HeaderHeight + Margin;
 
-        RenderHand(canvas, layout.LeftHand, false, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly, creativeThumbLayout);
-        RenderHand(canvas, layout.RightHand, true, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly, creativeThumbLayout);
+        RenderHand(canvas, layout.LeftHand, false, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly, creativeThumbLayout, deviceLayerColors);
+        RenderHand(canvas, layout.RightHand, true, layer.Index, totalLayers, userLayerColors, colors, keysY, hideThumbClusters, printFriendly, creativeThumbLayout, deviceLayerColors);
     }
 
     private static void RenderHand(SKCanvas canvas, PositionedHand hand,
         bool isRightHand, int layerIndex, int totalLayers, Dictionary<int, string>? userLayerColors,
         LayerColors colors, float keysY, bool hideThumbClusters, bool printFriendly,
-        bool creativeThumbLayout)
+        bool creativeThumbLayout,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors)
     {
         // Render finger clusters
         foreach (var cluster in hand.FingerClusters)
         {
             if (hideThumbClusters && BoardLayoutComputer.BottomClusters.Contains(cluster.Name))
                 continue;
-            RenderCluster(canvas, cluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly);
+            RenderCluster(canvas, cluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly, deviceLayerColors);
         }
 
         // Render thumb cluster
         if (hand.ThumbCluster is not null && !hideThumbClusters)
         {
             if (creativeThumbLayout)
-                RenderCreativeThumbCluster(canvas, hand.ThumbCluster, isRightHand, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly);
+                RenderCreativeThumbCluster(canvas, hand.ThumbCluster, isRightHand, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly, deviceLayerColors);
             else
-                RenderCluster(canvas, hand.ThumbCluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly);
+                RenderCluster(canvas, hand.ThumbCluster, layerIndex, totalLayers, userLayerColors, colors, keysY, printFriendly, deviceLayerColors);
         }
+    }
+
+    /// <summary>
+    /// Resolves the color set for a layer-switch key's *target* layer, honoring
+    /// user overrides first, then device HSV, then the algorithmic fallback.
+    /// </summary>
+    private static LayerColors ResolveTargetLayerColors(int targetIdx, int totalLayers,
+        Dictionary<int, string>? userLayerColors,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors,
+        bool printFriendly)
+    {
+        var targetColor = userLayerColors?.GetValueOrDefault(targetIdx);
+        var targetHsv = deviceLayerColors is not null && deviceLayerColors.TryGetValue(targetIdx, out var hsv)
+            ? hsv
+            : (null, null, null);
+        return LayerColorService.GetLayerColors(targetIdx, totalLayers,
+            targetHsv.Item1, targetHsv.Item2, targetHsv.Item3, targetColor, printFriendly);
     }
 
     private static void RenderCluster(SKCanvas canvas, PositionedCluster cluster,
         int layerIndex, int totalLayers, Dictionary<int, string>? userLayerColors,
-        LayerColors colors, float keysY, bool printFriendly)
+        LayerColors colors, float keysY, bool printFriendly,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors)
     {
         foreach (var posKey in cluster.Keys)
         {
             LayerColors? targetColors = null;
             if (posKey.Key.IsLayerSwitch && posKey.Key.TargetLayer.HasValue)
             {
-                var targetColor = userLayerColors?.GetValueOrDefault(posKey.Key.TargetLayer.Value);
-                targetColors = LayerColorService.GetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
-                    userHexColor: targetColor, printFriendly: printFriendly);
+                targetColors = ResolveTargetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
+                    userLayerColors, deviceLayerColors, printFriendly);
             }
 
             RenderKey(canvas, posKey, layerIndex, colors, targetColors, keysY);
@@ -334,7 +353,8 @@ public static class BoardRenderer
 
     private static void RenderCreativeThumbCluster(SKCanvas canvas, PositionedCluster cluster,
         bool isRightHand, int layerIndex, int totalLayers,
-        Dictionary<int, string>? userLayerColors, LayerColors colors, float keysY, bool printFriendly)
+        Dictionary<int, string>? userLayerColors, LayerColors colors, float keysY, bool printFriendly,
+        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors)
     {
         var keys = cluster.Keys.OrderBy(k => k.Key.Col).ToList();
         var layout = isRightHand ? RightThumbKeys : LeftThumbKeys;
@@ -372,9 +392,8 @@ public static class BoardRenderer
 
             var style = KeyStyleResolver.Resolve(posKey.Key, layerIndex, colors,
                 posKey.Key.IsLayerSwitch && posKey.Key.TargetLayer.HasValue
-                    ? LayerColorService.GetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
-                        userHexColor: userLayerColors?.GetValueOrDefault(posKey.Key.TargetLayer.Value),
-                        printFriendly: printFriendly)
+                    ? ResolveTargetLayerColors(posKey.Key.TargetLayer.Value, totalLayers,
+                        userLayerColors, deviceLayerColors, printFriendly)
                     : null);
 
             var bgColor = ParseColor(style.Background);
