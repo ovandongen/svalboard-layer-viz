@@ -21,6 +21,16 @@
         <conv:HexColorToBrushConverter x:Key="HexToBrush" />
     </Window.Resources>
 
+    <Window.Styles>
+        <!-- Shared toggle-button style: dim when off, fully opaque when .active. -->
+        <Style Selector="Button.toggle">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <Style Selector="Button.toggle.active">
+            <Setter Property="Opacity" Value="1.0" />
+        </Style>
+    </Window.Styles>
+
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Bars panel: Row 0 (top) or Row 2 (bottom), switched automatically.
@@ -57,39 +67,23 @@
                         </StackPanel.Styles>
                         <Button x:Name="LiveButton"
                                 Command="{Binding ToggleLiveHighlightingCommand}"
+                                Classes="toggle"
+                                Classes.active="{Binding IsLiveHighlightingEnabled}"
                                 Padding="8,4"
                                 IsVisible="{Binding IsConnected}"
+                                IsEnabled="{Binding CanToggleLivePolling}"
                                 ToolTip.Tip="{Binding [Tooltip_LiveHighlighting], Source={StaticResource Loc}}">
-                            <Button.Styles>
-                                <Style Selector="Button#LiveButton">
-                                    <Setter Property="Opacity" Value="0.4" />
-                                </Style>
-                                <Style Selector="Button#LiveButton[Tag=True]">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Style>
-                            </Button.Styles>
-                            <Button.Tag>
-                                <Binding Path="IsLiveHighlightingEnabled" />
-                            </Button.Tag>
                             <PathIcon Width="16" Height="16"
                                       Data="M3 12h4l3-8 4 16 3-8h4" />
                         </Button>
                         <Button x:Name="AutoLayerButton"
                                 Command="{Binding ToggleAutoLayerSwitchCommand}"
+                                Classes="toggle"
+                                Classes.active="{Binding IsAutoLayerSwitchEnabled}"
                                 Padding="8,4"
                                 IsVisible="{Binding IsLiveHighlightingEnabled}"
+                                IsEnabled="{Binding CanToggleLivePolling}"
                                 ToolTip.Tip="{Binding [Tooltip_AutoLayerSwitch], Source={StaticResource Loc}}">
-                            <Button.Styles>
-                                <Style Selector="Button#AutoLayerButton">
-                                    <Setter Property="Opacity" Value="0.4" />
-                                </Style>
-                                <Style Selector="Button#AutoLayerButton[Tag=True]">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Style>
-                            </Button.Styles>
-                            <Button.Tag>
-                                <Binding Path="IsAutoLayerSwitchEnabled" />
-                            </Button.Tag>
                             <PathIcon Width="14" Height="14"
                                       Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                         </Button>
@@ -107,6 +101,18 @@
                             <PathIcon Width="14" Height="14"
                                       Data="M2 4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4zm5.5 4.5L10 11l-2.5 2.5L9 15l4-4-4-4-1.5 1.5zM13 15h4v-2h-4v2z" />
                         </Button>
+                        <Button x:Name="EditButton" Command="{Binding EnterEditCommand}"
+                                Padding="8,4"
+                                ToolTip.Tip="{Binding [Tooltip_Edit], Source={StaticResource Loc}}">
+                            <Button.IsVisible>
+                                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                    <Binding Path="IsConnected" />
+                                    <Binding Path="!IsEditMode" />
+                                </MultiBinding>
+                            </Button.IsVisible>
+                            <PathIcon Width="14" Height="14"
+                                      Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </Button>
                         <Button x:Name="ExportButton" Command="{Binding ExportCommand}"
                                 Padding="8,4"
                                 IsVisible="{Binding IsConnected}"
@@ -116,40 +122,34 @@
                         </Button>
                         <Button x:Name="VerticalLayoutButton"
                                 Command="{Binding ToggleVerticalLayoutCommand}"
+                                Classes="toggle"
+                                Classes.active="{Binding IsVerticalLayout}"
                                 Padding="8,4"
                                 IsVisible="{Binding IsConnected}"
                                 ToolTip.Tip="{Binding [Tooltip_VerticalLayout], Source={StaticResource Loc}}">
-                            <Button.Styles>
-                                <Style Selector="Button#VerticalLayoutButton">
-                                    <Setter Property="Opacity" Value="0.4" />
-                                </Style>
-                                <Style Selector="Button#VerticalLayoutButton[Tag=True]">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Style>
-                            </Button.Styles>
-                            <Button.Tag>
-                                <Binding Path="IsVerticalLayout" />
-                            </Button.Tag>
                             <PathIcon Width="14" Height="14"
                                       Data="M4 2h16v8H4V2zm4 12h8v8H4v-8z" />
                         </Button>
                         <Button x:Name="PinButton"
                                 Command="{Binding TogglePinCommand}"
+                                Classes="toggle"
+                                Classes.active="{Binding IsAlwaysOnTop}"
                                 Padding="8,4"
                                 ToolTip.Tip="{Binding [Tooltip_AlwaysOnTop], Source={StaticResource Loc}}">
-                            <Button.Styles>
-                                <Style Selector="Button#PinButton">
-                                    <Setter Property="Opacity" Value="0.4" />
-                                </Style>
-                                <Style Selector="Button#PinButton[Tag=True]">
-                                    <Setter Property="Opacity" Value="1.0" />
-                                </Style>
-                            </Button.Styles>
-                            <Button.Tag>
-                                <Binding Path="IsAlwaysOnTop" />
-                            </Button.Tag>
                             <PathIcon Width="16" Height="16"
                                       Data="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2z" />
+                        </Button>
+                        <Button x:Name="OpenLogFolderButton" Command="{Binding OpenLogFolderCommand}"
+                                Padding="8,4"
+                                ToolTip.Tip="{Binding [Tooltip_OpenLogFolder], Source={StaticResource Loc}}">
+                            <PathIcon Width="14" Height="14"
+                                      Data="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                        </Button>
+                        <Button x:Name="CopyDiagnosticsButton" Command="{Binding CopyDiagnosticsCommand}"
+                                Padding="8,4"
+                                ToolTip.Tip="{Binding [Tooltip_CopyDiagnostics], Source={StaticResource Loc}}">
+                            <PathIcon Width="14" Height="14"
+                                      Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
                         </Button>
                         <Button x:Name="HelpButton" Command="{Binding OpenHelpCommand}"
                                 Padding="8,4"
@@ -162,6 +162,29 @@
                                 ToolTip.Tip="{Binding [Tooltip_Settings], Source={StaticResource Loc}}">
                             <PathIcon Width="16" Height="16"
                                       Data="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.21 3.79.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.21-3.796.75.75 0 0 1 .271-.826l1.244-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.272-.826 9.793 9.793 0 0 1 2.21-3.792.75.75 0 0 1 .849-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                        </Button>
+                        <Button x:Name="DynamicButton"
+                                Padding="8,4"
+                                IsVisible="{Binding IsConnected}"
+                                ToolTip.Tip="{Binding [Tooltip_Dynamic], Source={StaticResource Loc}}">
+                            <PathIcon Width="16" Height="16"
+                                      Data="M8 5v14l11-7L8 5z" />
+                            <Button.Flyout>
+                                <MenuFlyout>
+                                    <MenuItem Header="{Binding [Tooltip_Macros], Source={StaticResource Loc}}"
+                                              Command="{Binding OpenMacrosCommand}" />
+                                    <MenuItem Header="{Binding [Tooltip_Combos], Source={StaticResource Loc}}"
+                                              Command="{Binding OpenCombosCommand}" />
+                                    <MenuItem Header="{Binding [Tooltip_TapDance], Source={StaticResource Loc}}"
+                                              Command="{Binding OpenTapDanceCommand}" />
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                        <Button x:Name="HistoryButton" Command="{Binding OpenHistoryCommand}"
+                                Padding="8,4"
+                                ToolTip.Tip="{Binding [Tooltip_History], Source={StaticResource Loc}}">
+                            <PathIcon Width="16" Height="16"
+                                      Data="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
                         </Button>
                         <Button x:Name="RefreshButton" Command="{Binding RefreshCommand}"
                                 Padding="8,4"
@@ -211,7 +234,82 @@
         <!-- Board visualization area — background controlled by slider -->
         <Border Grid.Row="1" Padding="16"
                 Background="{Binding BoardBackground, Converter={StaticResource HexToBrush}}">
-            <views:BoardView DataContext="{Binding}" />
+            <DockPanel>
+
+                <!-- Edit-mode banner (visible only while editing) -->
+                <Border DockPanel.Dock="Top"
+                        IsVisible="{Binding IsEditMode}"
+                        Background="#89B4FA"
+                        CornerRadius="6"
+                        Padding="12,8"
+                        Margin="0,0,0,8">
+                    <Border.Styles>
+                        <Style Selector="Border > DockPanel Button">
+                            <Setter Property="Foreground" Value="#1E1E2E" />
+                        </Style>
+                    </Border.Styles>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                            <Button Command="{Binding CaptureManualSnapshotWithPromptCommand}"
+                                    ToolTip.Tip="{Binding [Edit_ManualSnapshot], Source={StaticResource Loc}}"
+                                    Padding="8,4">
+                                <PathIcon Width="14" Height="14"
+                                          Data="M12,2 C13.1,2 14,2.9 14,4 L14,4 L18,4 C19.1,4 20,4.9 20,6 L20,18 C20,19.1 19.1,20 18,20 L6,20 C4.9,20 4,19.1 4,18 L4,6 C4,4.9 4.9,4 6,4 L10,4 C10,2.9 10.9,2 12,2 Z M12,8 C9.24,8 7,10.24 7,13 C7,15.76 9.24,18 12,18 C14.76,18 17,15.76 17,13 C17,10.24 14.76,8 12,8 Z M12,10 C13.66,10 15,11.34 15,13 C15,14.66 13.66,16 12,16 C10.34,16 9,14.66 9,13 C9,11.34 10.34,10 12,10 Z"
+                                          Foreground="#1E1E2E" />
+                            </Button>
+                            <Button Command="{Binding OpenMacrosCommand}"
+                                    IsVisible="{Binding IsConnected}"
+                                    ToolTip.Tip="{Binding [Tooltip_Macros], Source={StaticResource Loc}}"
+                                    Padding="8,4">
+                                <PathIcon Width="14" Height="14"
+                                          Data="M8 5v14l11-7L8 5z"
+                                          Foreground="#1E1E2E" />
+                            </Button>
+                            <Button Command="{Binding OpenCombosCommand}"
+                                    IsVisible="{Binding IsConnected}"
+                                    ToolTip.Tip="{Binding [Tooltip_Combos], Source={StaticResource Loc}}"
+                                    Padding="8,4" Content="C" FontWeight="SemiBold" />
+                            <Button Command="{Binding OpenTapDanceCommand}"
+                                    IsVisible="{Binding IsConnected}"
+                                    ToolTip.Tip="{Binding [Tooltip_TapDance], Source={StaticResource Loc}}"
+                                    Padding="8,4" Content="TD" FontWeight="SemiBold" />
+                            <Button Command="{Binding OpenSettingsToDeviceCommand}"
+                                    ToolTip.Tip="{Binding [Tooltip_Settings], Source={StaticResource Loc}}"
+                                    Padding="8,4">
+                                <PathIcon Width="14" Height="14"
+                                          Data="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.21 3.79.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.21-3.796.75.75 0 0 1 .271-.826l1.244-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.272-.826 9.793 9.793 0 0 1 2.21-3.792.75.75 0 0 1 .849-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+                                          Foreground="#1E1E2E" />
+                            </Button>
+                            <Button Content="{Binding [Edit_Discard], Source={StaticResource Loc}}"
+                                    Command="{Binding DiscardEditCommand}"
+                                    Padding="12,4" />
+                            <Button Command="{Binding SaveEditCommand}"
+                                    Padding="12,4"
+                                    ToolTip.Tip="{Binding [Edit_SaveComingSoon], Source={StaticResource Loc}}">
+                                <Panel>
+                                    <TextBlock Text="{Binding [Edit_Save], Source={StaticResource Loc}}"
+                                               IsVisible="{Binding !IsSaving}" />
+                                    <TextBlock Text="{Binding [Edit_Saving], Source={StaticResource Loc}}"
+                                               IsVisible="{Binding IsSaving}" />
+                                </Panel>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock VerticalAlignment="Center"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1E1E2E">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} — {1} {2}">
+                                    <Binding Path="[Edit_BannerTitle]" Source="{StaticResource Loc}" />
+                                    <Binding Path="DirtyCount" />
+                                    <Binding Path="[Edit_BannerChanges]" Source="{StaticResource Loc}" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DockPanel>
+                </Border>
+
+                <views:BoardView DataContext="{Binding}" />
+            </DockPanel>
         </Border>
 
     </Grid>

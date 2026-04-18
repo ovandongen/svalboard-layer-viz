@@ -5,6 +5,17 @@ namespace SvalboardLayerViz.Core.Settings;
 /// </summary>
 public record UserSettings
 {
+    /// <summary>
+    /// Bumped on any breaking schema change (rename, type change, removed
+    /// required field). <see cref="Settings.SettingsService.Load"/> uses this
+    /// to dispatch migrations and to refuse files written by a newer version
+    /// rather than silently nuking them.
+    /// </summary>
+    public const int CurrentSchemaVersion = 1;
+
+    /// <summary>Schema version of the persisted settings file. Defaults to current for new files.</summary>
+    public int SchemaVersion { get; init; } = CurrentSchemaVersion;
+
     /// <summary>Per-layer color overrides. Key = layer index, Value = hex color "#RRGGBB".</summary>
     public Dictionary<int, string> LayerColors { get; init; } = new();
 
@@ -69,4 +80,16 @@ public record UserSettings
 
     /// <summary>Last window height (pixels). Null = use default (600).</summary>
     public double? WindowHeight { get; init; }
+
+    /// <summary>Minimum log level for diagnostic logging. Default "Info". Values: Trace, Debug, Info, Warn, Error.</summary>
+    public string LogLevel { get; init; } = "Info";
+
+    /// <summary>Whether to log verbose protocol-level HID traffic (sends/receives). Very noisy — Trace level.</summary>
+    public bool VerboseProtocolLogging { get; init; } = false;
+
+    /// <summary>Whether to allow restoring snapshots from a different UID (same VID/PID). Default false.</summary>
+    public bool FirmwareLenientMatch { get; init; } = false;
+
+    /// <summary>Number of days to keep first-connect snapshots before pruning. Default 30.</summary>
+    public int KeepFirstConnectDays { get; init; } = 30;
 }

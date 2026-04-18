@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        x:Class="SvalboardLayerViz.App.Views.SafetyConfirmDialog"
+        x:DataType="vm:SafetyConfirmViewModel"
+        Title="{Binding [SafetyConfirm_Title], Source={StaticResource Loc}}"
+        Width="480" Height="360"
+        MinWidth="380" MinHeight="260"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True">
+
+    <DockPanel Margin="16">
+
+        <!-- Footer buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}"
+                    Command="{Binding CancelCommand}" />
+            <Button Content="{Binding [SafetyConfirm_SaveAnyway], Source={StaticResource Loc}}"
+                    Command="{Binding ConfirmCommand}" />
+        </StackPanel>
+
+        <!-- Header -->
+        <StackPanel DockPanel.Dock="Top" Spacing="8">
+            <TextBlock Text="{Binding [SafetyConfirm_Title], Source={StaticResource Loc}}"
+                       FontSize="16" FontWeight="SemiBold" Foreground="#CDD6F4" />
+            <TextBlock Text="{Binding [SafetyConfirm_Message], Source={StaticResource Loc}}"
+                       FontSize="12" Foreground="#A6ADC8" TextWrapping="Wrap" />
+            <Border Height="1" Background="#313244" Margin="0,4" />
+        </StackPanel>
+
+        <!-- Warning list -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+            <ItemsControl ItemsSource="{Binding Warnings}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:SafetyWarningItem">
+                        <Grid ColumnDefinitions="Auto,*" Margin="0,4">
+                            <Border Grid.Column="0" Width="8" Height="8" CornerRadius="4"
+                                    Background="#F38BA8" Margin="0,6,10,0"
+                                    VerticalAlignment="Top" />
+                            <TextBlock Grid.Column="1" Text="{Binding Display}"
+                                       Foreground="#CDD6F4" TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+
+</Window>

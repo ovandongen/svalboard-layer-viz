@@ -9,13 +9,11 @@ public class ExportDialogViewModelTests
 {
     private static List<LayerViewModel> MakeLayers()
     {
-        var layers = new List<LayerViewModel>();
-        for (int i = 0; i < 3; i++)
-        {
-            var layer = new Layer { Index = i, Name = $"Layer {i}", Keys = [] };
-            layers.Add(new LayerViewModel(layer, _ => { }, totalLayers: 3));
-        }
-        return layers;
+        var layerRecords = Enumerable.Range(0, 3)
+            .Select(i => new Layer { Index = i, Name = $"Layer {i}", Keys = [] })
+            .ToList();
+        var palette = new LayerColorPalette(layerRecords, totalLayers: 3);
+        return layerRecords.Select(l => new LayerViewModel(l, palette, _ => { })).ToList();
     }
 
     [Fact]

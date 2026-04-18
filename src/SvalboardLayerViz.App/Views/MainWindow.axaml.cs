@@ -17,7 +17,7 @@ public partial class MainWindow : Window
         PositionChanged += OnPositionChanged;
         Opened += (_, _) =>
         {
-            StartupLogger.Log("MainWindow.Opened event fired");
+            DiagnosticLog.Info("UI", "MainWindow.Opened event fired");
             ApplyTransparencyFallback();
             UpdateBarPosition();
         };
@@ -36,12 +36,12 @@ public partial class MainWindow : Window
     /// </summary>
     private void ApplyTransparencyFallback()
     {
-        StartupLogger.Log($"Transparency: ActualTransparencyLevel={ActualTransparencyLevel}");
+        DiagnosticLog.Info("UI", $"Transparency: ActualTransparencyLevel={ActualTransparencyLevel}");
 
         if (ActualTransparencyLevel == WindowTransparencyLevel.None)
         {
             // Platform explicitly says no transparency — use solid background with system chrome.
-            StartupLogger.Log("Transparency: fallback to solid background + system decorations");
+            DiagnosticLog.Warn("UI", "Transparency: fallback to solid background + system decorations");
             Background = Avalonia.Media.SolidColorBrush.Parse("#1E1E2E");
             SystemDecorations = SystemDecorations.Full;
             ExtendClientAreaToDecorationsHint = false;
@@ -54,7 +54,7 @@ public partial class MainWindow : Window
         if (ActualTransparencyLevel == WindowTransparencyLevel.Transparent &&
             OperatingSystem.IsWindows())
         {
-            StartupLogger.Log("Transparency: applied near-transparent safety background (Windows + Transparent)");
+            DiagnosticLog.Info("UI", "Transparency: applied near-transparent safety background (Windows + Transparent)");
             Background = new Avalonia.Media.SolidColorBrush(
                 Avalonia.Media.Color.FromArgb(1, 0, 0, 0));
         }

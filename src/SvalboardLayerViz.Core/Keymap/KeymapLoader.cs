@@ -1,8 +1,11 @@
 using System.Text.Json;
 using SvalboardLayerViz.Core.Device;
+using SvalboardLayerViz.Core.Diagnostics;
+using SvalboardLayerViz.Core.Dynamic;
 using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
 using SvalboardLayerViz.Core.Protocol;
+using SvalboardLayerViz.Core.QmkSettings;
 using SvalboardLayerViz.Core.Settings;
 
 namespace SvalboardLayerViz.Core.Keymap;
@@ -57,13 +60,52 @@ public class KeymapLoader
         // 5. Get the full keymap
         var keymap = _protocol.GetKeymapBuffer(layerCount, rows, cols);
 
-        // 6. Get physical layout positions
-        var physicalLayout = SvalboardLayout.GetKeyPositions();
+        // 6. Get physical layout positions, indexed by (row, col) so the layer
+        //    build loop is O(rows*cols) instead of O(rows*cols*positions).
+        var physicalLayout = SvalboardLayout.GetKeyPositions()
+            .ToDictionary(p => (p.Row, p.Col));
 
         // 7. Probe Svalboard custom sub-protocol for per-layer colors.
         //    Null result means older firmware; LayerColorService falls back to
         //    algorithmic colors automatically.
         var hasSvalColors = _protocol.GetSvalProtoVersion() is not null;
+
+        // 7a. Discover QMK settings: query which IDs the firmware supports,
+        //     then read each value. Width comes from catalog (firmware query
+        //     returns QSIDs only, no width). Empty list if unsupported.
+        var settingIds = _protocol.GetQmkSettingsList();
+        var qmkSettings = new List<QmkSettingValue>(settingIds.Count);
+        foreach (var id in settingIds)
+        {
+            var width = QmkSettingsCatalog.GetWidth(id);
+            var value = _protocol.GetQmkSetting(id, width);
+            if (value.HasValue)
+                qmkSettings.Add(new QmkSettingValue(id, value.Value, width));
+        }
+
+        DiagnosticLog.Info("Proto", $"QMK settings loaded: {qmkSettings.Count} entries from {settingIds.Count} discovered");
+        foreach (var s in qmkSettings)
+        {
+            var desc = QmkSettingsCatalog.GetOrFallback(s.SettingId);
+            DiagnosticLog.Info("Proto",
+                $"  0x{s.SettingId:X4} w={s.Width} val={s.Value} catalog={desc.NameKey} type={desc.Type}");
+        }
+
+        // 7b. Macro buffer loading is deferred to after connection completes
+        //     (MainWindowViewModel.LoadMacrosAsync) to keep startup fast.
+
+        // 7c. Dynamic entries (combos + tap-dance). Read counts, then each entry.
+        //     These tables are small (≤32 entries each) so we fetch eagerly.
+        var dynCounts = _protocol.GetDynamicEntryCounts();
+        var combos = new List<byte[]>(dynCounts.ComboCount);
+        for (var i = 0; i < dynCounts.ComboCount; i++)
+            combos.Add(_protocol.GetComboEntry(i));
+        var tapDances = new List<byte[]>(dynCounts.TapDanceCount);
+        for (var i = 0; i < dynCounts.TapDanceCount; i++)
+            tapDances.Add(_protocol.GetTapDanceEntry(i));
+        DiagnosticLog.Info("Proto",
+            $"Dynamic entries: td={dynCounts.TapDanceCount} combo={dynCounts.ComboCount} " +
+            $"keyOverride={dynCounts.KeyOverrideCount} altRepeat={dynCounts.AltRepeatCount}");
 
         // 8. Build layer models
         var layers = new List<Layer>();
@@ -78,8 +120,8 @@ public class KeymapLoader
                     var info = _keycodeService.Resolve(rawKeycode);
 
                     // Look up physical position; skip matrix slots with no layout entry
-                    var position = physicalLayout.FirstOrDefault(p => p.Row == row && p.Col == col);
-                    if (position is null) continue;
+                    if (!physicalLayout.TryGetValue((row, col), out var position))
+                        continue;
 
                     keys.Add(new Key
                     {
@@ -134,11 +176,18 @@ public class KeymapLoader
         return new KeyboardConfig
         {
             DeviceName = device.ProductName,
+            VendorId = device.VendorId,
+            ProductId = device.ProductId,
             KeyboardId = keyboardId,
             MatrixRows = rows,
             MatrixCols = cols,
             Layers = layers,
             CustomKeycodes = customKeycodes,
+            QmkSettings = qmkSettings,
+            Macros = null,
+            DynamicEntryCounts = dynCounts,
+            Combos = combos,
+            TapDances = tapDances,
         };
     }
 

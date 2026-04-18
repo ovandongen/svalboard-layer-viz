@@ -8,7 +8,7 @@ namespace SvalboardLayerViz.Core.Device;
 /// Manages discovery and connection to Vial-compatible HID devices.
 /// Wraps HidSharp's device enumeration with Vial-specific filtering.
 /// </summary>
-public class DeviceConnectionService
+public class DeviceConnectionService : IDeviceConnectionService
 {
     /// <summary>
     /// Finds all connected Vial-compatible HID devices.
@@ -18,15 +18,15 @@ public class DeviceConnectionService
     {
         var devices = new List<DeviceInfo>();
 
-        StartupLogger.Log("HID: getting device list...");
+        DiagnosticLog.Info("HID", "Getting device list...");
         var hidDevices = DeviceList.Local.GetHidDevices();
-        StartupLogger.Log($"HID: {hidDevices.Count()} device(s) found, scanning descriptors...");
+        DiagnosticLog.Info("HID", $"{hidDevices.Count()} device(s) found, scanning descriptors...");
 
         foreach (var device in hidDevices)
         {
             // Log VID/PID before any USB I/O — if the next call hangs,
             // this line identifies which device is the culprit.
-            StartupLogger.Log($"HID: checking VID={device.VendorID:X4} PID={device.ProductID:X4}");
+            DiagnosticLog.Debug("HID", $"Checking VID={device.VendorID:X4} PID={device.ProductID:X4}");
             try
             {
                 string friendlyName;
@@ -46,7 +46,7 @@ public class DeviceConnectionService
                     {
                         matched = true;
                         var name = device.GetProductName() ?? "Unknown";
-                        StartupLogger.Log($"HID:   -> Vial device \"{name}\"");
+                        DiagnosticLog.Info("HID", $"Vial device \"{name}\"");
                         devices.Add(new DeviceInfo
                         {
                             DevicePath = device.DevicePath,
@@ -59,11 +59,11 @@ public class DeviceConnectionService
                 }
 
                 if (!matched)
-                    StartupLogger.Log($"HID:   skip \"{friendlyName}\"");
+                    DiagnosticLog.Debug("HID", $"Skip \"{friendlyName}\"");
             }
             catch (Exception ex)
             {
-                StartupLogger.Log($"HID:   error: {ex.Message}");
+                DiagnosticLog.Warn("HID", $"Error: {ex.Message}");
             }
         }
 

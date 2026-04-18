@@ -7,57 +7,6 @@
              Width="{Binding Width}"
              Height="{Binding Height}">
 
-    <UserControl.Resources>
-        <!-- Shared label content for creative thumb keys -->
-        <DataTemplate x:Key="ThumbKeyContent" x:DataType="vm:KeyViewModel">
-            <Grid Background="Transparent">
-                <ToolTip.Tip>
-                    <TextBlock Text="{Binding Tooltip}" />
-                </ToolTip.Tip>
-                <Grid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{Binding [Key_SetCustomLabel], Source={StaticResource Loc}}"
-                                  Command="{Binding SetLabelCommand}" />
-                    </ContextMenu>
-                </Grid.ContextMenu>
-
-                <StackPanel VerticalAlignment="Center"
-                            HorizontalAlignment="Center"
-                            Spacing="0">
-                    <TextBlock Text="{Binding SecondaryLabel}"
-                               FontSize="26" FontWeight="SemiBold"
-                               Foreground="{Binding TextColor}" Opacity="0.8"
-                               HorizontalAlignment="Center"
-                               IsVisible="{Binding SecondaryLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                        <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="6" Opacity="0.4" OffsetX="0" OffsetY="0" />
-                        </TextBlock.Effect>
-                    </TextBlock>
-                    <TextBlock Text="{Binding DisplayLabel}"
-                               FontSize="36" FontWeight="ExtraBold"
-                               Foreground="{Binding TextColor}"
-                               TextWrapping="Wrap" TextAlignment="Center"
-                               HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock.Effect>
-                            <DropShadowEffect Color="Black" BlurRadius="6" Opacity="0.4" OffsetX="0" OffsetY="0" />
-                        </TextBlock.Effect>
-                    </TextBlock>
-                </StackPanel>
-
-                <TextBlock Text="{Binding ShiftedLabel}"
-                           FontSize="28" FontWeight="SemiBold"
-                           Foreground="{Binding TextColor}" Opacity="0.7"
-                           HorizontalAlignment="Right" VerticalAlignment="Top"
-                           Margin="0,4,12,0"
-                           IsVisible="{Binding ShiftedLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                    <TextBlock.Effect>
-                        <DropShadowEffect Color="Black" BlurRadius="6" Opacity="0.4" OffsetX="0" OffsetY="0" />
-                    </TextBlock.Effect>
-                </TextBlock>
-            </Grid>
-        </DataTemplate>
-    </UserControl.Resources>
-
     <Grid>
         <!-- ═══ Default layout (original ItemsControl with KeyView) ═══ -->
         <ItemsControl x:Name="DefaultLayout" ItemsSource="{Binding Keys}">
@@ -82,7 +31,7 @@
         <!-- ═══ Left thumb creative layout ═══ -->
         <Viewbox x:Name="LeftCreativeLayout" Stretch="Uniform" IsVisible="False">
             <Canvas Width="880" Height="435">
-                <Border DataContext="{Binding Keys[2]}" ZIndex="0"
+                <Border DataContext="{Binding Thumb2}" ZIndex="0" Tapped="OnThumbKeyTapped"
                         Canvas.Left="338" Canvas.Top="5" Width="199" Height="430"
                         CornerRadius="16" Padding="0,240,0,0"
                         Background="{Binding BackgroundColor}"
@@ -99,18 +48,18 @@
                             <PathGeometry Figures="M 46,15 L 153,15 A 24,24 0 0 1 177,39 L 177,151 A 24,24 0 0 1 153,175 L 46,175 A 24,24 0 0 1 22,151 L 22,39 A 24,24 0 0 1 46,15 Z" />
                         </GeometryGroup>
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[5]}" ZIndex="2"
+                <Border DataContext="{Binding Thumb5}" ZIndex="2" Tapped="OnThumbKeyTapped"
                         Canvas.Left="370" Canvas.Top="30" Width="135" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
                         BorderBrush="{Binding BorderColor}"
                         BorderThickness="{Binding ActiveBorderThickness}"
                         Opacity="{Binding KeyOpacity}">
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[3]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb3}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="30" Canvas.Top="30" Width="280" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -121,9 +70,9 @@
                         <!-- Right (inner) edge narrows at bottom, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 266,0 A 14,14 0 0 1 280,14 L 276,126 A 14,14 0 0 1 262,140 L 14,140 A 14,14 0 0 1 0,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[1]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb1}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="565" Canvas.Top="30" Width="285" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -134,18 +83,18 @@
                         <!-- Left edge continues C:0's line, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 271,0 A 14,14 0 0 1 285,14 L 285,126 A 14,14 0 0 1 271,140 L 18,140 A 14,14 0 0 1 4,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[4]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb4}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="30" Canvas.Top="205" Width="370" Height="100"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
                         BorderBrush="{Binding BorderColor}"
                         BorderThickness="{Binding ActiveBorderThickness}"
                         Opacity="{Binding KeyOpacity}">
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[0]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb0}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="570" Canvas.Top="205" Width="280" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -156,7 +105,7 @@
                         <!-- Left (inner) edge narrows at bottom, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 266,0 A 14,14 0 0 1 280,14 L 280,126 A 14,14 0 0 1 266,140 L 18,140 A 14,14 0 0 1 4,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
             </Canvas>
         </Viewbox>
@@ -164,7 +113,7 @@
         <!-- ═══ Right thumb creative layout (horizontally mirrored) ═══ -->
         <Viewbox x:Name="RightCreativeLayout" Stretch="Uniform" IsVisible="False">
             <Canvas Width="880" Height="435">
-                <Border DataContext="{Binding Keys[2]}" ZIndex="0"
+                <Border DataContext="{Binding Thumb2}" ZIndex="0" Tapped="OnThumbKeyTapped"
                         Canvas.Left="343" Canvas.Top="5" Width="199" Height="430"
                         CornerRadius="16" Padding="0,240,0,0"
                         Background="{Binding BackgroundColor}"
@@ -181,18 +130,18 @@
                             <PathGeometry Figures="M 46,15 L 153,15 A 24,24 0 0 1 177,39 L 177,151 A 24,24 0 0 1 153,175 L 46,175 A 24,24 0 0 1 22,151 L 22,39 A 24,24 0 0 1 46,15 Z" />
                         </GeometryGroup>
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[5]}" ZIndex="2"
+                <Border DataContext="{Binding Thumb5}" ZIndex="2" Tapped="OnThumbKeyTapped"
                         Canvas.Left="375" Canvas.Top="30" Width="135" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
                         BorderBrush="{Binding BorderColor}"
                         BorderThickness="{Binding ActiveBorderThickness}"
                         Opacity="{Binding KeyOpacity}">
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[3]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb3}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="570" Canvas.Top="30" Width="280" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -203,9 +152,9 @@
                         <!-- Left (inner) edge narrows at bottom, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 266,0 A 14,14 0 0 1 280,14 L 280,126 A 14,14 0 0 1 266,140 L 18,140 A 14,14 0 0 1 4,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[1]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb1}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="30" Canvas.Top="30" Width="285" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -216,18 +165,18 @@
                         <!-- Right edge continues C:0's line, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 271,0 A 14,14 0 0 1 285,14 L 281,126 A 14,14 0 0 1 267,140 L 14,140 A 14,14 0 0 1 0,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[4]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb4}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="480" Canvas.Top="205" Width="370" Height="100"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
                         BorderBrush="{Binding BorderColor}"
                         BorderThickness="{Binding ActiveBorderThickness}"
                         Opacity="{Binding KeyOpacity}">
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
-                <Border DataContext="{Binding Keys[0]}" ZIndex="1"
+                <Border DataContext="{Binding Thumb0}" ZIndex="1" Tapped="OnThumbKeyTapped"
                         Canvas.Left="30" Canvas.Top="205" Width="280" Height="140"
                         CornerRadius="14"
                         Background="{Binding BackgroundColor}"
@@ -238,7 +187,7 @@
                         <!-- Right (inner) edge narrows at bottom, rounded corners R=14 -->
                         <PathGeometry Figures="M 0,14 A 14,14 0 0 1 14,0 L 266,0 A 14,14 0 0 1 280,14 L 276,126 A 14,14 0 0 1 262,140 L 14,140 A 14,14 0 0 1 0,126 Z" />
                     </Border.Clip>
-                    <ContentPresenter ContentTemplate="{StaticResource ThumbKeyContent}" Content="{Binding}" />
+                    <views:ThumbKeyView />
                 </Border>
             </Canvas>
         </Viewbox>

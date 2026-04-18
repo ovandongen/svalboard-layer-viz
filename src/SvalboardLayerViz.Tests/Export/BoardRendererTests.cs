@@ -63,8 +63,7 @@ public class BoardRendererTests
     public void GetLayerBlockHeight_HiddenThumbs_HeightAccountsForRemainingKeys()
     {
         var hidden = BoardRenderer.GetLayerBlockHeight(true);
-        // L-Mod keys (non-thumb) also occupy Y=5-6, so height may be same or slightly less.
-        // The key assertion is that it doesn't exceed full height.
+        // Hiding thumb clusters trims bottom rows, so height must not exceed full height.
         Assert.True(hidden <= BoardRenderer.LayerBlockHeight);
         Assert.True(hidden > 0);
     }

@@ -4,7 +4,7 @@
         x:Class="SvalboardLayerViz.App.Views.HelpWindow"
         x:DataType="vm:HelpWindowViewModel"
         Title="{Binding [Title_Help], Source={StaticResource Loc}}"
-        Width="560" Height="680"
+        Width="580" Height="760"
         MinWidth="400" MinHeight="400"
         WindowStartupLocation="CenterOwner"
         Background="#1E1E2E">
@@ -117,6 +117,21 @@
                         </StackPanel>
                     </DockPanel>
 
+                    <!-- Edit -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_EditTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_EditText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
                     <!-- Export -->
                     <DockPanel>
                         <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
@@ -162,6 +177,36 @@
                         </StackPanel>
                     </DockPanel>
 
+                    <!-- Open Log Folder -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_OpenLogFolderTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_OpenLogFolderText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Copy Diagnostics -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="14" Height="14" Foreground="#89B4FA"
+                                      Data="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_CopyDiagnosticsTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_CopyDiagnosticsText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
                     <!-- Settings -->
                     <DockPanel>
                         <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
@@ -173,6 +218,36 @@
                             <TextBlock Text="{Binding [Help_SettingsTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
                                        Foreground="#CDD6F4" FontSize="13" />
                             <TextBlock Text="{Binding [Help_SettingsText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Dynamic (Macros / Combos / Tap Dance) -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M8 5v14l11-7L8 5z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_DynamicTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_DynamicText], Source={StaticResource Loc}}"
+                                       TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- History -->
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="4"
+                                Background="#313244" VerticalAlignment="Top" Margin="0,0,12,0">
+                            <PathIcon Width="16" Height="16" Foreground="#89B4FA"
+                                      Data="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+                        </Border>
+                        <StackPanel Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding [Help_HistoryTitle], Source={StaticResource Loc}}" FontWeight="SemiBold"
+                                       Foreground="#CDD6F4" FontSize="13" />
+                            <TextBlock Text="{Binding [Help_HistoryText], Source={StaticResource Loc}}"
                                        TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="12" />
                         </StackPanel>
                     </DockPanel>
@@ -208,6 +283,76 @@
                 <!-- Separator -->
                 <Border Height="1" Background="#313244" />
 
+                <!-- Editing Your Keymap -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding [Help_EditingSection], Source={StaticResource Loc}}"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_EditingIntro], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_EditingUnlock], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_EditingKeyPicker], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_EditingSaveDiscard], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_EditingSafety], Source={StaticResource Loc}}" />
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Macros, Combos & Tap Dance -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding [Help_DynamicSection], Source={StaticResource Loc}}"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <StackPanel Spacing="6" Margin="8,0,0,0">
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_Macros], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_Combos], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_TapDance], Source={StaticResource Loc}}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Snapshots & History -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding [Help_SnapshotsSection], Source={StaticResource Loc}}"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_SnapshotsAuto], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_SnapshotsManual], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_SnapshotsDiff], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_SnapshotsRestore], Source={StaticResource Loc}}" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_SnapshotsImportExport], Source={StaticResource Loc}}" />
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
+                <!-- Device Settings (QMK) -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding [Help_DeviceSettingsSection], Source={StaticResource Loc}}"
+                               FontSize="16" FontWeight="SemiBold"
+                               Foreground="#CDD6F4" />
+                    <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                               Text="{Binding [Help_DeviceSettingsText], Source={StaticResource Loc}}" />
+                </StackPanel>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#313244" />
+
                 <!-- Auto-Layer Switch callout -->
                 <Border Background="#1A1A2E" CornerRadius="8" Padding="16"
                         BorderBrush="#89B4FA" BorderThickness="1">
@@ -223,6 +368,8 @@
                                    Text="{Binding [Help_ImportantText3], Source={StaticResource Loc}}" />
                         <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
                                    Text="{Binding [Help_ImportantText4], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_ImportantText5], Source={StaticResource Loc}}" />
                     </StackPanel>
                 </Border>
 
@@ -245,6 +392,12 @@
                                    Text="{Binding [Help_Tip4], Source={StaticResource Loc}}" />
                         <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
                                    Text="{Binding [Help_Tip5], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_Tip6], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_Tip7], Source={StaticResource Loc}}" />
+                        <TextBlock TextWrapping="Wrap" Foreground="#A6ADC8" FontSize="13"
+                                   Text="{Binding [Help_Tip8], Source={StaticResource Loc}}" />
                     </StackPanel>
                 </StackPanel>
 

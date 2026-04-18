@@ -12,6 +12,7 @@ public class MatrixPollingService : IDisposable
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
     private bool[,]? _lastState;
+    private volatile bool _disposed;
 
     /// <summary>Fired when the matrix state changes. Argument is bool[rows, cols].</summary>
     public event Action<bool[,]>? MatrixStateChanged;
@@ -71,7 +72,7 @@ public class MatrixPollingService : IDisposable
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                PollError?.Invoke(ex.Message);
+                if (!_disposed) PollError?.Invoke(ex.Message);
                 break;
             }
         }
@@ -98,6 +99,9 @@ public class MatrixPollingService : IDisposable
 
     public void Dispose()
     {
+        _disposed = true;
         Stop();
+        MatrixStateChanged = null;
+        PollError = null;
     }
 }

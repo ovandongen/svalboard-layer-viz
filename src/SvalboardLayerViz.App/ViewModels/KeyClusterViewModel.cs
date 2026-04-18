@@ -13,6 +13,17 @@ public class KeyClusterViewModel
     public IReadOnlyList<KeyViewModel> Keys { get; }
     public bool IsRightHand { get; }
 
+    // Named accessors for creative thumb-cluster layout bindings.
+    // Indexer bindings ({Binding Keys[N]}) can fail to re-resolve cleanly when
+    // the cluster VM is replaced after a save — named paths are more reliable
+    // with Avalonia's compiled bindings.
+    public KeyViewModel? Thumb0 => Keys.Count > 0 ? Keys[0] : null;
+    public KeyViewModel? Thumb1 => Keys.Count > 1 ? Keys[1] : null;
+    public KeyViewModel? Thumb2 => Keys.Count > 2 ? Keys[2] : null;
+    public KeyViewModel? Thumb3 => Keys.Count > 3 ? Keys[3] : null;
+    public KeyViewModel? Thumb4 => Keys.Count > 4 ? Keys[4] : null;
+    public KeyViewModel? Thumb5 => Keys.Count > 5 ? Keys[5] : null;
+
     /// <summary>Cluster position within the hand (hand-relative, pixels).</summary>
     public double Left { get; }
     public double Top { get; }
@@ -23,24 +34,19 @@ public class KeyClusterViewModel
         PositionedCluster cluster,
         Layer layer,
         double handOriginPx,
+        LayerColorPalette palette,
         bool isRightHand = false,
-        int totalLayers = 8,
-        Dictionary<int, string>? userLayerColors = null,
-        Action<KeyViewModel>? setLabelRequested = null,
-        IReadOnlyDictionary<int, (byte? H, byte? S, byte? V)>? deviceLayerColors = null)
+        Action<KeyViewModel>? setLabelRequested = null)
     {
         Name = cluster.Name;
         IsRightHand = isRightHand;
 
-        // Hand-relative position (subtract hand origin from board-absolute)
         Left = cluster.Left - handOriginPx;
         Top = cluster.Top;
         Width = cluster.Width;
         Height = cluster.Height;
 
-        // Keys positioned relative to cluster origin
         Keys = cluster.Keys.Select(pk => new KeyViewModel(pk, layer,
-            cluster.Left, cluster.Top,
-            totalLayers, userLayerColors, setLabelRequested, deviceLayerColors)).ToList();
+            cluster.Left, cluster.Top, palette, setLabelRequested)).ToList();
     }
 }

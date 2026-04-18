@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SvalboardLayerViz.Core.Settings;
 using Xunit;
 
@@ -115,5 +116,77 @@ public class SettingsServiceTests : IDisposable
         svc.Save(new UserSettings());
 
         Assert.True(File.Exists(nestedFile));
+    }
+
+    [Fact]
+    public void Load_TruncatedJson_ReturnsDefaults()
+    {
+        // Truncated mid-string — JsonException path. Behavior must be identical
+        // to the prior catch-all: defaults returned, no throw to caller. The
+        // difference is that the parse failure is now logged via DiagnosticLog.
+        File.WriteAllText(_tempFile, """{"HotkeyKey":"F1""");
+        var settings = _service.Load();
+
+        Assert.NotNull(settings);
+        Assert.Equal("F12", settings.HotkeyKey);
+    }
+
+    [Fact]
+    public void Save_OverwritesViaAtomicMove_NoOrphanTmp()
+    {
+        _service.Save(new UserSettings { HotkeyKey = "F9" });
+        _service.Save(new UserSettings { HotkeyKey = "F10" });
+
+        Assert.Equal("F10", _service.Load().HotkeyKey);
+        Assert.False(File.Exists(_tempFile + ".tmp"));
+    }
+
+    [Fact]
+    public void Load_FutureSchemaVersion_BacksUpAndReturnsDefaults()
+    {
+        File.WriteAllText(_tempFile, """{"SchemaVersion": 999, "HotkeyKey": "F4"}""");
+        var settings = _service.Load();
+
+        Assert.Equal("F12", settings.HotkeyKey);
+        Assert.True(File.Exists(_tempFile + ".v999.bak"));
+    }
+
+    [Fact]
+    public void Load_CurrentSchemaVersion_PreservesFields()
+    {
+        var original = new UserSettings { HotkeyKey = "F7", LayerHoldThresholdMs = 250 };
+        _service.Save(original);
+
+        var loaded = _service.Load();
+
+        Assert.Equal(UserSettings.CurrentSchemaVersion, loaded.SchemaVersion);
+        Assert.Equal("F7", loaded.HotkeyKey);
+        Assert.Equal(250, loaded.LayerHoldThresholdMs);
+    }
+
+    [Fact]
+    public void Load_OlderSchemaVersion_MigratesAndPersists()
+    {
+        // Write a payload that omits SchemaVersion entirely — JSON deserialization
+        // would normally fill it with the field's default (CurrentSchemaVersion),
+        // so to genuinely test the migration branch we explicitly set 0.
+        File.WriteAllText(_tempFile, """{"SchemaVersion": 0, "HotkeyKey": "F3"}""");
+        var loaded = _service.Load();
+
+        Assert.Equal("F3", loaded.HotkeyKey);
+        Assert.Equal(UserSettings.CurrentSchemaVersion, loaded.SchemaVersion);
+
+        // Assert on disk, not via re-Load: the previous version of this test
+        // called Load() again to verify persistence, but that can pass if
+        // Save() silently failed (the migration branch would just rerun in
+        // memory). Parse the on-disk JSON directly so the migration-persist
+        // path is the only thing under test.
+        var raw = File.ReadAllText(_tempFile);
+        using var doc = JsonDocument.Parse(raw);
+        Assert.Equal(UserSettings.CurrentSchemaVersion, doc.RootElement.GetProperty("SchemaVersion").GetInt32());
+
+        // And the re-Load still works too — kept for regression coverage.
+        var rereread = _service.Load();
+        Assert.Equal(UserSettings.CurrentSchemaVersion, rereread.SchemaVersion);
     }
 }

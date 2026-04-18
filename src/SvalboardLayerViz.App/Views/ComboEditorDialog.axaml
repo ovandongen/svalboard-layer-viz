@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        x:Class="SvalboardLayerViz.App.Views.ComboEditorDialog"
+        x:DataType="vm:ComboEditorViewModel"
+        Title="{Binding [ComboEditor_Title], Source={StaticResource Loc}}"
+        Width="720" Height="520"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="12">
+        <!-- Bottom: usage + close -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <TextBlock DockPanel.Dock="Left" Text="{Binding UsageLabel}"
+                       Foreground="#CDD6F4" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding [ComboEditor_ReadOnly], Source={StaticResource Loc}}"
+                       IsVisible="{Binding !IsEditMode}"
+                       Foreground="#A6E3A1" FontSize="11" FontStyle="Italic"
+                       VerticalAlignment="Center" Margin="12,0,0,0" />
+            <Button DockPanel.Dock="Right"
+                    Content="{Binding [Common_Close], Source={StaticResource Loc}}"
+                    Command="{Binding CloseCommand}" Padding="12,4"
+                    HorizontalAlignment="Right" />
+        </DockPanel>
+
+        <!-- Header row -->
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="40,*,*,*,*,*,60"
+              Margin="0,0,0,6">
+            <TextBlock Grid.Column="0" Text="#" FontWeight="SemiBold" Foreground="#89B4FA" />
+            <TextBlock Grid.Column="1" Text="{Binding [ComboEditor_Input0], Source={StaticResource Loc}}"
+                       FontWeight="SemiBold" Foreground="#89B4FA" />
+            <TextBlock Grid.Column="2" Text="{Binding [ComboEditor_Input1], Source={StaticResource Loc}}"
+                       FontWeight="SemiBold" Foreground="#89B4FA" />
+            <TextBlock Grid.Column="3" Text="{Binding [ComboEditor_Input2], Source={StaticResource Loc}}"
+                       FontWeight="SemiBold" Foreground="#89B4FA" />
+            <TextBlock Grid.Column="4" Text="{Binding [ComboEditor_Input3], Source={StaticResource Loc}}"
+                       FontWeight="SemiBold" Foreground="#89B4FA" />
+            <TextBlock Grid.Column="5" Text="{Binding [ComboEditor_Output], Source={StaticResource Loc}}"
+                       FontWeight="SemiBold" Foreground="#F9E2AF" />
+            <TextBlock Grid.Column="6" Text="" />
+        </Grid>
+
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Rows}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ComboRowViewModel">
+                        <Grid ColumnDefinitions="40,*,*,*,*,*,60" Margin="0,2">
+                            <TextBlock Grid.Column="0" Text="{Binding DisplayIndex}"
+                                       FontWeight="SemiBold" Foreground="#A6ADC8"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Content="{Binding Input0Label}"
+                                    Command="{Binding EditSlotCommand}" CommandParameter="0"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="4,2" />
+                            <Button Grid.Column="2" Content="{Binding Input1Label}"
+                                    Command="{Binding EditSlotCommand}" CommandParameter="1"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="4,2" />
+                            <Button Grid.Column="3" Content="{Binding Input2Label}"
+                                    Command="{Binding EditSlotCommand}" CommandParameter="2"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="4,2" />
+                            <Button Grid.Column="4" Content="{Binding Input3Label}"
+                                    Command="{Binding EditSlotCommand}" CommandParameter="3"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="4,2" />
+                            <Button Grid.Column="5" Content="{Binding OutputLabel}"
+                                    Command="{Binding EditSlotCommand}" CommandParameter="4"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="4,2"
+                                    Foreground="#F9E2AF" />
+                            <Button Grid.Column="6"
+                                    Content="{Binding [Common_Clear], Source={StaticResource Loc}}"
+                                    Command="{Binding ClearCommand}"
+                                    IsEnabled="{Binding IsEditMode}"
+                                    HorizontalAlignment="Stretch" Margin="2,0" Padding="2,2"
+                                    FontSize="11" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

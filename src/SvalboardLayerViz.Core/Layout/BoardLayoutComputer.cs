@@ -1,3 +1,4 @@
+using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Models;
 
 namespace SvalboardLayerViz.Core.Layout;
@@ -11,8 +12,8 @@ public static class BoardLayoutComputer
 {
     private static readonly Dictionary<(int Row, int Col), KeyPosition> ClusterLookup;
 
-    /// <summary>Cluster names that sit at the bottom of the board (thumbs + left modifiers).</summary>
-    public static readonly HashSet<string> BottomClusters = ["L-Thumb", "R-Thumb", "L-Mod"];
+    /// <summary>Cluster names that sit at the bottom of the board (the two thumb clusters).</summary>
+    public static readonly HashSet<string> BottomClusters = ["L-Thumb", "R-Thumb"];
 
     static BoardLayoutComputer()
     {
@@ -68,8 +69,20 @@ public static class BoardLayoutComputer
         foreach (var group in byRow)
         {
             var rowKeys = group.ToList();
-            var clusterName = ClusterLookup.GetValueOrDefault((group.Key, 0))?.Cluster
-                              ?? $"Row{group.Key}";
+            string clusterName;
+            if (ClusterLookup.TryGetValue((group.Key, 0), out var pos))
+            {
+                clusterName = pos.Cluster;
+            }
+            else
+            {
+                // Fallback indicates the physical layout table is missing an
+                // entry for this (row, 0). That's a stale-layout bug, not
+                // expected runtime state — log so it doesn't silently hide.
+                clusterName = $"Row{group.Key}";
+                DiagnosticLog.Warn("Layout",
+                    $"No cluster defined for row {group.Key} col 0; falling back to '{clusterName}'.");
+            }
             var isThumb = group.Key == thumbRow;
 
             var positionedKeys = rowKeys.Select(k => new PositionedKey(

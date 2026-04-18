@@ -16,6 +16,7 @@ public class LedPollingService : IDisposable
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
     private (byte H, byte S)? _lastColor;
+    private volatile bool _disposed;
 
     /// <summary>Fired when the polled rgblight hue+sat changes.</summary>
     public event Action<byte, byte>? LedColorChanged;
@@ -73,7 +74,7 @@ public class LedPollingService : IDisposable
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                PollError?.Invoke(ex.Message);
+                if (!_disposed) PollError?.Invoke(ex.Message);
                 break;
             }
         }
@@ -81,6 +82,9 @@ public class LedPollingService : IDisposable
 
     public void Dispose()
     {
+        _disposed = true;
         Stop();
+        LedColorChanged = null;
+        PollError = null;
     }
 }

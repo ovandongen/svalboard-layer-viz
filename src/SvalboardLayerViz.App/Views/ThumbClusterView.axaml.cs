@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using SvalboardLayerViz.App.ViewModels;
 
@@ -12,6 +13,15 @@ public partial class ThumbClusterView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+    }
+
+    private void OnThumbKeyTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is Control { DataContext: KeyViewModel kvm } && kvm.IsEditMode)
+        {
+            kvm.ClickCommand.Execute(null);
+            e.Handled = true;
+        }
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)

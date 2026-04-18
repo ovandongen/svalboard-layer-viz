@@ -112,6 +112,57 @@
   <data name="Tooltip_Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Tooltip_Macros" xml:space="preserve">
+    <value>Macros</value>
+  </data>
+  <data name="Tooltip_Dynamic" xml:space="preserve">
+    <value>Macros / Combos / Tap Dance</value>
+  </data>
+  <data name="MacroEditor_Title" xml:space="preserve">
+    <value>Macro Editor</value>
+  </data>
+  <data name="MacroEditor_Slots" xml:space="preserve">
+    <value>Macro Slots</value>
+  </data>
+  <data name="MacroEditor_Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="MacroEditor_AddTap" xml:space="preserve">
+    <value>Tap Key</value>
+  </data>
+  <data name="MacroEditor_AddDown" xml:space="preserve">
+    <value>Hold Key</value>
+  </data>
+  <data name="MacroEditor_AddUp" xml:space="preserve">
+    <value>Release Key</value>
+  </data>
+  <data name="MacroEditor_AddDelay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="MacroEditor_AddText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="MacroEditor_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="MacroEditor_MoveUp" xml:space="preserve">
+    <value>Move Up</value>
+  </data>
+  <data name="MacroEditor_MoveDown" xml:space="preserve">
+    <value>Move Down</value>
+  </data>
+  <data name="MacroEditor_BufferUsage" xml:space="preserve">
+    <value>{0}/{1} bytes</value>
+  </data>
+  <data name="MacroEditor_Empty" xml:space="preserve">
+    <value>(empty)</value>
+  </data>
+  <data name="MacroEditor_OverCapacity" xml:space="preserve">
+    <value>Buffer full! Remove actions to save.</value>
+  </data>
+  <data name="MacroEditor_ReadOnly" xml:space="preserve">
+    <value>Enter Edit mode to modify macros</value>
+  </data>
   <data name="Tooltip_Refresh" xml:space="preserve">
     <value>Refresh</value>
   </data>
@@ -120,6 +171,9 @@
   </data>
   <data name="Tooltip_Remove" xml:space="preserve">
     <value>Remove</value>
+  </data>
+  <data name="Tooltip_Edit" xml:space="preserve">
+    <value>Edit keymap</value>
   </data>
 
   <!-- ══════════════ Status Messages ══════════════ -->
@@ -163,6 +217,56 @@
     <value>Settings error: {0}</value>
     <comment>{0} = error message</comment>
   </data>
+  <data name="Status_EditModeActive" xml:space="preserve">
+    <value>Edit mode — click a key to change it</value>
+  </data>
+  <data name="Status_EditUnlockErrorFormat" xml:space="preserve">
+    <value>Could not enter edit mode: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
+  <data name="Status_EditAbortedDisconnect" xml:space="preserve">
+    <value>Edit mode aborted — device disconnected. Pending changes discarded.</value>
+  </data>
+  <data name="Status_SaveInProgressFormat" xml:space="preserve">
+    <value>Saving {0} change(s)…</value>
+    <comment>{0} = pending write count</comment>
+  </data>
+  <data name="Status_SaveCompleteFormat" xml:space="preserve">
+    <value>Saved {0} change(s)</value>
+    <comment>{0} = applied count</comment>
+  </data>
+  <data name="Status_SavePartialFormat" xml:space="preserve">
+    <value>Saved {0} of {1} — {2} still pending</value>
+    <comment>{0} = applied, {1} = total, {2} = still pending</comment>
+  </data>
+  <data name="Status_SaveCancelled" xml:space="preserve">
+    <value>Save cancelled</value>
+  </data>
+  <data name="Status_SaveCancelledSafety" xml:space="preserve">
+    <value>Save cancelled — safety warnings</value>
+  </data>
+  <data name="SafetyConfirm_Title" xml:space="preserve">
+    <value>Save with warnings?</value>
+  </data>
+  <data name="SafetyConfirm_Message" xml:space="preserve">
+    <value>The keymap you're about to save has potential issues:</value>
+  </data>
+  <data name="SafetyConfirm_SaveAnyway" xml:space="preserve">
+    <value>Save anyway</value>
+  </data>
+  <data name="SafetyWarning_BaseLayerUnusable" xml:space="preserve">
+    <value>Base layer has no usable keys</value>
+  </data>
+  <data name="SafetyWarning_UnreachableLayer" xml:space="preserve">
+    <value>Layer is not referenced by any layer-switch key</value>
+  </data>
+  <data name="SafetyWarning_AllTransparentBaseLayer" xml:space="preserve">
+    <value>Base layer is entirely transparent</value>
+  </data>
+  <data name="Status_SaveErrorFormat" xml:space="preserve">
+    <value>Save failed: {0}</value>
+    <comment>{0} = error message</comment>
+  </data>
 
   <!-- ══════════════ Board View ══════════════ -->
   <data name="Board_ConnectPrompt" xml:space="preserve">
@@ -172,6 +276,9 @@
   <!-- ══════════════ Key Context Menu ══════════════ -->
   <data name="Key_SetCustomLabel" xml:space="preserve">
     <value>Set Custom Label...</value>
+  </data>
+  <data name="Key_EditKeycode" xml:space="preserve">
+    <value>Edit keycode...</value>
   </data>
 
   <!-- ══════════════ Key Tooltips ══════════════ -->
@@ -196,6 +303,10 @@
   <data name="Key_TooltipRowColFormat" xml:space="preserve">
     <value>Row: {0}, Col: {1}</value>
     <comment>{0} = row, {1} = col</comment>
+  </data>
+  <data name="Key_TooltipPendingFormat" xml:space="preserve">
+    <value>was: {0} → now: {1}</value>
+    <comment>{0} = original label, {1} = new pending label</comment>
   </data>
 
   <!-- ══════════════ Key Label Dialog ══════════════ -->
@@ -402,7 +513,7 @@
     <value>Getting Started</value>
   </data>
   <data name="Help_GettingStartedText" xml:space="preserve">
-    <value>Connect your Svalboard via USB. The app detects it automatically and loads all layers. If you disconnect and reconnect, it will re-sync.</value>
+    <value>Connect your Svalboard via USB. The app detects it automatically and loads all layers. Browse the layout in read-only mode, or click Edit to change keys, macros, combos, tap-dance, and device settings.</value>
   </data>
   <data name="Help_ToolbarButtons" xml:space="preserve">
     <value>Toolbar Buttons</value>
@@ -453,7 +564,7 @@
     <value>Settings</value>
   </data>
   <data name="Help_SettingsText" xml:space="preserve">
-    <value>Customize layer colors, names, global hotkey, background transparency, hold threshold, and custom key labels.</value>
+    <value>Customize layer colors and names, global hotkey, background transparency, hold threshold, and custom key labels. The Device tab adds QMK firmware settings when your Svalboard supports them.</value>
   </data>
   <data name="Help_RefreshTitle" xml:space="preserve">
     <value>Refresh</value>
@@ -465,7 +576,7 @@
     <value>Layer Tabs</value>
   </data>
   <data name="Help_LayerTabsText" xml:space="preserve">
-    <value>Click a tab to view that layer's key assignments. Each layer has a unique color. Layers where every key is empty (KC_NO) are hidden automatically.</value>
+    <value>Click a tab to view that layer's key assignments. Each layer has a unique color. Layers where every key is empty (KC_NO) are hidden in read-only mode — in Edit Mode, all layers are visible so you can fill them in.</value>
   </data>
   <data name="Help_ImportantTitle" xml:space="preserve">
     <value>Important: Auto-Layer Switch &amp; Svalboard Input</value>
@@ -499,6 +610,883 @@
   </data>
   <data name="Help_Tip5" xml:space="preserve">
     <value>&#x2022; The system tray icon provides quick access to show and quit</value>
+  </data>
+  <data name="Help_Tip6" xml:space="preserve">
+    <value>&#x2022; Take a manual snapshot before big changes — you can always restore it from History later</value>
+  </data>
+  <data name="Help_Tip7" xml:space="preserve">
+    <value>&#x2022; If Save warns about safety issues, review the list before choosing Save Anyway</value>
+  </data>
+  <data name="Help_Tip8" xml:space="preserve">
+    <value>&#x2022; Macros share a firmware memory buffer — the bar in the Macro Editor shows how much you've used</value>
+  </data>
+  <data name="Help_EditTitle" xml:space="preserve">
+    <value>Edit Mode</value>
+  </data>
+  <data name="Help_EditText" xml:space="preserve">
+    <value>Unlocks the keymap for editing. Click keys to change them, or edit macros, combos, tap-dance, and device settings.</value>
+  </data>
+  <data name="Help_OpenLogFolderTitle" xml:space="preserve">
+    <value>Open Log Folder</value>
+  </data>
+  <data name="Help_OpenLogFolderText" xml:space="preserve">
+    <value>Opens the folder containing the app's log files. Useful for troubleshooting or sharing logs when reporting an issue.</value>
+  </data>
+  <data name="Help_CopyDiagnosticsTitle" xml:space="preserve">
+    <value>Copy Diagnostics</value>
+  </data>
+  <data name="Help_CopyDiagnosticsText" xml:space="preserve">
+    <value>Copies a diagnostic summary (device info, firmware, recent events) to the clipboard.</value>
+  </data>
+  <data name="Help_DynamicTitle" xml:space="preserve">
+    <value>Macros / Combos / Tap Dance</value>
+  </data>
+  <data name="Help_DynamicText" xml:space="preserve">
+    <value>Dropdown to open the Macro, Combo, or Tap-Dance editor. Read-only unless Edit Mode is active.</value>
+  </data>
+  <data name="Help_HistoryTitle" xml:space="preserve">
+    <value>Snapshot History</value>
+  </data>
+  <data name="Help_HistoryText" xml:space="preserve">
+    <value>Shows all saved keymap snapshots. Compare with the current device, restore a snapshot into Edit Mode, or import/export snapshots.</value>
+  </data>
+  <data name="Help_EditingSection" xml:space="preserve">
+    <value>Editing Your Keymap</value>
+  </data>
+  <data name="Help_EditingIntro" xml:space="preserve">
+    <value>Click Edit to unlock the keymap for changes. A blue banner appears showing the number of pending changes. Live highlighting and auto-layer-switch are paused while editing, and the background becomes fully opaque for better contrast (your transparency setting is restored when you Save or Discard).</value>
+  </data>
+  <data name="Help_EditingUnlock" xml:space="preserve">
+    <value>If your firmware is locked, an unlock dialog asks you to hold a specific key combination on the Svalboard until the app confirms the device is unlocked.</value>
+  </data>
+  <data name="Help_EditingKeyPicker" xml:space="preserve">
+    <value>Click any key on the board to open the Key Picker. Choose a category (Basic, Modifier, Layer, Media, Mouse, Macro, Tap Dance, Custom, Advanced), pick or build the keycode, preview the result, and apply.</value>
+  </data>
+  <data name="Help_EditingSaveDiscard" xml:space="preserve">
+    <value>The edit banner has buttons for taking a manual snapshot, jumping to Macros, Combos, Tap Dance, or Device Settings, and either Discard (throw away all pending changes) or Save (write them to the device).</value>
+  </data>
+  <data name="Help_EditingSafety" xml:space="preserve">
+    <value>Before saving, the app checks for potential issues — unreachable layers, a base layer with no usable keys, and similar. If warnings are found, a confirm dialog lets you Cancel or Save Anyway.</value>
+  </data>
+  <data name="Help_DynamicSection" xml:space="preserve">
+    <value>Macros, Combos &amp; Tap Dance</value>
+  </data>
+  <data name="Help_Macros" xml:space="preserve">
+    <value>&#x2022; Macros — multi-step sequences of key taps, holds, releases, delays, or text. The editor shows a buffer-usage bar since macros share firmware memory.</value>
+  </data>
+  <data name="Help_Combos" xml:space="preserve">
+    <value>&#x2022; Combos — press up to four keys together within a short window to produce a different output key.</value>
+  </data>
+  <data name="Help_TapDance" xml:space="preserve">
+    <value>&#x2022; Tap Dance — one key, multiple outcomes: tap, hold, double-tap, or tap-then-hold. Each entry has a configurable term (ms) that controls timing.</value>
+  </data>
+  <data name="Help_SnapshotsSection" xml:space="preserve">
+    <value>Snapshots &amp; History</value>
+  </data>
+  <data name="Help_SnapshotsAuto" xml:space="preserve">
+    <value>Snapshots are taken automatically when the device connects and before/after each Save, so you can always roll back.</value>
+  </data>
+  <data name="Help_SnapshotsManual" xml:space="preserve">
+    <value>In Edit Mode, use the camera icon on the blue banner to take a manual snapshot before big changes.</value>
+  </data>
+  <data name="Help_SnapshotsDiff" xml:space="preserve">
+    <value>In the History window, click View on any snapshot to see a side-by-side diff against the current device, switch layers independently, or sync both sides.</value>
+  </data>
+  <data name="Help_SnapshotsRestore" xml:space="preserve">
+    <value>Click Restore on a snapshot to load it into Edit Mode as pending changes — review them, then Save or Discard like any other edit.</value>
+  </data>
+  <data name="Help_SnapshotsImportExport" xml:space="preserve">
+    <value>Individual snapshots can be exported or deleted; the whole history can be exported as a bundle or imported from a previous export.</value>
+  </data>
+  <data name="Help_DeviceSettingsSection" xml:space="preserve">
+    <value>Device Settings (QMK)</value>
+  </data>
+  <data name="Help_DeviceSettingsText" xml:space="preserve">
+    <value>Open Settings and switch to the Device tab (only available if your firmware exposes QMK settings) to adjust tapping term, debounce, auto-shift, combo term, and similar device-level options. Changes are read-only until you enter Edit Mode, and are committed by the main Save button on the edit banner.</value>
+  </data>
+  <data name="Help_ImportantText5" xml:space="preserve">
+    <value>Auto-layer-switch is paused while Edit Mode is active. Click Discard or Save on the edit banner to resume it.</value>
+  </data>
+  <data name="Status_DiagnosticsCopied" xml:space="preserve">
+    <value>Diagnostics copied to clipboard</value>
+  </data>
+  <data name="Tooltip_OpenLogFolder" xml:space="preserve">
+    <value>Open log folder</value>
+  </data>
+  <data name="Tooltip_CopyDiagnostics" xml:space="preserve">
+    <value>Copy diagnostics to clipboard</value>
+  </data>
+
+  <!-- ══════════════ Unlock Dialog ══════════════ -->
+  <data name="Unlock_Title" xml:space="preserve">
+    <value>Unlock Keyboard</value>
+  </data>
+  <data name="Unlock_HoldKeys" xml:space="preserve">
+    <value>Hold the highlighted keys to unlock your keyboard for editing</value>
+  </data>
+  <data name="Unlock_Success" xml:space="preserve">
+    <value>Keyboard unlocked!</value>
+  </data>
+  <data name="Unlock_Polling" xml:space="preserve">
+    <value>Waiting for keys...</value>
+  </data>
+
+  <!-- ══════════════ Key Picker Dialog ══════════════ -->
+  <data name="Picker_Title" xml:space="preserve">
+    <value>Choose Keycode</value>
+  </data>
+  <data name="Picker_SearchPlaceholder" xml:space="preserve">
+    <value>Search keycodes...</value>
+  </data>
+  <data name="Picker_Category" xml:space="preserve">
+    <value>Choose a category</value>
+  </data>
+  <data name="Picker_Selection" xml:space="preserve">
+    <value>Choose a key or builder</value>
+  </data>
+  <data name="Picker_Arguments" xml:space="preserve">
+    <value>Configure arguments</value>
+  </data>
+  <data name="Picker_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Picker_RecentlyUsed" xml:space="preserve">
+    <value>Recently Used</value>
+  </data>
+  <data name="Picker_RawHex" xml:space="preserve">
+    <value>Raw Hex Code</value>
+  </data>
+  <data name="Picker_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+
+  <!-- ══════════════ Common (additional) ══════════════ -->
+  <data name="Common_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Common_Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Category buttons ══════════════ -->
+  <data name="Picker_Cat_Basic" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Picker_Cat_Modifier" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Picker_Cat_Layer" xml:space="preserve">
+    <value>Layer</value>
+  </data>
+  <data name="Picker_Cat_Media" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="Picker_Cat_Mouse" xml:space="preserve">
+    <value>Mouse</value>
+  </data>
+  <data name="Picker_Cat_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Picker_Cat_Macro" xml:space="preserve">
+    <value>Macro</value>
+  </data>
+  <data name="Picker_Cat_TapDance" xml:space="preserve">
+    <value>Tap Dance</value>
+  </data>
+  <data name="Picker_Cat_Advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Category intros ══════════════ -->
+  <data name="Picker_Intro_Modifier" xml:space="preserve">
+    <value>Modifier keys (Ctrl, Shift, Alt, Gui/Win/Cmd) change how other keys behave. Pick one option below — Mod-Tap combines a tap key with held modifiers on the same key; One-Shot Mod applies modifiers to just the next key you press.</value>
+  </data>
+  <data name="Picker_Intro_Layer" xml:space="preserve">
+    <value>Layers are alternate keymaps stacked on the same physical keys — like how Shift turns letters into capitals, but for every key at once. Pick one option below: Layer-Tap adds a tap keycode to a held layer, Layer-Mod combines a layer with modifiers, and Layer Function gives you the raw layer switches (MO/TG/TO/DF/OSL/TT).</value>
+  </data>
+  <data name="Picker_Intro_Custom" xml:space="preserve">
+    <value>Firmware-defined keycodes that don't fit the standard HID set. Pick Custom Keycode below to address one by numeric index.</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Field labels ══════════════ -->
+  <data name="Picker_Field_HoldModifiers" xml:space="preserve">
+    <value>Hold Modifiers</value>
+  </data>
+  <data name="Picker_Field_Modifiers" xml:space="preserve">
+    <value>Modifiers</value>
+  </data>
+  <data name="Picker_Field_TapKey" xml:space="preserve">
+    <value>Tap Key</value>
+  </data>
+  <data name="Picker_Field_Layer" xml:space="preserve">
+    <value>Layer</value>
+  </data>
+  <data name="Picker_Field_Function" xml:space="preserve">
+    <value>Function</value>
+  </data>
+  <data name="Picker_Field_CustomIndex" xml:space="preserve">
+    <value>Custom Index</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Modifier checkboxes ══════════════ -->
+  <data name="Picker_Mod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Picker_Mod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Picker_Mod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Picker_Mod_Gui" xml:space="preserve">
+    <value>Gui</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Builder names + descriptions ══════════════ -->
+  <data name="Builder_ModTap_Name" xml:space="preserve">
+    <value>Mod-Tap</value>
+  </data>
+  <data name="Builder_ModTap_Desc" xml:space="preserve">
+    <value>Tap for a normal keypress, hold to apply modifier(s). Check which modifiers fire under 'Hold Modifiers', and pick what the tap sends under 'Tap Key'. Example: Hold Modifiers = Ctrl, Tap Key = A → tap for A, hold for Ctrl.</value>
+  </data>
+  <data name="Builder_OneShotMod_Name" xml:space="preserve">
+    <value>One-Shot Mod</value>
+  </data>
+  <data name="Builder_OneShotMod_Desc" xml:space="preserve">
+    <value>Press and release once — whichever boxes you check under 'Modifiers' apply to just the next key you press, no holding needed. Example: Modifiers = Shift, then tap 'a' to type 'A'. Great if holding modifiers is awkward.</value>
+  </data>
+  <data name="Builder_LayerTap_Name" xml:space="preserve">
+    <value>Layer-Tap</value>
+  </data>
+  <data name="Builder_LayerTap_Desc" xml:space="preserve">
+    <value>Tap for a normal keypress, hold to switch to another layer. Pick the target under 'Layer' and the tap keycode under 'Tap Key'. Example: Layer = Symbols, Tap Key = Space → tap for Space, hold for Symbols.</value>
+  </data>
+  <data name="Builder_LayerMod_Name" xml:space="preserve">
+    <value>Layer-Mod</value>
+  </data>
+  <data name="Builder_LayerMod_Desc" xml:space="preserve">
+    <value>Hold this key to activate a layer AND apply modifier(s) at the same time. Pick the target under 'Layer' and which keys come with it under 'Modifiers'. Example: Layer = Nav, Modifiers = Shift → arrow keys on the Nav layer become Shift+Arrow for selection.</value>
+  </data>
+  <data name="Builder_LayerFunction_Name" xml:space="preserve">
+    <value>Layer Function</value>
+  </data>
+  <data name="Builder_LayerFunction_Desc" xml:space="preserve">
+    <value>Switches layers in various ways. Pick how the switch behaves under 'Function' (momentary, toggle, etc.) and the target under 'Layer'. The line under Function describes exactly what the chosen Function does.</value>
+  </data>
+  <data name="Builder_CustomKeycode_Name" xml:space="preserve">
+    <value>Custom Keycode</value>
+  </data>
+  <data name="Builder_CustomKeycode_Desc" xml:space="preserve">
+    <value>Firmware-defined keycode addressed by 'Custom Index'. Only useful if you already know which index maps to which custom keycode in your firmware build — normally you'd pick one by name from the Custom category instead.</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Layer function per-kind help ══════════════ -->
+  <data name="LayerFn_None_Desc" xml:space="preserve">
+    <value>Pick a Function to see what it does.</value>
+  </data>
+  <data name="LayerFn_MO_Desc" xml:space="preserve">
+    <value>MO — Momentary: the Layer picked below is active only while you hold the key. Release = back to base.</value>
+  </data>
+  <data name="LayerFn_TG_Desc" xml:space="preserve">
+    <value>TG — Toggle: press to flip the Layer picked below on; press again to flip it off. Stays put until toggled.</value>
+  </data>
+  <data name="LayerFn_TO_Desc" xml:space="preserve">
+    <value>TO — Turn On: switches to the Layer picked below and stays there (replaces the current active layer).</value>
+  </data>
+  <data name="LayerFn_DF_Desc" xml:space="preserve">
+    <value>DF — Default: makes the Layer picked below your new base — what you return to when other layers release.</value>
+  </data>
+  <data name="LayerFn_OSL_Desc" xml:space="preserve">
+    <value>OSL — One-Shot Layer: activates the Layer picked below for just the next keypress, then snaps back.</value>
+  </data>
+  <data name="LayerFn_TT_Desc" xml:space="preserve">
+    <value>TT — Tap-Toggle: tap several times in a row to toggle the Layer picked below on; or hold for momentary (like MO).</value>
+  </data>
+
+  <!-- ══════════════ Edit Mode ══════════════ -->
+  <data name="Edit_BannerTitle" xml:space="preserve">
+    <value>Editing</value>
+  </data>
+  <data name="Edit_BannerChangesFormat" xml:space="preserve">
+    <value>{0} pending changes</value>
+    <comment>{0} = dirty count</comment>
+  </data>
+  <data name="Edit_BannerChanges" xml:space="preserve">
+    <value>pending changes</value>
+  </data>
+  <data name="Edit_Discard" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="Edit_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Edit_Saving" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="Edit_SaveComingSoon" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="Edit_MacroLoading" xml:space="preserve">
+    <value>Macros are still loading, please wait…</value>
+  </data>
+  <data name="Edit_MacroBufferOverflow" xml:space="preserve">
+    <value>Macro buffer overflow — reduce macro content before saving</value>
+  </data>
+
+  <!-- ══════════════ Snapshot History ══════════════ -->
+  <data name="Title_History" xml:space="preserve">
+    <value>Snapshot History</value>
+  </data>
+  <data name="Tooltip_History" xml:space="preserve">
+    <value>Snapshot history</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="History_Search" xml:space="preserve">
+    <value>Search snapshots…</value>
+  </data>
+  <data name="History_Filter_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="History_Filter_Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="History_Filter_Initial" xml:space="preserve">
+    <value>Initial</value>
+  </data>
+  <data name="History_DefaultManualLabel" xml:space="preserve">
+    <value>Manual snapshot</value>
+  </data>
+  <data name="History_PreSaveLabel" xml:space="preserve">
+    <value>Before save</value>
+  </data>
+  <data name="History_PostSaveLabel" xml:space="preserve">
+    <value>After save</value>
+  </data>
+  <data name="History_FirstConnectLabel" xml:space="preserve">
+    <value>Initial state</value>
+  </data>
+  <data name="History_Import" xml:space="preserve">
+    <value>Import…</value>
+  </data>
+  <data name="History_ExportAll" xml:space="preserve">
+    <value>Export all…</value>
+  </data>
+  <data name="History_ExportRow" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="History_DeleteRow" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="History_RestoreRow" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="History_ViewDiff" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Diff_Title" xml:space="preserve">
+    <value>Snapshot Diff</value>
+  </data>
+  <data name="Diff_SnapshotSide" xml:space="preserve">
+    <value>Snapshot</value>
+  </data>
+  <data name="Diff_DeviceSide" xml:space="preserve">
+    <value>Current Device</value>
+  </data>
+  <data name="Diff_SyncLayers" xml:space="preserve">
+    <value>Sync layers</value>
+  </data>
+  <data name="Diff_ChangeCount" xml:space="preserve">
+    <value>Changes ({0}):</value>
+    <comment>{0} = number of changed keys</comment>
+  </data>
+  <data name="Diff_FirmwareWarning" xml:space="preserve">
+    <value>Captured on different firmware. Some keycodes may behave differently — review carefully.</value>
+  </data>
+  <data name="Diff_LayerTruncateWarning" xml:space="preserve">
+    <value>Snapshot has {0} layers, device supports {1} — only layers 0–{2} will be restored.</value>
+    <comment>{0} = snapshot layers, {1} = device layers, {2} = max restored index</comment>
+  </data>
+  <data name="Diff_RestoreConfirm" xml:space="preserve">
+    <value>This will load the snapshot from {0} as pending changes. You'll review and Save them. Continue?</value>
+    <comment>{0} = snapshot timestamp</comment>
+  </data>
+  <data name="Diff_RestoreDisabledPending" xml:space="preserve">
+    <value>Save or discard your pending changes first.</value>
+  </data>
+  <data name="Diff_RestoreDisabledNoDevice" xml:space="preserve">
+    <value>Connect a device to restore.</value>
+  </data>
+  <data name="Diff_NoChanges" xml:space="preserve">
+    <value>This snapshot is identical to the current device state.</value>
+  </data>
+  <data name="Edit_ManualSnapshot" xml:space="preserve">
+    <value>Take snapshot</value>
+  </data>
+  <data name="Edit_ManualSnapshotPrompt" xml:space="preserve">
+    <value>Snapshot label (optional)</value>
+  </data>
+  <data name="Status_RestoreLoaded" xml:space="preserve">
+    <value>Snapshot restored — {0} changes pending. Review and Save.</value>
+    <comment>{0} = number of pending changes</comment>
+  </data>
+  <data name="History_DeleteConfirm" xml:space="preserve">
+    <value>Delete snapshot "{0}"? This cannot be undone.</value>
+    <comment>{0} = snapshot display label</comment>
+  </data>
+  <data name="History_DeletedStatus" xml:space="preserve">
+    <value>Deleted snapshot "{0}"</value>
+  </data>
+  <data name="History_ExportedStatus" xml:space="preserve">
+    <value>Exported snapshot "{0}"</value>
+  </data>
+  <data name="History_ExportedAllStatus" xml:space="preserve">
+    <value>Exported {0} snapshot(s)</value>
+  </data>
+  <data name="History_ImportSummary" xml:space="preserve">
+    <value>Imported {0} • Skipped {1} • Refused {2}</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>No snapshots yet</value>
+  </data>
+  <data name="History_NoMatch" xml:space="preserve">
+    <value>No snapshots match the current filter</value>
+  </data>
+  <data name="History_NoDevice" xml:space="preserve">
+    <value>Connect a device to browse snapshots</value>
+  </data>
+  <data name="History_ExportFileTitle" xml:space="preserve">
+    <value>Export snapshot</value>
+  </data>
+  <data name="History_ExportFolderTitle" xml:space="preserve">
+    <value>Export all snapshots — choose folder</value>
+  </data>
+  <data name="History_ImportFolderTitle" xml:space="preserve">
+    <value>Import snapshots — choose folder</value>
+  </data>
+
+  <!-- ══════════════ Settings: Device Tab ══════════════ -->
+  <data name="Settings_TabDevice" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Settings_DeviceEditHint" xml:space="preserve">
+    <value>Enter edit mode to modify device settings</value>
+  </data>
+  <data name="Settings_DeviceNoSettings" xml:space="preserve">
+    <value>No QMK settings available on this device</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Names ══════════════ -->
+  <!-- Tap-Hold settings -->
+  <data name="QmkSetting_TappingTerm" xml:space="preserve">
+    <value>Tapping Term</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay" xml:space="preserve">
+    <value>Tap Code Delay</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay" xml:space="preserve">
+    <value>Tap Hold Caps Delay</value>
+  </data>
+  <data name="QmkSetting_TappingToggle" xml:space="preserve">
+    <value>Tapping Toggle</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm" xml:space="preserve">
+    <value>Quick Tap Term</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm" xml:space="preserve">
+    <value>Flow Tap Term</value>
+  </data>
+  <data name="QmkSetting_PermissiveHold" xml:space="preserve">
+    <value>Permissive Hold</value>
+  </data>
+  <data name="QmkSetting_HoldOnOtherKeyPress" xml:space="preserve">
+    <value>Hold on Other Key Press</value>
+  </data>
+  <data name="QmkSetting_RetroTapping" xml:space="preserve">
+    <value>Retro Tapping</value>
+  </data>
+  <data name="QmkSetting_ChordalHold" xml:space="preserve">
+    <value>Chordal Hold</value>
+  </data>
+
+  <!-- One-shot settings -->
+  <data name="QmkSetting_OneShotTapToggle" xml:space="preserve">
+    <value>One-shot Tap Toggle</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout" xml:space="preserve">
+    <value>One-shot Timeout</value>
+  </data>
+
+  <!-- Combo settings -->
+  <data name="QmkSetting_ComboTerm" xml:space="preserve">
+    <value>Combo Term</value>
+  </data>
+
+  <!-- Auto-shift settings -->
+  <data name="QmkSetting_AutoShiftTimeout" xml:space="preserve">
+    <value>Auto-shift Timeout</value>
+  </data>
+
+  <!-- Mouse key settings -->
+  <data name="QmkSetting_MouseKeyDelay" xml:space="preserve">
+    <value>Mouse Key Delay</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval" xml:space="preserve">
+    <value>Mouse Key Interval</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMoveDelta" xml:space="preserve">
+    <value>Mouse Key Move Delta</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMaxSpeed" xml:space="preserve">
+    <value>Mouse Key Max Speed</value>
+  </data>
+  <data name="QmkSetting_MouseKeyTimeToMax" xml:space="preserve">
+    <value>Mouse Key Time to Max</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay" xml:space="preserve">
+    <value>Mouse Wheel Delay</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval" xml:space="preserve">
+    <value>Mouse Wheel Interval</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelMaxSpeed" xml:space="preserve">
+    <value>Mouse Wheel Max Speed</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelTimeToMax" xml:space="preserve">
+    <value>Mouse Wheel Time to Max</value>
+  </data>
+
+  <!-- Setting group headers -->
+  <data name="QmkSettingGroup_TapHold" xml:space="preserve">
+    <value>Tap / Hold</value>
+  </data>
+  <data name="QmkSettingGroup_OneShot" xml:space="preserve">
+    <value>One-shot</value>
+  </data>
+  <data name="QmkSettingGroup_Combos" xml:space="preserve">
+    <value>Combos</value>
+  </data>
+  <data name="QmkSettingGroup_AutoShift" xml:space="preserve">
+    <value>Auto-shift</value>
+  </data>
+  <data name="QmkSettingGroup_MouseKeys" xml:space="preserve">
+    <value>Mouse Keys</value>
+  </data>
+  <data name="QmkSettingGroup_Misc" xml:space="preserve">
+    <value>Miscellaneous</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Descriptions (plain-language) ══════════════ -->
+  <data name="QmkSetting_TappingTerm_Desc" xml:space="preserve">
+    <value>How long you can hold a dual-function key before it counts as "held" instead of "tapped" (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay_Desc" xml:space="preserve">
+    <value>Delay between key presses when sending tap codes (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay_Desc" xml:space="preserve">
+    <value>Extra delay added when Caps Lock is involved in a tap-hold key (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_TappingToggle_Desc" xml:space="preserve">
+    <value>Number of taps needed to permanently toggle a layer on via a tap-toggle key</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm_Desc" xml:space="preserve">
+    <value>If you tap a dual-function key again within this time, it always sends the tap — even if you hold it (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm_Desc" xml:space="preserve">
+    <value>When typing quickly, keys pressed within this window are treated as taps rather than holds (in milliseconds). Set to 0 to disable</value>
+  </data>
+  <data name="QmkSetting_PermissiveHold_Desc" xml:space="preserve">
+    <value>If another key is pressed and released while a dual-function key is held, treat it as a hold even if the tapping term hasn't expired</value>
+  </data>
+  <data name="QmkSetting_HoldOnOtherKeyPress_Desc" xml:space="preserve">
+    <value>Immediately treat a dual-function key as held the moment any other key is pressed — faster but less forgiving</value>
+  </data>
+  <data name="QmkSetting_RetroTapping_Desc" xml:space="preserve">
+    <value>If a dual-function key is held past the tapping term but no other key is pressed, still send the tap action on release</value>
+  </data>
+  <data name="QmkSetting_ChordalHold_Desc" xml:space="preserve">
+    <value>Decide tap vs. hold based on whether the next key is on the same hand (tap) or opposite hand (hold)</value>
+  </data>
+  <data name="QmkSetting_OneShotTapToggle_Desc" xml:space="preserve">
+    <value>Number of taps needed to lock a one-shot modifier or layer on permanently</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout_Desc" xml:space="preserve">
+    <value>How long a one-shot modifier stays active waiting for the next key press (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_ComboTerm_Desc" xml:space="preserve">
+    <value>Maximum time between key presses for them to count as a combo (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_AutoShiftTimeout_Desc" xml:space="preserve">
+    <value>Hold a key longer than this to automatically type its shifted version, e.g. hold "a" to get "A" (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyDelay_Desc" xml:space="preserve">
+    <value>Delay before mouse cursor starts moving after pressing a mouse key (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval_Desc" xml:space="preserve">
+    <value>Time between mouse movement updates — lower means smoother but faster cursor (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMoveDelta_Desc" xml:space="preserve">
+    <value>How many pixels the cursor moves per update step</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMaxSpeed_Desc" xml:space="preserve">
+    <value>Maximum cursor speed multiplier after acceleration</value>
+  </data>
+  <data name="QmkSetting_MouseKeyTimeToMax_Desc" xml:space="preserve">
+    <value>Number of update steps before the cursor reaches maximum speed</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay_Desc" xml:space="preserve">
+    <value>Delay before scroll wheel starts moving after pressing a wheel key (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval_Desc" xml:space="preserve">
+    <value>Time between scroll wheel steps — lower means faster scrolling (in milliseconds)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelMaxSpeed_Desc" xml:space="preserve">
+    <value>Maximum scroll wheel speed multiplier after acceleration</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelTimeToMax_Desc" xml:space="preserve">
+    <value>Number of update steps before scroll wheel reaches maximum speed</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Units ══════════════ -->
+  <data name="QmkSetting_TappingTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_ComboTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_AutoShiftTimeout_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+
+  <!-- QMK Settings: Group headers (new) -->
+  <data name="QmkSettingGroup_Magic" xml:space="preserve">
+    <value>Magic</value>
+  </data>
+  <data name="QmkSettingGroup_GraveEscape" xml:space="preserve">
+    <value>Grave Escape</value>
+  </data>
+
+  <!-- QMK Settings: Magic bitfield (QSID 0x15) -->
+  <data name="QmkSetting_Magic_SwapCapsCtrl" xml:space="preserve">
+    <value>Swap Caps Lock and Left Control</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapCapsCtrl_Desc" xml:space="preserve">
+    <value>Exchanges Caps Lock and Left Control key functions</value>
+  </data>
+  <data name="QmkSetting_Magic_CapsToCtrl" xml:space="preserve">
+    <value>Treat Caps Lock as Control</value>
+  </data>
+  <data name="QmkSetting_Magic_CapsToCtrl_Desc" xml:space="preserve">
+    <value>Caps Lock acts as Control without swapping</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLAltLGui" xml:space="preserve">
+    <value>Swap Left Alt and GUI</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLAltLGui_Desc" xml:space="preserve">
+    <value>Exchanges Left Alt and Left GUI (Win/Cmd) keys</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRAltRGui" xml:space="preserve">
+    <value>Swap Right Alt and GUI</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRAltRGui_Desc" xml:space="preserve">
+    <value>Exchanges Right Alt and Right GUI (Win/Cmd) keys</value>
+  </data>
+  <data name="QmkSetting_Magic_NoGui" xml:space="preserve">
+    <value>Disable the GUI Keys</value>
+  </data>
+  <data name="QmkSetting_Magic_NoGui_Desc" xml:space="preserve">
+    <value>Disables both GUI (Win/Cmd) keys entirely</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapGraveEsc" xml:space="preserve">
+    <value>Swap ` and Escape</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapGraveEsc_Desc" xml:space="preserve">
+    <value>Exchanges the Grave/Tilde and Escape key functions</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapBsBackslash" xml:space="preserve">
+    <value>Swap \ and Backspace</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapBsBackslash_Desc" xml:space="preserve">
+    <value>Exchanges Backslash and Backspace key functions</value>
+  </data>
+  <data name="QmkSetting_Magic_Nkro" xml:space="preserve">
+    <value>Enable N-Key Rollover</value>
+  </data>
+  <data name="QmkSetting_Magic_Nkro_Desc" xml:space="preserve">
+    <value>Allows unlimited simultaneous key presses (requires USB support)</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLCtlLGui" xml:space="preserve">
+    <value>Swap Left Control and GUI</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLCtlLGui_Desc" xml:space="preserve">
+    <value>Exchanges Left Control and Left GUI (Win/Cmd) keys</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRCtlRGui" xml:space="preserve">
+    <value>Swap Right Control and GUI</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRCtlRGui_Desc" xml:space="preserve">
+    <value>Exchanges Right Control and Right GUI (Win/Cmd) keys</value>
+  </data>
+
+  <!-- QMK Settings: Grave Escape bitfield (QSID 0x01) -->
+  <data name="QmkSetting_GraveEsc_Alt" xml:space="preserve">
+    <value>Always Send Escape with Alt</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Alt_Desc" xml:space="preserve">
+    <value>Grave Escape always sends Escape when Alt is held</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Ctrl" xml:space="preserve">
+    <value>Always Send Escape with Control</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Ctrl_Desc" xml:space="preserve">
+    <value>Grave Escape always sends Escape when Control is held</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Gui" xml:space="preserve">
+    <value>Always Send Escape with GUI</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Gui_Desc" xml:space="preserve">
+    <value>Grave Escape always sends Escape when GUI (Win/Cmd) is held</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Shift" xml:space="preserve">
+    <value>Always Send Escape with Shift</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Shift_Desc" xml:space="preserve">
+    <value>Grave Escape always sends Escape when Shift is held</value>
+  </data>
+
+  <!-- QMK Settings: Auto Shift bitfield (QSID 0x03) -->
+  <data name="QmkSetting_AutoShift_Enable" xml:space="preserve">
+    <value>Enable Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Enable_Desc" xml:space="preserve">
+    <value>Holding a key longer than the timeout automatically applies Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Modifiers" xml:space="preserve">
+    <value>Enable for Modifiers</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Modifiers_Desc" xml:space="preserve">
+    <value>Auto Shift also applies to modifier keys</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoSpecial" xml:space="preserve">
+    <value>Do Not Auto Shift Special Keys</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoSpecial_Desc" xml:space="preserve">
+    <value>Excludes special keys (punctuation, symbols) from Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoNumeric" xml:space="preserve">
+    <value>Do Not Auto Shift Numeric Keys</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoNumeric_Desc" xml:space="preserve">
+    <value>Excludes number keys from Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoAlpha" xml:space="preserve">
+    <value>Do Not Auto Shift Alpha Characters</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoAlpha_Desc" xml:space="preserve">
+    <value>Excludes letter keys from Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Repeat" xml:space="preserve">
+    <value>Enable Key Repeat</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Repeat_Desc" xml:space="preserve">
+    <value>Enables key repeat for Auto Shifted keys</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoRepeat" xml:space="preserve">
+    <value>Disable Key Repeat on Timeout</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoRepeat_Desc" xml:space="preserve">
+    <value>Stops key repeat when the Auto Shift timeout is exceeded</value>
+  </data>
+  <data name="Common_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Tooltip_Combos" xml:space="preserve">
+    <value>Edit combos</value>
+  </data>
+  <data name="Tooltip_TapDance" xml:space="preserve">
+    <value>Edit tap-dance</value>
+  </data>
+  <data name="ComboEditor_Title" xml:space="preserve">
+    <value>Combos</value>
+  </data>
+  <data name="ComboEditor_None" xml:space="preserve">
+    <value>No combo slots available on this firmware.</value>
+  </data>
+  <data name="ComboEditor_ReadOnly" xml:space="preserve">
+    <value>Read-only — enter edit mode to change combos.</value>
+  </data>
+  <data name="ComboEditor_Usage" xml:space="preserve">
+    <value>{0} / {1} used</value>
+  </data>
+  <data name="ComboEditor_Input0" xml:space="preserve">
+    <value>Input 1</value>
+  </data>
+  <data name="ComboEditor_Input1" xml:space="preserve">
+    <value>Input 2</value>
+  </data>
+  <data name="ComboEditor_Input2" xml:space="preserve">
+    <value>Input 3</value>
+  </data>
+  <data name="ComboEditor_Input3" xml:space="preserve">
+    <value>Input 4</value>
+  </data>
+  <data name="ComboEditor_Output" xml:space="preserve">
+    <value>Output</value>
+  </data>
+  <data name="TapDanceEditor_Title" xml:space="preserve">
+    <value>Tap-Dance</value>
+  </data>
+  <data name="TapDanceEditor_None" xml:space="preserve">
+    <value>No tap-dance slots available on this firmware.</value>
+  </data>
+  <data name="TapDanceEditor_ReadOnly" xml:space="preserve">
+    <value>Read-only — enter edit mode to change tap-dance entries.</value>
+  </data>
+  <data name="TapDanceEditor_Usage" xml:space="preserve">
+    <value>{0} / {1} used</value>
+  </data>
+  <data name="TapDanceEditor_OnTap" xml:space="preserve">
+    <value>On tap</value>
+  </data>
+  <data name="TapDanceEditor_OnHold" xml:space="preserve">
+    <value>On hold</value>
+  </data>
+  <data name="TapDanceEditor_OnDoubleTap" xml:space="preserve">
+    <value>On double tap</value>
+  </data>
+  <data name="TapDanceEditor_OnTapHold" xml:space="preserve">
+    <value>On tap + hold</value>
+  </data>
+  <data name="TapDanceEditor_Term" xml:space="preserve">
+    <value>Term (ms)</value>
   </data>
 
 </root>

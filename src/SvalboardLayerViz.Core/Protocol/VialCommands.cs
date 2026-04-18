@@ -29,12 +29,16 @@ public static class VialCommands
     /// Response: [0x08, 0x83, H, S, ...]. Confirmed working on Svalboard firmware.
     /// </summary>
     public const byte QmkRgblightColor = 0x83;
+    public const byte DynamicKeymapReset = 0x06;
+    public const byte EepromReset = 0x0A;
+    public const byte DynamicKeymapMacroReset = 0x0B;
     public const byte MacroGetCount = 0x0C;
     public const byte MacroGetBufferSize = 0x0D;
     public const byte MacroGetBuffer = 0x0E;
     public const byte MacroSetBuffer = 0x0F;
     public const byte GetLayerCount = 0x11;
     public const byte KeymapGetBuffer = 0x12;
+    public const byte KeymapSetBuffer = 0x13;
 
     // --- Vial prefix and sub-commands ---
 
@@ -56,6 +60,13 @@ public static class VialCommands
     public const byte VialQmkSettingsReset = 0x0C;
     public const byte VialDynamicEntryOp = 0x0D;
 
+    // Sub-ops for VialDynamicEntryOp (third byte of command).
+    public const byte DynamicEntryGetNumberOfEntries = 0x00;
+    public const byte DynamicEntryTapDanceGet = 0x01;
+    public const byte DynamicEntryTapDanceSet = 0x02;
+    public const byte DynamicEntryComboGet = 0x03;
+    public const byte DynamicEntryComboSet = 0x04;
+
     // --- Svalboard custom sub-protocol (identifier 0xEE) ---
     // Reference: keybard-ng/pages/js/vial/sval.js
     // Confirmed against Svalboard Lightly firmware (sval proto version 3).
@@ -70,12 +81,49 @@ public static class VialCommands
     public const byte SvalLayerColorGet = 0x10;
 
     // --- QMK Settings IDs (from Vial QMK Settings protocol) ---
+    // Reference: vial-gui qmk_settings.json, vial-qmk quantum/qmk_settings.h
+    // Only non-bitfield settings are listed here. Bitfield settings (0x01 grave_esc,
+    // 0x03 auto_shift flags, 0x08 legacy tap-hold, 0x15 magic) need per-bit UI.
 
-    /// <summary>
-    /// QMK setting ID for TAPPING_TERM (u16, milliseconds).
-    /// Confirmed on Svalboard firmware via probe: setting 0x0007 returns tapping term.
-    /// </summary>
+    // Bitfield settings (packed booleans — each bit is a separate flag)
+    public const ushort QmkSettingGraveEscOverride = 0x0001;
+    public const ushort QmkSettingAutoShiftFlags = 0x0003;
+    public const ushort QmkSettingMagic = 0x0015;
+
+    // Combo
+    public const ushort QmkSettingComboTerm = 0x0002;
+
+    // Auto Shift
+    public const ushort QmkSettingAutoShiftTimeout = 0x0004;
+
+    // One Shot
+    public const ushort QmkSettingOneShotTapToggle = 0x0005;
+    public const ushort QmkSettingOneShotTimeout = 0x0006;
+
+    // Tap-Hold
     public const ushort QmkSettingTappingTerm = 0x0007;
+
+    // Mouse Keys
+    public const ushort QmkSettingMouseKeyDelay = 0x0009;
+    public const ushort QmkSettingMouseKeyInterval = 0x000A;
+    public const ushort QmkSettingMouseKeyMoveDelta = 0x000B;
+    public const ushort QmkSettingMouseKeyMaxSpeed = 0x000C;
+    public const ushort QmkSettingMouseKeyTimeToMax = 0x000D;
+    public const ushort QmkSettingMouseKeyWheelDelay = 0x000E;
+    public const ushort QmkSettingMouseKeyWheelInterval = 0x000F;
+    public const ushort QmkSettingMouseKeyWheelMaxSpeed = 0x0010;
+    public const ushort QmkSettingMouseKeyWheelTimeToMax = 0x0011;
+
+    // Tap-Hold (continued)
+    public const ushort QmkSettingTapCodeDelay = 0x0012;
+    public const ushort QmkSettingTapHoldCapsDelay = 0x0013;
+    public const ushort QmkSettingTappingToggle = 0x0014;
+    public const ushort QmkSettingPermissiveHold = 0x0016;
+    public const ushort QmkSettingHoldOnOtherKeyPress = 0x0017;
+    public const ushort QmkSettingRetroTapping = 0x0018;
+    public const ushort QmkSettingQuickTapTerm = 0x0019;
+    public const ushort QmkSettingChordalHold = 0x001A;
+    public const ushort QmkSettingFlowTapTerm = 0x001B;
 
     // --- XZ magic bytes for definition payload ---
 

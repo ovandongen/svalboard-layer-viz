@@ -40,24 +40,20 @@ public class KeycodeServiceTests
         Assert.Equal("Space", result.Label);
     }
 
-    [Fact]
-    public void Resolve_MomentaryLayer2_ReturnsMO2()
+    [Theory]
+    [InlineData(0x5200, "TO(0)", 0)]
+    [InlineData(0x5222, "MO(2)", 2)]
+    [InlineData(0x5223, "MO(3)", 3)]
+    [InlineData(0x5242, "DF(2)", 2)]
+    [InlineData(0x5261, "TG(1)", 1)]
+    [InlineData(0x5281, "OSL(1)", 1)]
+    [InlineData(0x52C4, "TT(4)", 4)]
+    public void Resolve_LayerFunctions_ReturnLabel(ushort code, string label, int targetLayer)
     {
-        // MO(2) = 0x5220 + 2 = 0x5222
-        var result = _sut.Resolve(0x5222);
-        Assert.Equal("MO(2)", result.Label);
+        var result = _sut.Resolve(code);
+        Assert.Equal(label, result.Label);
         Assert.True(result.IsLayerSwitch);
-        Assert.Equal(2, result.TargetLayer);
-    }
-
-    [Fact]
-    public void Resolve_ToggleLayer1_ReturnsTG1()
-    {
-        // TG(1) = 0x5260 + 1 = 0x5261
-        var result = _sut.Resolve(0x5261);
-        Assert.Equal("TG(1)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(1, result.TargetLayer);
+        Assert.Equal(targetLayer, result.TargetLayer);
     }
 
     [Fact]
@@ -74,58 +70,6 @@ public class KeycodeServiceTests
     {
         var result = _sut.Resolve(0xFFFF);
         Assert.StartsWith("0x", result.Label);
-    }
-
-    // --- Batch 1: Layer function range tests (keybard-ng keygen.ts ranges) ---
-
-    [Fact]
-    public void Resolve_TO_Layer0_ReturnsTO0()
-    {
-        // TO(0) = 0x5200
-        var result = _sut.Resolve(0x5200);
-        Assert.Equal("TO(0)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(0, result.TargetLayer);
-    }
-
-    [Fact]
-    public void Resolve_MO_Layer3_ReturnsMO3()
-    {
-        // MO(3) = 0x5220 + 3 = 0x5223
-        var result = _sut.Resolve(0x5223);
-        Assert.Equal("MO(3)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(3, result.TargetLayer);
-    }
-
-    [Fact]
-    public void Resolve_DF_Layer2_ReturnsDF2()
-    {
-        // DF(2) = 0x5240 + 2 = 0x5242
-        var result = _sut.Resolve(0x5242);
-        Assert.Equal("DF(2)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(2, result.TargetLayer);
-    }
-
-    [Fact]
-    public void Resolve_OSL_Layer1_ReturnsOSL1()
-    {
-        // OSL(1) = 0x5280 + 1 = 0x5281
-        var result = _sut.Resolve(0x5281);
-        Assert.Equal("OSL(1)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(1, result.TargetLayer);
-    }
-
-    [Fact]
-    public void Resolve_TT_Layer4_ReturnsTT4()
-    {
-        // TT(4) = 0x52C0 + 4 = 0x52C4
-        var result = _sut.Resolve(0x52C4);
-        Assert.Equal("TT(4)", result.Label);
-        Assert.True(result.IsLayerSwitch);
-        Assert.Equal(4, result.TargetLayer);
     }
 
     [Fact]
@@ -404,5 +348,57 @@ public class KeycodeServiceTests
     {
         // MO(1) = 0x5221
         Assert.Null(_sut.Resolve(0x5221).ShiftedLabel);
+    }
+
+    // --- Macro keycodes ---
+
+    [Theory]
+    [InlineData(0x7700, "M0")]
+    [InlineData(0x7701, "M1")]
+    [InlineData(0x770F, "M15")]
+    public void Resolve_MacroKeycode_ReturnsMLabel(ushort code, string expectedLabel)
+    {
+        var result = _sut.Resolve(code);
+        Assert.Equal(expectedLabel, result.Label);
+        Assert.False(result.IsUnknown);
+    }
+
+    [Fact]
+    public void Resolve_MacroKeycode_WithPreviews_ShowsSecondaryLabel()
+    {
+        _sut.SetMacroPreviews(["Hello", "Ctrl+C Ctrl+V", ""]);
+        var r0 = _sut.Resolve(0x7700);
+        Assert.Equal("M0", r0.Label);
+        Assert.Equal("Hello", r0.SecondaryLabel);
+
+        var r1 = _sut.Resolve(0x7701);
+        Assert.Equal("M1", r1.Label);
+        Assert.Equal("Ctrl+C Ctrl+V", r1.SecondaryLabel);
+    }
+
+    [Fact]
+    public void Resolve_MacroKeycode_EmptyPreview_NoSecondaryLabel()
+    {
+        _sut.SetMacroPreviews(["", ""]);
+        var result = _sut.Resolve(0x7700);
+        Assert.Equal("M0", result.Label);
+        Assert.Null(result.SecondaryLabel);
+    }
+
+    [Fact]
+    public void Resolve_MacroKeycode_NoPreviews_NoSecondaryLabel()
+    {
+        var result = _sut.Resolve(0x7700);
+        Assert.Equal("M0", result.Label);
+        Assert.Null(result.SecondaryLabel);
+    }
+
+    [Fact]
+    public void Resolve_MacroKeycode_IndexOutOfRange_NoSecondaryLabel()
+    {
+        _sut.SetMacroPreviews(["Hello"]);
+        var result = _sut.Resolve(0x7705); // M5, but only 1 preview
+        Assert.Equal("M5", result.Label);
+        Assert.Null(result.SecondaryLabel);
     }
 }

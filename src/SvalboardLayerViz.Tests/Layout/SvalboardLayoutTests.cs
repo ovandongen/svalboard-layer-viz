@@ -22,8 +22,8 @@ public class SvalboardLayoutTests
     }
 
     [Theory]
-    [InlineData(0, 6)]  // L-Mod
-    [InlineData(5, 6)]  // Thumb cluster
+    [InlineData(0, 6)]  // L-Thumb
+    [InlineData(5, 6)]  // R-Thumb
     [InlineData(1, 5)]  // L-Index
     [InlineData(2, 5)]  // L-Middle
     [InlineData(3, 5)]  // L-Ring
@@ -56,11 +56,12 @@ public class SvalboardLayoutTests
     }
 
     [Fact]
-    public void All11Clusters_ArePresent()
+    public void All10Clusters_ArePresent()
     {
+        // 2 thumbs + 4 finger clusters per hand = 10 clusters total.
         var expected = new HashSet<string>
         {
-            "L-Mod", "L-Index", "L-Middle", "L-Ring", "L-Pinky", "L-Thumb",
+            "L-Thumb", "L-Index", "L-Middle", "L-Ring", "L-Pinky",
             "R-Thumb", "R-Index", "R-Middle", "R-Ring", "R-Pinky"
         };
         var actual = _positions.Select(p => p.Cluster).Distinct().ToHashSet();
@@ -89,7 +90,7 @@ public class SvalboardLayoutTests
     [Fact]
     public void LeftFingerClusters_HaveLowerX_ThanRightFingerClusters()
     {
-        // Exclude thumb clusters since L-Thumb and R-Thumb share the center area
+        // Finger clusters only (thumbs sit in the center rows and span similar Xs).
         var leftMaxX = _positions
             .Where(p => p.Cluster.StartsWith("L-") && !p.Cluster.Contains("Thumb"))
             .Max(p => p.X);

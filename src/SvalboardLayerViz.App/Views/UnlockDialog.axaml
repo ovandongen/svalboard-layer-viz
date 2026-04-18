@@ -1,0 +1,68 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        xmlns:conv="using:SvalboardLayerViz.App.Converters"
+        x:Class="SvalboardLayerViz.App.Views.UnlockDialog"
+        x:DataType="vm:UnlockDialogViewModel"
+        Title="{Binding [Unlock_Title], Source={StaticResource Loc}}"
+        Width="500" Height="360"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1E1E2E">
+
+    <DockPanel Margin="16">
+
+        <!-- Footer: Cancel button -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}"
+                    Command="{Binding CancelCommand}"
+                    IsVisible="{Binding !IsUnlocked}"
+                    Padding="16,6" />
+        </StackPanel>
+
+        <!-- Status text -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="{Binding StatusText}"
+                   FontSize="16" FontWeight="SemiBold"
+                   Foreground="#CDD6F4"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,16" />
+
+        <!-- Instruction text -->
+        <TextBlock DockPanel.Dock="Top"
+                   Text="{Binding [Unlock_HoldKeys], Source={StaticResource Loc}}"
+                   FontSize="12" Foreground="#A6ADC8"
+                   HorizontalAlignment="Center"
+                   IsVisible="{Binding IsPolling}"
+                   Margin="0,0,0,12" />
+
+        <!-- Mini-board canvas -->
+        <Border Background="#181825" CornerRadius="8" Padding="16"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ItemsControl ItemsSource="{Binding AllKeyPositions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas Width="440" Height="140" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.Styles>
+                    <Style Selector="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.Styles>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MiniKeyDisplay">
+                        <Border Width="{Binding W}" Height="{Binding H}"
+                                CornerRadius="2"
+                                Background="{Binding Background, Converter={x:Static conv:HexColorToBrushConverter.Instance}}"
+                                ToolTip.Tip="{Binding Label}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+
+    </DockPanel>
+
+</Window>

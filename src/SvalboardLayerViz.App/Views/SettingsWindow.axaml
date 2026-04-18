@@ -43,7 +43,7 @@
         <!-- Separator above version/buttons footer -->
         <Border DockPanel.Dock="Bottom" Height="1" Background="#45475A" Margin="0,10,0,0" />
 
-        <TabControl>
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
 
             <!-- ══════════════ Appearance Tab ══════════════ -->
             <TabItem Header="{Binding [Settings_TabAppearance], Source={StaticResource Loc}}">
@@ -226,6 +226,79 @@
                         <Button Grid.Column="1" Content="{Binding [Common_Add], Source={StaticResource Loc}}" Margin="6,0,0,0"
                                 Command="{Binding AddCustomLabelCommand}" Padding="10,4" />
                     </Grid>
+
+                </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ══════════════ Device Tab ══════════════ -->
+            <TabItem Header="{Binding [Settings_TabDevice], Source={StaticResource Loc}}"
+                     IsVisible="{Binding QmkSettingsTab, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="8,12,20,12" Spacing="12">
+
+                    <!-- Edit-mode hint -->
+                    <TextBlock Text="{Binding QmkSettingsTab.EditModeHint}"
+                               Foreground="#A6E3A1" FontSize="11" FontStyle="Italic"
+                               IsVisible="{Binding QmkSettingsTab.IsEditMode, Converter={x:Static BoolConverters.Not}}" />
+
+                    <ItemsControl ItemsSource="{Binding QmkSettingsTab.Groups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:QmkSettingGroupViewModel">
+                                <StackPanel Spacing="8" Margin="0,0,0,8">
+                                    <!-- Group header -->
+                                    <TextBlock Text="{Binding GroupName}"
+                                               FontSize="14" FontWeight="SemiBold" Foreground="#CDD6F4" />
+
+                                    <!-- Setting rows -->
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:QmkSettingRowViewModel">
+                                                <Border Margin="0,2" Padding="4">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <!-- Left: name + description -->
+                                                        <StackPanel Grid.Column="0" Spacing="2"
+                                                                    VerticalAlignment="Center" Margin="0,0,16,0">
+                                                            <TextBlock Text="{Binding Name}"
+                                                                       Foreground="#CDD6F4" FontSize="13"
+                                                                       FontWeight="SemiBold" />
+                                                            <TextBlock Text="{Binding Description}"
+                                                                       Foreground="#6C7086" FontSize="11"
+                                                                       TextWrapping="Wrap"
+                                                                       IsVisible="{Binding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                        </StackPanel>
+                                                        <!-- Right: checkbox for Boolean -->
+                                                        <CheckBox Grid.Column="1"
+                                                                  IsChecked="{Binding BoolValue}"
+                                                                  IsEnabled="{Binding !IsReadOnly}"
+                                                                  VerticalAlignment="Center"
+                                                                  IsVisible="{Binding IsBoolean}" />
+                                                        <!-- Right: slider+value for numeric -->
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                                                    VerticalAlignment="Center" Spacing="8"
+                                                                    IsVisible="{Binding !IsBoolean}">
+                                                            <Slider Minimum="{Binding Min}"
+                                                                    Maximum="{Binding Max}"
+                                                                    Value="{Binding SliderValue}"
+                                                                    TickFrequency="1"
+                                                                    IsSnapToTickEnabled="True"
+                                                                    IsEnabled="{Binding !IsReadOnly}"
+                                                                    Width="160" />
+                                                            <TextBlock Text="{Binding FormattedValue}"
+                                                                       Foreground="#CDD6F4"
+                                                                       FontWeight="SemiBold" Width="70"
+                                                                       VerticalAlignment="Center"
+                                                                       TextAlignment="Right" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
                 </StackPanel>
                 </ScrollViewer>

@@ -205,6 +205,74 @@
     <value>Instellingen</value>
     <comment/>
   </data>
+  <data name="Tooltip_Macros" xml:space="preserve">
+    <value>Macro's</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Dynamic" xml:space="preserve">
+    <value>Macro's / Combo's / Tap Dance</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_Title" xml:space="preserve">
+    <value>Macro-editor</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_Slots" xml:space="preserve">
+    <value>Macroslots</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_Actions" xml:space="preserve">
+    <value>Acties</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_AddTap" xml:space="preserve">
+    <value>Toets tikken</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_AddDown" xml:space="preserve">
+    <value>Toets indrukken</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_AddUp" xml:space="preserve">
+    <value>Toets loslaten</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_AddDelay" xml:space="preserve">
+    <value>Vertraging</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_AddText" xml:space="preserve">
+    <value>Tekst</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_Remove" xml:space="preserve">
+    <value>Verwijderen</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_MoveUp" xml:space="preserve">
+    <value>Omhoog</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_MoveDown" xml:space="preserve">
+    <value>Omlaag</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_BufferUsage" xml:space="preserve">
+    <value>{0}/{1} bytes</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_Empty" xml:space="preserve">
+    <value>(leeg)</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_OverCapacity" xml:space="preserve">
+    <value>Buffer vol! Verwijder acties om op te slaan.</value>
+    <comment/>
+  </data>
+  <data name="MacroEditor_ReadOnly" xml:space="preserve">
+    <value>Ga naar bewerkingsmodus om macro's te wijzigen</value>
+    <comment/>
+  </data>
   <data name="Tooltip_Refresh" xml:space="preserve">
     <value>Vernieuwen</value>
     <comment/>
@@ -215,6 +283,10 @@
   </data>
   <data name="Tooltip_Remove" xml:space="preserve">
     <value>Verwijderen</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_Edit" xml:space="preserve">
+    <value>Keymap bewerken</value>
     <comment/>
   </data>
   <data name="Status_LookingForDevice" xml:space="preserve">
@@ -261,12 +333,76 @@
     <value>Instellingenfout: {0}</value>
     <comment/>
   </data>
+  <data name="Status_EditModeActive" xml:space="preserve">
+    <value>Bewerkmodus — klik op een toets om deze te wijzigen</value>
+    <comment/>
+  </data>
+  <data name="Status_EditUnlockErrorFormat" xml:space="preserve">
+    <value>Kon bewerkmodus niet openen: {0}</value>
+    <comment/>
+  </data>
+  <data name="Status_EditAbortedDisconnect" xml:space="preserve">
+    <value>Bewerkmodus afgebroken — apparaat losgekoppeld. Openstaande wijzigingen verworpen.</value>
+    <comment/>
+  </data>
+  <data name="Status_SaveInProgressFormat" xml:space="preserve">
+    <value>Bezig met opslaan van {0} wijziging(en)…</value>
+    <comment/>
+  </data>
+  <data name="Status_SaveCompleteFormat" xml:space="preserve">
+    <value>{0} wijziging(en) opgeslagen</value>
+    <comment/>
+  </data>
+  <data name="Status_SavePartialFormat" xml:space="preserve">
+    <value>{0} van {1} opgeslagen — {2} nog in behandeling</value>
+    <comment/>
+  </data>
+  <data name="Status_SaveCancelled" xml:space="preserve">
+    <value>Opslaan geannuleerd</value>
+    <comment/>
+  </data>
+  <data name="Status_SaveCancelledSafety" xml:space="preserve">
+    <value>Opslaan geannuleerd — veiligheidswaarschuwingen</value>
+    <comment/>
+  </data>
+  <data name="SafetyConfirm_Title" xml:space="preserve">
+    <value>Opslaan met waarschuwingen?</value>
+    <comment/>
+  </data>
+  <data name="SafetyConfirm_Message" xml:space="preserve">
+    <value>De keymap die je wilt opslaan heeft mogelijke problemen:</value>
+    <comment/>
+  </data>
+  <data name="SafetyConfirm_SaveAnyway" xml:space="preserve">
+    <value>Toch opslaan</value>
+    <comment/>
+  </data>
+  <data name="SafetyWarning_BaseLayerUnusable" xml:space="preserve">
+    <value>Basislaag heeft geen bruikbare toetsen</value>
+    <comment/>
+  </data>
+  <data name="SafetyWarning_UnreachableLayer" xml:space="preserve">
+    <value>Laag wordt niet bereikt door enige laagschakelaar</value>
+    <comment/>
+  </data>
+  <data name="SafetyWarning_AllTransparentBaseLayer" xml:space="preserve">
+    <value>Basislaag is volledig transparant</value>
+    <comment/>
+  </data>
+  <data name="Status_SaveErrorFormat" xml:space="preserve">
+    <value>Opslaan mislukt: {0}</value>
+    <comment/>
+  </data>
   <data name="Board_ConnectPrompt" xml:space="preserve">
     <value>Sluit je Svalboard aan om de indeling te zien</value>
     <comment/>
   </data>
   <data name="Key_SetCustomLabel" xml:space="preserve">
     <value>Aangepast label instellen...</value>
+    <comment/>
+  </data>
+  <data name="Key_EditKeycode" xml:space="preserve">
+    <value>Toetscode bewerken...</value>
     <comment/>
   </data>
   <data name="Key_TooltipLayerFormat" xml:space="preserve">
@@ -291,6 +427,10 @@
   </data>
   <data name="Key_TooltipRowColFormat" xml:space="preserve">
     <value>Rij: {0}, Kolom: {1}</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipPendingFormat" xml:space="preserve">
+    <value>was: {0} → nu: {1}</value>
     <comment/>
   </data>
   <data name="Key_LabelWatermark" xml:space="preserve">
@@ -542,7 +682,7 @@
     <comment/>
   </data>
   <data name="Help_GettingStartedText" xml:space="preserve">
-    <value>Sluit je Svalboard aan via USB. De app detecteert het automatisch en laadt alle lagen. Als je het loskoppelt en weer aansluit, synchroniseert het opnieuw.</value>
+    <value>Sluit je Svalboard aan via USB. De app detecteert het automatisch en laadt alle lagen. Bekijk de indeling in alleen-lezen-modus of klik op Bewerken om toetsen, macro's, combo's, tap-dance en apparaatinstellingen te wijzigen.</value>
     <comment/>
   </data>
   <data name="Help_ToolbarButtons" xml:space="preserve">
@@ -610,7 +750,7 @@
     <comment/>
   </data>
   <data name="Help_SettingsText" xml:space="preserve">
-    <value>Pas laagkleuren, namen, globale sneltoets, achtergrondtransparantie, vasthouddrempel en aangepaste toetslabels aan.</value>
+    <value>Pas laagkleuren en namen, globale sneltoets, achtergrondtransparantie, vasthouddrempel en aangepaste toetslabels aan. Het tabblad Apparaat voegt QMK-firmware-instellingen toe als je Svalboard dit ondersteunt.</value>
     <comment/>
   </data>
   <data name="Help_RefreshTitle" xml:space="preserve">
@@ -626,7 +766,7 @@
     <comment/>
   </data>
   <data name="Help_LayerTabsText" xml:space="preserve">
-    <value>Klik op een tab om de toetsindeling van die laag te bekijken. Elke laag heeft een unieke kleur. Lagen waar elke toets leeg is (KC_NO) worden automatisch verborgen.</value>
+    <value>Klik op een tab om de toetsindeling van die laag te bekijken. Elke laag heeft een unieke kleur. Lagen waarin elke toets leeg is (KC_NO) worden verborgen in alleen-lezen-modus — in Bewerkmodus zijn alle lagen zichtbaar zodat je ze kunt invullen.</value>
     <comment/>
   </data>
   <data name="Help_ImportantTitle" xml:space="preserve">
@@ -673,4 +813,911 @@
     <value>• Het systeemvakpictogram biedt snelle toegang tot tonen en afsluiten</value>
     <comment/>
   </data>
+  <data name="Help_Tip6" xml:space="preserve">
+    <value>• Maak een handmatige snapshot voor grote wijzigingen — je kunt deze later altijd terugzetten vanuit Geschiedenis</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip7" xml:space="preserve">
+    <value>• Als Opslaan waarschuwt voor veiligheidskwesties, bekijk de lijst voordat je 'Toch opslaan' kiest</value>
+    <comment/>
+  </data>
+  <data name="Help_Tip8" xml:space="preserve">
+    <value>• Macro's delen een firmware-geheugenbuffer — de balk in de Macro-editor laat zien hoeveel je hebt gebruikt</value>
+    <comment/>
+  </data>
+  <data name="Help_EditTitle" xml:space="preserve">
+    <value>Bewerkmodus</value>
+    <comment/>
+  </data>
+  <data name="Help_EditText" xml:space="preserve">
+    <value>Ontgrendelt de keymap voor bewerking. Klik op toetsen om ze te wijzigen, of bewerk macro's, combo's, tap-dance en apparaatinstellingen.</value>
+    <comment/>
+  </data>
+  <data name="Help_OpenLogFolderTitle" xml:space="preserve">
+    <value>Logmap openen</value>
+    <comment/>
+  </data>
+  <data name="Help_OpenLogFolderText" xml:space="preserve">
+    <value>Opent de map met de logbestanden van de app. Handig voor foutopsporing of om logs te delen bij het melden van een probleem.</value>
+    <comment/>
+  </data>
+  <data name="Help_CopyDiagnosticsTitle" xml:space="preserve">
+    <value>Diagnostiek kopiëren</value>
+    <comment/>
+  </data>
+  <data name="Help_CopyDiagnosticsText" xml:space="preserve">
+    <value>Kopieert een diagnostische samenvatting (apparaatinfo, firmware, recente gebeurtenissen) naar het klembord.</value>
+    <comment/>
+  </data>
+  <data name="Help_DynamicTitle" xml:space="preserve">
+    <value>Macro's / Combo's / Tap Dance</value>
+    <comment/>
+  </data>
+  <data name="Help_DynamicText" xml:space="preserve">
+    <value>Dropdown om de Macro-, Combo- of Tap-Dance-editor te openen. Alleen-lezen tenzij Bewerkmodus actief is.</value>
+    <comment/>
+  </data>
+  <data name="Help_HistoryTitle" xml:space="preserve">
+    <value>Snapshot-geschiedenis</value>
+    <comment/>
+  </data>
+  <data name="Help_HistoryText" xml:space="preserve">
+    <value>Toont alle opgeslagen keymap-snapshots. Vergelijk met het huidige apparaat, zet een snapshot terug in Bewerkmodus, of importeer/exporteer snapshots.</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingSection" xml:space="preserve">
+    <value>Je keymap bewerken</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingIntro" xml:space="preserve">
+    <value>Klik op Bewerken om de keymap voor wijzigingen te ontgrendelen. Er verschijnt een blauwe balk met het aantal openstaande wijzigingen. Live markering en automatisch laag wisselen zijn gepauzeerd tijdens het bewerken, en de achtergrond wordt volledig dekkend voor beter contrast (je transparantie-instelling wordt hersteld zodra je Opslaan of Verwerpen kiest).</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingUnlock" xml:space="preserve">
+    <value>Als je firmware vergrendeld is, vraagt een ontgrendeldialoog je om een specifieke toetscombinatie op de Svalboard vast te houden tot de app bevestigt dat het apparaat ontgrendeld is.</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingKeyPicker" xml:space="preserve">
+    <value>Klik op een willekeurige toets op het bord om de Toetskiezer te openen. Kies een categorie (Basis, Modifier, Laag, Media, Muis, Macro, Tap Dance, Aangepast, Geavanceerd), kies of bouw de keycode, bekijk het resultaat en pas het toe.</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingSaveDiscard" xml:space="preserve">
+    <value>De bewerkbalk heeft knoppen om een handmatige snapshot te maken, naar Macro's, Combo's, Tap Dance of Apparaatinstellingen te springen, en Verwerpen (alle openstaande wijzigingen weggooien) of Opslaan (naar het apparaat schrijven).</value>
+    <comment/>
+  </data>
+  <data name="Help_EditingSafety" xml:space="preserve">
+    <value>Vóór het opslaan controleert de app op mogelijke problemen — onbereikbare lagen, een basislaag zonder bruikbare toetsen, en vergelijkbaar. Als er waarschuwingen zijn, kun je in een bevestigingsdialoog Annuleren of Toch opslaan kiezen.</value>
+    <comment/>
+  </data>
+  <data name="Help_DynamicSection" xml:space="preserve">
+    <value>Macro's, Combo's &amp; Tap Dance</value>
+    <comment/>
+  </data>
+  <data name="Help_Macros" xml:space="preserve">
+    <value>• Macro's — meerstaps-sequenties van toetsaanslagen, vasthouden, loslaten, vertragingen of tekst. De editor toont een bufferbalk omdat macro's firmware-geheugen delen.</value>
+    <comment/>
+  </data>
+  <data name="Help_Combos" xml:space="preserve">
+    <value>• Combo's — druk tot vier toetsen tegelijk in binnen een kort tijdvenster om een andere uitvoertoets te produceren.</value>
+    <comment/>
+  </data>
+  <data name="Help_TapDance" xml:space="preserve">
+    <value>• Tap Dance — één toets, meerdere uitkomsten: tikken, vasthouden, dubbel tikken of tikken-en-vasthouden. Elke invoer heeft een instelbare term (ms) die de timing bepaalt.</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsSection" xml:space="preserve">
+    <value>Snapshots &amp; Geschiedenis</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsAuto" xml:space="preserve">
+    <value>Snapshots worden automatisch gemaakt als het apparaat verbindt en vóór/na elke Opslag, zodat je altijd kunt terugzetten.</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsManual" xml:space="preserve">
+    <value>Gebruik in Bewerkmodus het camera-icoon op de blauwe balk om vóór grote wijzigingen een handmatige snapshot te maken.</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsDiff" xml:space="preserve">
+    <value>Klik in het Geschiedenis-venster op Bekijken bij een snapshot voor een zij-aan-zij-vergelijking met het huidige apparaat, wissel onafhankelijk van laag, of synchroniseer beide zijden.</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsRestore" xml:space="preserve">
+    <value>Klik op Terugzetten bij een snapshot om deze in Bewerkmodus te laden als openstaande wijzigingen — bekijk ze, en kies dan Opslaan of Verwerpen zoals bij elke andere bewerking.</value>
+    <comment/>
+  </data>
+  <data name="Help_SnapshotsImportExport" xml:space="preserve">
+    <value>Losse snapshots kunnen worden geëxporteerd of verwijderd; de hele geschiedenis kan als bundel worden geëxporteerd of geïmporteerd vanuit een eerdere export.</value>
+    <comment/>
+  </data>
+  <data name="Help_DeviceSettingsSection" xml:space="preserve">
+    <value>Apparaatinstellingen (QMK)</value>
+    <comment/>
+  </data>
+  <data name="Help_DeviceSettingsText" xml:space="preserve">
+    <value>Open Instellingen en ga naar het tabblad Apparaat (alleen beschikbaar als je firmware QMK-instellingen blootstelt) om tapping term, debounce, auto-shift, combo term en vergelijkbare apparaatopties aan te passen. Wijzigingen zijn alleen-lezen tot je Bewerkmodus opent, en worden doorgevoerd met de hoofdknop Opslaan op de bewerkbalk.</value>
+    <comment/>
+  </data>
+  <data name="Help_ImportantText5" xml:space="preserve">
+    <value>Automatisch laag wisselen is gepauzeerd terwijl Bewerkmodus actief is. Klik op Verwerpen of Opslaan op de bewerkbalk om het te hervatten.</value>
+    <comment/>
+  </data>
+  <data name="Status_DiagnosticsCopied" xml:space="preserve">
+    <value>Diagnostiek gekopieerd naar klembord</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_OpenLogFolder" xml:space="preserve">
+    <value>Logmap openen</value>
+    <comment/>
+  </data>
+  <data name="Tooltip_CopyDiagnostics" xml:space="preserve">
+    <value>Diagnostiek naar klembord kopiëren</value>
+    <comment/>
+  </data>
+
+  <!-- ══════════════ Unlock Dialog ══════════════ -->
+  <data name="Unlock_Title" xml:space="preserve">
+    <value>Toetsenbord ontgrendelen</value>
+  </data>
+  <data name="Unlock_HoldKeys" xml:space="preserve">
+    <value>Houd de gemarkeerde toetsen ingedrukt om je toetsenbord te ontgrendelen voor bewerking</value>
+  </data>
+  <data name="Unlock_Success" xml:space="preserve">
+    <value>Toetsenbord ontgrendeld!</value>
+  </data>
+  <data name="Unlock_Polling" xml:space="preserve">
+    <value>Wachten op toetsen...</value>
+  </data>
+
+  <!-- ══════════════ Key Picker Dialog ══════════════ -->
+  <data name="Picker_Title" xml:space="preserve">
+    <value>Toetscode kiezen</value>
+  </data>
+  <data name="Picker_SearchPlaceholder" xml:space="preserve">
+    <value>Toetscodes zoeken...</value>
+  </data>
+  <data name="Picker_Category" xml:space="preserve">
+    <value>Kies een categorie</value>
+  </data>
+  <data name="Picker_Selection" xml:space="preserve">
+    <value>Kies een toets of bouwer</value>
+  </data>
+  <data name="Picker_Arguments" xml:space="preserve">
+    <value>Argumenten configureren</value>
+  </data>
+  <data name="Picker_Preview" xml:space="preserve">
+    <value>Voorbeeld</value>
+  </data>
+  <data name="Picker_RecentlyUsed" xml:space="preserve">
+    <value>Recent gebruikt</value>
+  </data>
+  <data name="Picker_RawHex" xml:space="preserve">
+    <value>Ruwe hex-code</value>
+  </data>
+  <data name="Picker_Apply" xml:space="preserve">
+    <value>Toepassen</value>
+  </data>
+
+  <!-- ══════════════ Common (additional) ══════════════ -->
+  <data name="Common_Back" xml:space="preserve">
+    <value>Terug</value>
+  </data>
+  <data name="Common_Next" xml:space="preserve">
+    <value>Volgende</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Categorieknoppen ══════════════ -->
+  <data name="Picker_Cat_Basic" xml:space="preserve">
+    <value>Basis</value>
+  </data>
+  <data name="Picker_Cat_Modifier" xml:space="preserve">
+    <value>Modificator</value>
+  </data>
+  <data name="Picker_Cat_Layer" xml:space="preserve">
+    <value>Laag</value>
+  </data>
+  <data name="Picker_Cat_Media" xml:space="preserve">
+    <value>Media</value>
+  </data>
+  <data name="Picker_Cat_Mouse" xml:space="preserve">
+    <value>Muis</value>
+  </data>
+  <data name="Picker_Cat_Custom" xml:space="preserve">
+    <value>Aangepast</value>
+  </data>
+  <data name="Picker_Cat_Macro" xml:space="preserve">
+    <value>Macro</value>
+  </data>
+  <data name="Picker_Cat_TapDance" xml:space="preserve">
+    <value>Tap Dance</value>
+  </data>
+  <data name="Picker_Cat_Advanced" xml:space="preserve">
+    <value>Geavanceerd</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Categorie-intro's ══════════════ -->
+  <data name="Picker_Intro_Modifier" xml:space="preserve">
+    <value>Modificator-toetsen (Ctrl, Shift, Alt, Gui/Win/Cmd) veranderen hoe andere toetsen werken. Kies hieronder een optie — Mod-Tap combineert een tik-toets met ingedrukte modificatoren op dezelfde toets; Eenmalige Modificator past modificatoren toe op alleen de volgende toets die je indrukt.</value>
+  </data>
+  <data name="Picker_Intro_Layer" xml:space="preserve">
+    <value>Lagen zijn alternatieve toetsindelingen die op dezelfde fysieke toetsen zijn gestapeld — zoals Shift letters in hoofdletters verandert, maar dan voor elke toets tegelijk. Kies hieronder een optie: Laag-Tik voegt een tik-toetscode toe aan een ingedrukte laag, Laag-Modificator combineert een laag met modificatoren, en Laagfunctie geeft je de directe laagschakelaars (MO/TG/TO/DF/OSL/TT).</value>
+  </data>
+  <data name="Picker_Intro_Custom" xml:space="preserve">
+    <value>Firmware-gedefinieerde toetscodes die niet in de standaard HID-set passen. Kies hieronder Aangepaste Toetscode om er één via een numerieke index aan te spreken.</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Veldlabels ══════════════ -->
+  <data name="Picker_Field_HoldModifiers" xml:space="preserve">
+    <value>Modificatoren ingedrukt</value>
+  </data>
+  <data name="Picker_Field_Modifiers" xml:space="preserve">
+    <value>Modificatoren</value>
+  </data>
+  <data name="Picker_Field_TapKey" xml:space="preserve">
+    <value>Tik-toets</value>
+  </data>
+  <data name="Picker_Field_Layer" xml:space="preserve">
+    <value>Laag</value>
+  </data>
+  <data name="Picker_Field_Function" xml:space="preserve">
+    <value>Functie</value>
+  </data>
+  <data name="Picker_Field_CustomIndex" xml:space="preserve">
+    <value>Aangepaste index</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Modificator-vinkjes ══════════════ -->
+  <data name="Picker_Mod_Ctrl" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="Picker_Mod_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Picker_Mod_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="Picker_Mod_Gui" xml:space="preserve">
+    <value>Gui</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Bouwer-namen + beschrijvingen ══════════════ -->
+  <data name="Builder_ModTap_Name" xml:space="preserve">
+    <value>Mod-Tap</value>
+  </data>
+  <data name="Builder_ModTap_Desc" xml:space="preserve">
+    <value>Tik voor een normale toetsdruk, houd ingedrukt om modificator(en) toe te passen. Vink onder 'Modificatoren ingedrukt' aan welke modificatoren meegaan, en kies onder 'Tik-toets' wat de tik verstuurt. Voorbeeld: Modificatoren ingedrukt = Ctrl, Tik-toets = A → tik voor A, ingedrukt voor Ctrl.</value>
+  </data>
+  <data name="Builder_OneShotMod_Name" xml:space="preserve">
+    <value>Eenmalige Modificator</value>
+  </data>
+  <data name="Builder_OneShotMod_Desc" xml:space="preserve">
+    <value>Eenmaal indrukken en loslaten — de vinkjes onder 'Modificatoren' gelden alleen voor de volgende toets die je indrukt, ingedrukt houden is niet nodig. Voorbeeld: Modificatoren = Shift, tik dan 'a' om 'A' te typen. Handig als modificatoren ingedrukt houden lastig is.</value>
+  </data>
+  <data name="Builder_LayerTap_Name" xml:space="preserve">
+    <value>Laag-Tik</value>
+  </data>
+  <data name="Builder_LayerTap_Desc" xml:space="preserve">
+    <value>Tik voor een normale toetsdruk, houd ingedrukt om naar een andere laag te schakelen. Kies de doellaag onder 'Laag' en de tik-toetscode onder 'Tik-toets'. Voorbeeld: Laag = Symbolen, Tik-toets = Spatie → tik voor Spatie, ingedrukt voor Symbolen.</value>
+  </data>
+  <data name="Builder_LayerMod_Name" xml:space="preserve">
+    <value>Laag-Modificator</value>
+  </data>
+  <data name="Builder_LayerMod_Desc" xml:space="preserve">
+    <value>Houd deze toets ingedrukt om tegelijkertijd een laag te activeren én modificator(en) toe te passen. Kies de doellaag onder 'Laag' en welke toetsen meegaan onder 'Modificatoren'. Voorbeeld: Laag = Nav, Modificatoren = Shift → pijltoetsen op de Nav-laag worden Shift+Pijl voor selectie.</value>
+  </data>
+  <data name="Builder_LayerFunction_Name" xml:space="preserve">
+    <value>Laagfunctie</value>
+  </data>
+  <data name="Builder_LayerFunction_Desc" xml:space="preserve">
+    <value>Wisselt op verschillende manieren van laag. Kies onder 'Functie' hoe het schakelen zich gedraagt (kortstondig, wisselen, enz.) en het doel onder 'Laag'. De regel onder Functie beschrijft exact wat de gekozen Functie doet.</value>
+  </data>
+  <data name="Builder_CustomKeycode_Name" xml:space="preserve">
+    <value>Aangepaste Toetscode</value>
+  </data>
+  <data name="Builder_CustomKeycode_Desc" xml:space="preserve">
+    <value>Firmware-gedefinieerde toetscode aangesproken via 'Aangepaste index'. Alleen nuttig als je al weet welke index op welke aangepaste toetscode in je firmware-build wijst — normaal gesproken kies je er één op naam uit de categorie Aangepast.</value>
+  </data>
+
+  <!-- ══════════════ Key Picker — Laagfunctie help per soort ══════════════ -->
+  <data name="LayerFn_None_Desc" xml:space="preserve">
+    <value>Kies een Functie om te zien wat deze doet.</value>
+  </data>
+  <data name="LayerFn_MO_Desc" xml:space="preserve">
+    <value>MO — Kortstondig: de Laag hieronder is alleen actief terwijl je de toets ingedrukt houdt. Loslaten = terug naar basis.</value>
+  </data>
+  <data name="LayerFn_TG_Desc" xml:space="preserve">
+    <value>TG — Wisselen: druk om de Laag hieronder aan te zetten; druk opnieuw om uit te zetten. Blijft staan tot je weer wisselt.</value>
+  </data>
+  <data name="LayerFn_TO_Desc" xml:space="preserve">
+    <value>TO — Aanzetten: schakelt naar de Laag hieronder en blijft daar (vervangt de huidige actieve laag).</value>
+  </data>
+  <data name="LayerFn_DF_Desc" xml:space="preserve">
+    <value>DF — Standaard: maakt de Laag hieronder je nieuwe basis — waar je naar terugkeert als andere lagen loslaten.</value>
+  </data>
+  <data name="LayerFn_OSL_Desc" xml:space="preserve">
+    <value>OSL — Eenmalige Laag: activeert de Laag hieronder voor alleen de volgende toetsdruk en springt dan terug.</value>
+  </data>
+  <data name="LayerFn_TT_Desc" xml:space="preserve">
+    <value>TT — Tik-Wisselen: tik meerdere keren achter elkaar om de Laag hieronder aan te zetten; of houd ingedrukt voor kortstondig (zoals MO).</value>
+  </data>
+
+  <!-- ══════════════ Edit Mode ══════════════ -->
+  <data name="Edit_BannerTitle" xml:space="preserve">
+    <value>Bewerken</value>
+  </data>
+  <data name="Edit_BannerChangesFormat" xml:space="preserve">
+    <value>{0} openstaande wijzigingen</value>
+  </data>
+  <data name="Edit_BannerChanges" xml:space="preserve">
+    <value>openstaande wijzigingen</value>
+  </data>
+  <data name="Edit_Discard" xml:space="preserve">
+    <value>Verwerpen</value>
+  </data>
+  <data name="Edit_Save" xml:space="preserve">
+    <value>Opslaan</value>
+  </data>
+  <data name="Edit_Saving" xml:space="preserve">
+    <value>Opslaan…</value>
+  </data>
+  <data name="Edit_SaveComingSoon" xml:space="preserve">
+    <value>Wijzigingen opslaan</value>
+  </data>
+  <data name="Edit_MacroLoading" xml:space="preserve">
+    <value>Macro's worden nog geladen, even geduld…</value>
+  </data>
+  <data name="Edit_MacroBufferOverflow" xml:space="preserve">
+    <value>Macrobuffer overflow — verklein macro-inhoud voor het opslaan</value>
+  </data>
+
+  <!-- ══════════════ Snapshot History ══════════════ -->
+  <data name="Title_History" xml:space="preserve">
+    <value>Snapshot-geschiedenis</value>
+  </data>
+  <data name="Tooltip_History" xml:space="preserve">
+    <value>Snapshot-geschiedenis</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Sluiten</value>
+  </data>
+  <data name="History_Search" xml:space="preserve">
+    <value>Snapshots zoeken…</value>
+  </data>
+  <data name="History_Filter_Manual" xml:space="preserve">
+    <value>Handmatig</value>
+  </data>
+  <data name="History_Filter_Auto" xml:space="preserve">
+    <value>Automatisch</value>
+  </data>
+  <data name="History_Filter_Initial" xml:space="preserve">
+    <value>Begin</value>
+  </data>
+  <data name="History_DefaultManualLabel" xml:space="preserve">
+    <value>Handmatige snapshot</value>
+  </data>
+  <data name="History_PreSaveLabel" xml:space="preserve">
+    <value>Voor opslaan</value>
+  </data>
+  <data name="History_PostSaveLabel" xml:space="preserve">
+    <value>Na opslaan</value>
+  </data>
+  <data name="History_FirstConnectLabel" xml:space="preserve">
+    <value>Beginstaat</value>
+  </data>
+  <data name="History_Import" xml:space="preserve">
+    <value>Importeren…</value>
+  </data>
+  <data name="History_ExportAll" xml:space="preserve">
+    <value>Alles exporteren…</value>
+  </data>
+  <data name="History_ExportRow" xml:space="preserve">
+    <value>Exporteren</value>
+  </data>
+  <data name="History_DeleteRow" xml:space="preserve">
+    <value>Verwijderen</value>
+  </data>
+  <data name="History_RestoreRow" xml:space="preserve">
+    <value>Herstellen</value>
+  </data>
+  <data name="History_ViewDiff" xml:space="preserve">
+    <value>Bekijken</value>
+  </data>
+  <data name="Diff_Title" xml:space="preserve">
+    <value>Snapshot-verschil</value>
+  </data>
+  <data name="Diff_SnapshotSide" xml:space="preserve">
+    <value>Snapshot</value>
+  </data>
+  <data name="Diff_DeviceSide" xml:space="preserve">
+    <value>Huidig apparaat</value>
+  </data>
+  <data name="Diff_SyncLayers" xml:space="preserve">
+    <value>Lagen synchroniseren</value>
+  </data>
+  <data name="Diff_ChangeCount" xml:space="preserve">
+    <value>Wijzigingen ({0}):</value>
+  </data>
+  <data name="Diff_FirmwareWarning" xml:space="preserve">
+    <value>Vastgelegd met andere firmware. Sommige toetscodes kunnen anders werken — controleer zorgvuldig.</value>
+  </data>
+  <data name="Diff_LayerTruncateWarning" xml:space="preserve">
+    <value>Snapshot heeft {0} lagen, apparaat ondersteunt {1} — alleen lagen 0–{2} worden hersteld.</value>
+  </data>
+  <data name="Diff_RestoreConfirm" xml:space="preserve">
+    <value>Dit laadt de snapshot van {0} als openstaande wijzigingen. Bekijk en sla ze op. Doorgaan?</value>
+  </data>
+  <data name="Diff_RestoreDisabledPending" xml:space="preserve">
+    <value>Sla eerst je openstaande wijzigingen op of verwerp ze.</value>
+  </data>
+  <data name="Diff_RestoreDisabledNoDevice" xml:space="preserve">
+    <value>Sluit een apparaat aan om te herstellen.</value>
+  </data>
+  <data name="Diff_NoChanges" xml:space="preserve">
+    <value>Deze snapshot is identiek aan de huidige apparaatstatus.</value>
+  </data>
+  <data name="Edit_ManualSnapshot" xml:space="preserve">
+    <value>Snapshot maken</value>
+  </data>
+  <data name="Edit_ManualSnapshotPrompt" xml:space="preserve">
+    <value>Snapshotlabel (optioneel)</value>
+  </data>
+  <data name="Status_RestoreLoaded" xml:space="preserve">
+    <value>Snapshot hersteld — {0} wijzigingen in behandeling. Bekijk en sla op.</value>
+  </data>
+  <data name="History_DeleteConfirm" xml:space="preserve">
+    <value>Snapshot "{0}" verwijderen? Dit kan niet ongedaan worden gemaakt.</value>
+  </data>
+  <data name="History_DeletedStatus" xml:space="preserve">
+    <value>Snapshot "{0}" verwijderd</value>
+  </data>
+  <data name="History_ExportedStatus" xml:space="preserve">
+    <value>Snapshot "{0}" geëxporteerd</value>
+  </data>
+  <data name="History_ExportedAllStatus" xml:space="preserve">
+    <value>{0} snapshot(s) geëxporteerd</value>
+  </data>
+  <data name="History_ImportSummary" xml:space="preserve">
+    <value>Geïmporteerd {0} • Overgeslagen {1} • Geweigerd {2}</value>
+  </data>
+  <data name="History_Empty" xml:space="preserve">
+    <value>Nog geen snapshots</value>
+  </data>
+  <data name="History_NoMatch" xml:space="preserve">
+    <value>Geen snapshots voldoen aan het filter</value>
+  </data>
+  <data name="History_NoDevice" xml:space="preserve">
+    <value>Sluit een toetsenbord aan om snapshots te bekijken</value>
+  </data>
+  <data name="History_ExportFileTitle" xml:space="preserve">
+    <value>Snapshot exporteren</value>
+  </data>
+  <data name="History_ExportFolderTitle" xml:space="preserve">
+    <value>Alle snapshots exporteren — kies map</value>
+  </data>
+  <data name="History_ImportFolderTitle" xml:space="preserve">
+    <value>Snapshots importeren — kies map</value>
+  </data>
+
+  <!-- ══════════════ Settings: Device Tab ══════════════ -->
+  <data name="Settings_TabDevice" xml:space="preserve">
+    <value>Apparaat</value>
+  </data>
+  <data name="Settings_DeviceEditHint" xml:space="preserve">
+    <value>Schakel bewerkingsmodus in om apparaatinstellingen te wijzigen</value>
+  </data>
+  <data name="Settings_DeviceNoSettings" xml:space="preserve">
+    <value>Geen QMK-instellingen beschikbaar op dit apparaat</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Names ══════════════ -->
+  <!-- Tap-Hold instellingen -->
+  <data name="QmkSetting_TappingTerm" xml:space="preserve">
+    <value>Tik-termijn</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay" xml:space="preserve">
+    <value>Tikcode-vertraging</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay" xml:space="preserve">
+    <value>Tik-vasthoud Caps-vertraging</value>
+  </data>
+  <data name="QmkSetting_TappingToggle" xml:space="preserve">
+    <value>Tik-schakelaar</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm" xml:space="preserve">
+    <value>Snelle tik-termijn</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm" xml:space="preserve">
+    <value>Vloeiende tik-termijn</value>
+  </data>
+  <data name="QmkSetting_PermissiveHold" xml:space="preserve">
+    <value>Tolerant vasthouden</value>
+  </data>
+  <data name="QmkSetting_HoldOnOtherKeyPress" xml:space="preserve">
+    <value>Vasthouden bij andere toetsaanslag</value>
+  </data>
+  <data name="QmkSetting_RetroTapping" xml:space="preserve">
+    <value>Retro-tikken</value>
+  </data>
+  <data name="QmkSetting_ChordalHold" xml:space="preserve">
+    <value>Akkoord vasthouden</value>
+  </data>
+
+  <!-- Eenmalige instellingen -->
+  <data name="QmkSetting_OneShotTapToggle" xml:space="preserve">
+    <value>Eenmalig tik-schakelaar</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout" xml:space="preserve">
+    <value>Eenmalig time-out</value>
+  </data>
+
+  <!-- Combo instellingen -->
+  <data name="QmkSetting_ComboTerm" xml:space="preserve">
+    <value>Combo-termijn</value>
+  </data>
+
+  <!-- Auto-shift instellingen -->
+  <data name="QmkSetting_AutoShiftTimeout" xml:space="preserve">
+    <value>Automatisch verschuiven time-out</value>
+  </data>
+
+  <!-- Muistoets instellingen -->
+  <data name="QmkSetting_MouseKeyDelay" xml:space="preserve">
+    <value>Muistoets vertraging</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval" xml:space="preserve">
+    <value>Muistoets interval</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMoveDelta" xml:space="preserve">
+    <value>Muistoets bewegingsdelta</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMaxSpeed" xml:space="preserve">
+    <value>Muistoets maximale snelheid</value>
+  </data>
+  <data name="QmkSetting_MouseKeyTimeToMax" xml:space="preserve">
+    <value>Muistoets tijd tot maximaal</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay" xml:space="preserve">
+    <value>Muiswiel vertraging</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval" xml:space="preserve">
+    <value>Muiswiel interval</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelMaxSpeed" xml:space="preserve">
+    <value>Muiswiel maximale snelheid</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelTimeToMax" xml:space="preserve">
+    <value>Muiswiel tijd tot maximaal</value>
+  </data>
+
+  <!-- Groepskoppen -->
+  <data name="QmkSettingGroup_TapHold" xml:space="preserve">
+    <value>Tik / Vasthouden</value>
+  </data>
+  <data name="QmkSettingGroup_OneShot" xml:space="preserve">
+    <value>Eenmalig</value>
+  </data>
+  <data name="QmkSettingGroup_Combos" xml:space="preserve">
+    <value>Combo's</value>
+  </data>
+  <data name="QmkSettingGroup_AutoShift" xml:space="preserve">
+    <value>Automatisch verschuiven</value>
+  </data>
+  <data name="QmkSettingGroup_MouseKeys" xml:space="preserve">
+    <value>Muistoetsen</value>
+  </data>
+  <data name="QmkSettingGroup_Misc" xml:space="preserve">
+    <value>Overig</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Descriptions ══════════════ -->
+  <data name="QmkSetting_TappingTerm_Desc" xml:space="preserve">
+    <value>Hoe lang je een dubbelfunctietoets kunt vasthouden voordat het als "vasthouden" telt in plaats van "tikken" (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay_Desc" xml:space="preserve">
+    <value>Vertraging tussen toetsaanslagen bij het verzenden van tikcodes (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay_Desc" xml:space="preserve">
+    <value>Extra vertraging wanneer Caps Lock betrokken is bij een tik-vasthoudtoets (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_TappingToggle_Desc" xml:space="preserve">
+    <value>Aantal tikken nodig om een laag permanent in te schakelen via een tik-schakeltoets</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm_Desc" xml:space="preserve">
+    <value>Als je een dubbelfunctietoets binnen deze tijd opnieuw tikt, stuurt het altijd de tik — zelfs als je vasthoudt (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm_Desc" xml:space="preserve">
+    <value>Bij snel typen worden toetsen binnen dit venster als tikken behandeld in plaats van vasthouden (in milliseconden). Stel in op 0 om uit te schakelen</value>
+  </data>
+  <data name="QmkSetting_PermissiveHold_Desc" xml:space="preserve">
+    <value>Als een andere toets wordt ingedrukt en losgelaten terwijl een dubbelfunctietoets vastgehouden wordt, behandel het als vasthouden — zelfs als de tiktermijn nog niet verstreken is</value>
+  </data>
+  <data name="QmkSetting_HoldOnOtherKeyPress_Desc" xml:space="preserve">
+    <value>Behandel een dubbelfunctietoets direct als vastgehouden zodra een andere toets wordt ingedrukt — sneller maar minder vergevingsgezind</value>
+  </data>
+  <data name="QmkSetting_RetroTapping_Desc" xml:space="preserve">
+    <value>Als een dubbelfunctietoets langer dan de tiktermijn vastgehouden wordt maar er geen andere toets wordt ingedrukt, stuur toch de tikactie bij loslaten</value>
+  </data>
+  <data name="QmkSetting_ChordalHold_Desc" xml:space="preserve">
+    <value>Beslis tik vs. vasthouden op basis van of de volgende toets op dezelfde hand (tik) of tegenovergestelde hand (vasthouden) zit</value>
+  </data>
+  <data name="QmkSetting_OneShotTapToggle_Desc" xml:space="preserve">
+    <value>Aantal tikken nodig om een eenmalige modifier of laag permanent te vergrendelen</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout_Desc" xml:space="preserve">
+    <value>Hoe lang een eenmalige modifier actief blijft wachtend op de volgende toetsaanslag (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_ComboTerm_Desc" xml:space="preserve">
+    <value>Maximale tijd tussen toetsaanslagen om als combo te tellen (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_AutoShiftTimeout_Desc" xml:space="preserve">
+    <value>Houd een toets langer vast dan dit om automatisch de shift-versie te typen, bijv. houd "a" vast voor "A" (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyDelay_Desc" xml:space="preserve">
+    <value>Vertraging voordat de muiscursor begint te bewegen na het indrukken van een muistoets (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval_Desc" xml:space="preserve">
+    <value>Tijd tussen muisbewegingsupdates — lager betekent vloeiender maar snellere cursor (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMoveDelta_Desc" xml:space="preserve">
+    <value>Hoeveel pixels de cursor per updatestap beweegt</value>
+  </data>
+  <data name="QmkSetting_MouseKeyMaxSpeed_Desc" xml:space="preserve">
+    <value>Maximale cursorsnelheidsvermenigvuldiger na acceleratie</value>
+  </data>
+  <data name="QmkSetting_MouseKeyTimeToMax_Desc" xml:space="preserve">
+    <value>Aantal updatestappen voordat de cursor maximale snelheid bereikt</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay_Desc" xml:space="preserve">
+    <value>Vertraging voordat het scrollwiel begint te bewegen na het indrukken van een wieltoets (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval_Desc" xml:space="preserve">
+    <value>Tijd tussen scrollwielstappen — lager betekent sneller scrollen (in milliseconden)</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelMaxSpeed_Desc" xml:space="preserve">
+    <value>Maximale scrollwielsnelheidsvermenigvuldiger na acceleratie</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelTimeToMax_Desc" xml:space="preserve">
+    <value>Aantal updatestappen voordat het scrollwiel maximale snelheid bereikt</value>
+  </data>
+
+  <!-- ══════════════ QMK Setting Units ══════════════ -->
+  <data name="QmkSetting_TappingTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_TapCodeDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_TapHoldCapsDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_QuickTapTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_FlowTapTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_OneShotTimeout_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_ComboTerm_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_AutoShiftTimeout_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyInterval_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelDelay_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="QmkSetting_MouseKeyWheelInterval_Unit" xml:space="preserve">
+    <value>ms</value>
+  </data>
+
+  <!-- QMK Settings: Group headers (new) -->
+  <data name="QmkSettingGroup_Magic" xml:space="preserve">
+    <value>Magic</value>
+  </data>
+  <data name="QmkSettingGroup_GraveEscape" xml:space="preserve">
+    <value>Grave Escape</value>
+  </data>
+
+  <!-- QMK Settings: Magic bitfield -->
+  <data name="QmkSetting_Magic_SwapCapsCtrl" xml:space="preserve">
+    <value>Caps Lock en linker Control omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapCapsCtrl_Desc" xml:space="preserve">
+    <value>Wisselt Caps Lock en linker Control toetsfuncties om</value>
+  </data>
+  <data name="QmkSetting_Magic_CapsToCtrl" xml:space="preserve">
+    <value>Caps Lock als Control gebruiken</value>
+  </data>
+  <data name="QmkSetting_Magic_CapsToCtrl_Desc" xml:space="preserve">
+    <value>Caps Lock werkt als Control zonder omwisseling</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLAltLGui" xml:space="preserve">
+    <value>Linker Alt en GUI omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLAltLGui_Desc" xml:space="preserve">
+    <value>Wisselt linker Alt en linker GUI (Win/Cmd) toetsen om</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRAltRGui" xml:space="preserve">
+    <value>Rechter Alt en GUI omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRAltRGui_Desc" xml:space="preserve">
+    <value>Wisselt rechter Alt en rechter GUI (Win/Cmd) toetsen om</value>
+  </data>
+  <data name="QmkSetting_Magic_NoGui" xml:space="preserve">
+    <value>GUI-toetsen uitschakelen</value>
+  </data>
+  <data name="QmkSetting_Magic_NoGui_Desc" xml:space="preserve">
+    <value>Schakelt beide GUI (Win/Cmd) toetsen volledig uit</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapGraveEsc" xml:space="preserve">
+    <value>` en Escape omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapGraveEsc_Desc" xml:space="preserve">
+    <value>Wisselt Grave/Tilde en Escape toetsfuncties om</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapBsBackslash" xml:space="preserve">
+    <value>\ en Backspace omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapBsBackslash_Desc" xml:space="preserve">
+    <value>Wisselt Backslash en Backspace toetsfuncties om</value>
+  </data>
+  <data name="QmkSetting_Magic_Nkro" xml:space="preserve">
+    <value>N-Key Rollover inschakelen</value>
+  </data>
+  <data name="QmkSetting_Magic_Nkro_Desc" xml:space="preserve">
+    <value>Maakt onbeperkt gelijktijdige toetsaanslagen mogelijk (vereist USB-ondersteuning)</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLCtlLGui" xml:space="preserve">
+    <value>Linker Control en GUI omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapLCtlLGui_Desc" xml:space="preserve">
+    <value>Wisselt linker Control en linker GUI (Win/Cmd) toetsen om</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRCtlRGui" xml:space="preserve">
+    <value>Rechter Control en GUI omwisselen</value>
+  </data>
+  <data name="QmkSetting_Magic_SwapRCtlRGui_Desc" xml:space="preserve">
+    <value>Wisselt rechter Control en rechter GUI (Win/Cmd) toetsen om</value>
+  </data>
+
+  <!-- QMK Settings: Grave Escape bitfield -->
+  <data name="QmkSetting_GraveEsc_Alt" xml:space="preserve">
+    <value>Altijd Escape sturen met Alt</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Alt_Desc" xml:space="preserve">
+    <value>Grave Escape stuurt altijd Escape wanneer Alt ingedrukt is</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Ctrl" xml:space="preserve">
+    <value>Altijd Escape sturen met Control</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Ctrl_Desc" xml:space="preserve">
+    <value>Grave Escape stuurt altijd Escape wanneer Control ingedrukt is</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Gui" xml:space="preserve">
+    <value>Altijd Escape sturen met GUI</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Gui_Desc" xml:space="preserve">
+    <value>Grave Escape stuurt altijd Escape wanneer GUI (Win/Cmd) ingedrukt is</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Shift" xml:space="preserve">
+    <value>Altijd Escape sturen met Shift</value>
+  </data>
+  <data name="QmkSetting_GraveEsc_Shift_Desc" xml:space="preserve">
+    <value>Grave Escape stuurt altijd Escape wanneer Shift ingedrukt is</value>
+  </data>
+
+  <!-- QMK Settings: Auto Shift bitfield -->
+  <data name="QmkSetting_AutoShift_Enable" xml:space="preserve">
+    <value>Auto Shift inschakelen</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Enable_Desc" xml:space="preserve">
+    <value>Een toets langer ingedrukt houden dan de timeout past automatisch Shift toe</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Modifiers" xml:space="preserve">
+    <value>Inschakelen voor modifiers</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Modifiers_Desc" xml:space="preserve">
+    <value>Auto Shift geldt ook voor modificatietoetsen</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoSpecial" xml:space="preserve">
+    <value>Speciale toetsen niet Auto Shiften</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoSpecial_Desc" xml:space="preserve">
+    <value>Sluit speciale toetsen (leestekens, symbolen) uit van Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoNumeric" xml:space="preserve">
+    <value>Numerieke toetsen niet Auto Shiften</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoNumeric_Desc" xml:space="preserve">
+    <value>Sluit cijfertoetsen uit van Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoAlpha" xml:space="preserve">
+    <value>Alfatekens niet Auto Shiften</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoAlpha_Desc" xml:space="preserve">
+    <value>Sluit lettertoetsen uit van Auto Shift</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Repeat" xml:space="preserve">
+    <value>Toetsherhaling inschakelen</value>
+  </data>
+  <data name="QmkSetting_AutoShift_Repeat_Desc" xml:space="preserve">
+    <value>Schakelt toetsherhaling in voor Auto Shift toetsen</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoRepeat" xml:space="preserve">
+    <value>Toetsherhaling uitschakelen bij timeout</value>
+  </data>
+  <data name="QmkSetting_AutoShift_NoRepeat_Desc" xml:space="preserve">
+    <value>Stopt toetsherhaling wanneer de Auto Shift timeout is overschreden</value>
+  </data>
+  <data name="Common_Clear" xml:space="preserve">
+    <value>Wissen</value>
+  </data>
+  <data name="Tooltip_Combos" xml:space="preserve">
+    <value>Combo's bewerken</value>
+  </data>
+  <data name="Tooltip_TapDance" xml:space="preserve">
+    <value>Tap-dance bewerken</value>
+  </data>
+  <data name="ComboEditor_Title" xml:space="preserve">
+    <value>Combo's</value>
+  </data>
+  <data name="ComboEditor_None" xml:space="preserve">
+    <value>Deze firmware heeft geen combo-slots.</value>
+  </data>
+  <data name="ComboEditor_ReadOnly" xml:space="preserve">
+    <value>Alleen-lezen — ga in bewerkmodus om combo's te wijzigen.</value>
+  </data>
+  <data name="ComboEditor_Usage" xml:space="preserve">
+    <value>{0} / {1} gebruikt</value>
+  </data>
+  <data name="ComboEditor_Input0" xml:space="preserve">
+    <value>Invoer 1</value>
+  </data>
+  <data name="ComboEditor_Input1" xml:space="preserve">
+    <value>Invoer 2</value>
+  </data>
+  <data name="ComboEditor_Input2" xml:space="preserve">
+    <value>Invoer 3</value>
+  </data>
+  <data name="ComboEditor_Input3" xml:space="preserve">
+    <value>Invoer 4</value>
+  </data>
+  <data name="ComboEditor_Output" xml:space="preserve">
+    <value>Uitvoer</value>
+  </data>
+  <data name="TapDanceEditor_Title" xml:space="preserve">
+    <value>Tap-Dance</value>
+  </data>
+  <data name="TapDanceEditor_None" xml:space="preserve">
+    <value>Deze firmware heeft geen tap-dance-slots.</value>
+  </data>
+  <data name="TapDanceEditor_ReadOnly" xml:space="preserve">
+    <value>Alleen-lezen — ga in bewerkmodus om tap-dance te wijzigen.</value>
+  </data>
+  <data name="TapDanceEditor_Usage" xml:space="preserve">
+    <value>{0} / {1} gebruikt</value>
+  </data>
+  <data name="TapDanceEditor_OnTap" xml:space="preserve">
+    <value>Bij tap</value>
+  </data>
+  <data name="TapDanceEditor_OnHold" xml:space="preserve">
+    <value>Bij hold</value>
+  </data>
+  <data name="TapDanceEditor_OnDoubleTap" xml:space="preserve">
+    <value>Bij dubbel-tap</value>
+  </data>
+  <data name="TapDanceEditor_OnTapHold" xml:space="preserve">
+    <value>Bij tap + hold</value>
+  </data>
+  <data name="TapDanceEditor_Term" xml:space="preserve">
+    <value>Term (ms)</value>
+  </data>
+
 </root>

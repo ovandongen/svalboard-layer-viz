@@ -171,14 +171,26 @@ public partial class SettingsViewModel : ObservableObject
         ? Loc.Instance.Format("Settings_DeviceTappingTermFormat", DeviceTappingTermMs.Value)
         : Loc.Instance["Settings_DeviceTappingTermUnavailable"];
 
+    /// <summary>
+    /// ViewModel for the Device tab in Settings, showing QMK firmware settings.
+    /// Null when no device is connected or the device has no QMK settings.
+    /// </summary>
+    public QmkSettingsTabViewModel? QmkSettingsTab { get; }
+
+    /// <summary>Currently selected tab index. Lets callers open the window on a specific tab.</summary>
+    [ObservableProperty]
+    private int _selectedTabIndex;
+
     public SettingsViewModel(ISettingsService settingsService, int totalLayers,
         IReadOnlyList<(string HexKeycode, string CurrentLabel)>? unknownKeycodes = null,
         int? deviceTappingTermMs = null,
-        IReadOnlyList<Layer>? layers = null)
+        IReadOnlyList<Layer>? layers = null,
+        QmkSettingsTabViewModel? qmkSettingsTab = null)
     {
         _settingsService = settingsService;
         _totalLayers = totalLayers;
         DeviceTappingTermMs = deviceTappingTermMs;
+        QmkSettingsTab = qmkSettingsTab;
 
         var settings = settingsService.Load();
 

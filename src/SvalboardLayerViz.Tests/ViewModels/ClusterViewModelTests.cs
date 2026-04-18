@@ -10,8 +10,8 @@ public class ClusterViewModelTests
     public void BuildFromLayout_ReturnsExpectedClusterCount()
     {
         var clusters = ClusterViewModel.BuildFromLayout();
-        // Svalboard has 11 clusters: L-Mod, L-Index...L-Pinky, L-Thumb, R-Index...R-Pinky, R-Thumb
-        Assert.Equal(11, clusters.Count);
+        // Svalboard has 10 clusters: L-Thumb + L-Index..L-Pinky, R-Thumb + R-Index..R-Pinky.
+        Assert.Equal(10, clusters.Count);
     }
 
     [Fact]

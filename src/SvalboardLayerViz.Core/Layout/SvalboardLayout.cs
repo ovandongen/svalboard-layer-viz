@@ -7,9 +7,9 @@ namespace SvalboardLayerViz.Core.Layout;
 /// Positions are in layout units; 1 unit = 60 px (UNIT_SIZE from keybard-ng).
 ///
 /// Matrix layout: 10 rows × 6 cols.
-///   Row 0        — left inner modifier keys (6 keys)
+///   Row 0        — L-Thumb: left hand bottom cluster (6 keys)
 ///   Rows 1–4     — left finger clusters: Index, Middle, Ring, Pinky (5 keys each)
-///   Row 5        — thumb cluster (6 keys, shared row)
+///   Row 5        — R-Thumb: right hand bottom cluster (6 keys)
 ///   Rows 6–9     — right finger clusters: Index, Middle, Ring, Pinky (5 keys each)
 ///
 /// Column pattern for finger clusters (rows 1–4, 6–9):
@@ -37,13 +37,13 @@ public static class SvalboardLayout
 
     private static readonly KeyPosition[] _positions =
     [
-        // Row 0 — left inner modifiers
-        new(0, 0, 10.8, 6.0, "L-Mod", "Ctrl"),
-        new(0, 1, 10.8, 5.0, "L-Mod", "Tab"),
-        new(0, 2,  9.5, 6.0, "L-Mod", "Shift"),
-        new(0, 3,  8.2, 5.0, "L-Mod", "Enter"),
-        new(0, 4,  8.2, 6.0, "L-Mod", "Fn"),
-        new(0, 5,  9.5, 5.0, "L-Mod", "Caps"),
+        // Row 0 — L-Thumb (left hand bottom cluster, 6 keys)
+        new(0, 0, 10.8, 6.0, "L-Thumb", "Ctrl"),
+        new(0, 1, 10.8, 5.0, "L-Thumb", "Tab"),
+        new(0, 2,  9.5, 6.0, "L-Thumb", "Shift"),
+        new(0, 3,  8.2, 5.0, "L-Thumb", "Enter"),
+        new(0, 4,  8.2, 6.0, "L-Thumb", "Fn"),
+        new(0, 5,  9.5, 5.0, "L-Thumb", "Caps"),
 
         // Row 1 — L-Index
         new(1, 0,  9.5, 3.5, "L-Index", "South"),
@@ -73,10 +73,10 @@ public static class SvalboardLayout
         new(4, 3,  1.0, 1.5, "L-Pinky", "North"),
         new(4, 4,  0.0, 2.5, "L-Pinky", "West"),
 
-        // Row 5 — thumb cluster (both hands share this row)
-        new(5, 0, 12.5, 6.0, "L-Thumb", "Inner"),
-        new(5, 1, 12.5, 5.0, "L-Thumb", "Outer"),
-        new(5, 2, 13.8, 6.0, "L-Thumb", "Center"),
+        // Row 5 — R-Thumb (right hand bottom cluster, 6 keys)
+        new(5, 0, 12.5, 6.0, "R-Thumb", "Inner"),
+        new(5, 1, 12.5, 5.0, "R-Thumb", "Outer"),
+        new(5, 2, 13.8, 6.0, "R-Thumb", "Center"),
         new(5, 3, 15.1, 5.0, "R-Thumb", "Outer"),
         new(5, 4, 15.1, 6.0, "R-Thumb", "Inner"),
         new(5, 5, 13.8, 5.0, "R-Thumb", "Center"),

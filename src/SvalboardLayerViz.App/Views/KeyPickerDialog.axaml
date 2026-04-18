@@ -1,0 +1,489 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        xmlns:builders="using:SvalboardLayerViz.Core.Keymap.Builders"
+        xmlns:keymap="using:SvalboardLayerViz.Core.Keymap"
+        xmlns:conv="using:SvalboardLayerViz.App.Converters"
+        x:Class="SvalboardLayerViz.App.Views.KeyPickerDialog"
+        x:DataType="vm:PickerSessionViewModel"
+        Name="RootWindow"
+        Title="{Binding [Picker_Title], Source={StaticResource Loc}}"
+        Width="550" Height="620"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1E1E2E">
+
+    <DockPanel Margin="16">
+
+        <!-- Footer buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Content="{Binding [Common_Back], Source={StaticResource Loc}}"
+                    Command="{Binding GoBackCommand}"
+                    IsVisible="{Binding CanGoBack}"
+                    Padding="12,6" />
+            <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}"
+                    Name="CancelButton"
+                    Padding="12,6" />
+            <Button Content="{Binding [Common_Next], Source={StaticResource Loc}}"
+                    Command="{Binding GoNextCommand}"
+                    IsVisible="{Binding ShowNextButton}"
+                    IsEnabled="{Binding CanGoNext}"
+                    Padding="12,6" />
+            <Button Content="{Binding [Picker_Apply], Source={StaticResource Loc}}"
+                    Command="{Binding ConfirmCommand}"
+                    IsVisible="{Binding ShowApplyButton}"
+                    Name="ApplyButton"
+                    Padding="12,6" />
+        </StackPanel>
+
+        <!-- Step header -->
+        <TextBlock DockPanel.Dock="Top" FontSize="14" FontWeight="SemiBold"
+                   Foreground="#CDD6F4" Margin="0,0,0,12">
+            <TextBlock.Text>
+                <MultiBinding StringFormat="{}{0}">
+                    <Binding Path="CurrentStep" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+
+        <!-- =============================== -->
+        <!-- Step 1: Category selection       -->
+        <!-- =============================== -->
+        <StackPanel IsVisible="{Binding IsStepCategory}" Spacing="8">
+            <TextBlock Text="{Binding [Picker_Category], Source={StaticResource Loc}}"
+                       Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,8" />
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <WrapPanel.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Width" Value="140" />
+                        <Setter Property="Height" Value="60" />
+                        <Setter Property="Margin" Value="6" />
+                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </WrapPanel.Styles>
+                <Button Content="{Binding [Picker_Cat_Basic], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Basic}"
+                        IsVisible="{Binding ShowCategory_Basic}" />
+                <Button Content="{Binding [Picker_Cat_Modifier], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Modifier}"
+                        IsVisible="{Binding ShowCategory_Modifier}" />
+                <Button Content="{Binding [Picker_Cat_Layer], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Layer}"
+                        IsVisible="{Binding ShowCategory_Layer}" />
+                <Button Content="{Binding [Picker_Cat_Media], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Media}"
+                        IsVisible="{Binding ShowCategory_Media}" />
+                <Button Content="{Binding [Picker_Cat_Mouse], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Mouse}"
+                        IsVisible="{Binding ShowCategory_Mouse}" />
+                <Button Content="{Binding [Picker_Cat_Macro], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Macro}"
+                        IsVisible="{Binding ShowCategory_Macro}" />
+                <Button Content="{Binding [Picker_Cat_TapDance], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.TapDance}"
+                        IsVisible="{Binding ShowCategory_TapDance}" />
+                <Button Content="{Binding [Picker_Cat_Custom], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Custom}"
+                        IsVisible="{Binding ShowCategory_Custom}" />
+                <Button Content="{Binding [Picker_Cat_Advanced], Source={StaticResource Loc}}"
+                        Command="{Binding SelectCategoryCommand}"
+                        CommandParameter="{x:Static vm:PickerCategory.Advanced}"
+                        IsVisible="{Binding ShowCategory_Advanced}" />
+            </WrapPanel>
+
+            <!-- Recently used (visible from the start) -->
+            <StackPanel Spacing="4" Margin="0,16,0,0">
+                <TextBlock Text="{Binding [Picker_RecentlyUsed], Source={StaticResource Loc}}"
+                           Foreground="#A6ADC8" FontSize="11" />
+                <ItemsControl Name="RecentlyUsedPanel">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- =============================== -->
+        <!-- Step 2: Selection                -->
+        <!-- =============================== -->
+        <DockPanel IsVisible="{Binding IsStepSelection}">
+
+            <!-- Catalog mode (Basic / Media) -->
+            <DockPanel IsVisible="{Binding IsCatalogMode}">
+                <!-- Modifier toggles -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal"
+                            Spacing="8" Margin="0,0,0,6">
+                    <TextBlock Text="Mods:" Foreground="#6C7086" VerticalAlignment="Center" FontSize="12" />
+                    <CheckBox Content="Ctrl" IsChecked="{Binding ModCtrl}" FontSize="12" Padding="2,0" />
+                    <CheckBox Content="Shift" IsChecked="{Binding ModShift}" FontSize="12" Padding="2,0" />
+                    <CheckBox Content="Alt" IsChecked="{Binding ModAlt}" FontSize="12" Padding="2,0" />
+                    <CheckBox Content="Gui" IsChecked="{Binding ModGui}" FontSize="12" Padding="2,0" />
+                    <CheckBox Content="Right" IsChecked="{Binding ModRight}" FontSize="12" Padding="2,0"
+                              Margin="16,0,0,0"
+                              ToolTip.Tip="Use right-side modifiers (RCtrl/RShift/RAlt/RGui)" />
+                </StackPanel>
+                <!-- Search bar -->
+                <TextBox DockPanel.Dock="Top"
+                         Text="{Binding SearchText}"
+                         Watermark="{Binding [Picker_SearchPlaceholder], Source={StaticResource Loc}}"
+                         Margin="0,0,0,8" />
+
+                <!-- Catalog grid -->
+                <ListBox ItemsSource="{Binding FilteredCatalog}"
+                         SelectedItem="{Binding SelectedCatalogEntry, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Width" Value="64" />
+                            <Setter Property="Height" Value="36" />
+                            <Setter Property="Margin" Value="2" />
+                            <Setter Property="Padding" Value="4,2" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="CornerRadius" Value="3" />
+                        </Style>
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="#45475A" />
+                            <Setter Property="BorderBrush" Value="#A6E3A1" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="keymap:KeycodeCatalog+CatalogEntry">
+                            <TextBlock Text="{Binding Label}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       ToolTip.Tip="{Binding ShiftedLabel}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Builder mode (Modifier / Layer / Custom) -->
+            <StackPanel IsVisible="{Binding IsBuilderMode}" Spacing="4">
+                <TextBlock Text="{Binding [Picker_Selection], Source={StaticResource Loc}}"
+                           Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,4" />
+
+                <!-- Category-level intro: explains WHAT this family of keys does, before
+                     the user has picked a specific builder. -->
+                <Border Background="#181825" CornerRadius="4" Padding="10,8" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCategory,
+                                               Converter={x:Static conv:EqualityToBoolConverter.Instance},
+                                               ConverterParameter=Modifier}"
+                                   Text="{Binding [Picker_Intro_Modifier], Source={StaticResource Loc}}" />
+                        <TextBlock Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCategory,
+                                               Converter={x:Static conv:EqualityToBoolConverter.Instance},
+                                               ConverterParameter=Layer}"
+                                   Text="{Binding [Picker_Intro_Layer], Source={StaticResource Loc}}" />
+                        <TextBlock Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCategory,
+                                               Converter={x:Static conv:EqualityToBoolConverter.Instance},
+                                               ConverterParameter=Custom}"
+                                   Text="{Binding [Picker_Intro_Custom], Source={StaticResource Loc}}" />
+                    </StackPanel>
+                </Border>
+
+                <ListBox ItemsSource="{Binding AvailableBuilders}"
+                         SelectedItem="{Binding ActiveBuilder, Mode=TwoWay}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Setter Property="Padding" Value="12,8" />
+                            <Setter Property="Margin" Value="0,2" />
+                            <Setter Property="CornerRadius" Value="3" />
+                        </Style>
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="#45475A" />
+                            <Setter Property="BorderBrush" Value="#A6E3A1" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="builders:IKeycodeBuilder">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{Binding DisplayName}" FontSize="13" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Description}"
+                                           FontSize="11" Foreground="#A6ADC8"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+
+        </DockPanel>
+
+        <!-- =============================== -->
+        <!-- Step 3: Arguments                -->
+        <!-- =============================== -->
+        <DockPanel IsVisible="{Binding IsStepArguments}">
+            <TextBlock DockPanel.Dock="Top"
+                       Text="{Binding [Picker_Arguments], Source={StaticResource Loc}}"
+                       Foreground="#A6ADC8" FontSize="12" Margin="0,0,0,4" />
+
+            <!-- Reminder of what the chosen builder does (bound so switching builders
+                 via Back/Next refreshes automatically). -->
+            <Border DockPanel.Dock="Top"
+                    Background="#181825" CornerRadius="4" Padding="10,8" Margin="0,0,0,8"
+                    IsVisible="{Binding ActiveBuilder, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <TextBlock Text="{Binding ActiveBuilder.Description}"
+                           Foreground="#CDD6F4" FontSize="12" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- Preview of current build state -->
+            <Border DockPanel.Dock="Bottom"
+                    Background="#181825" CornerRadius="4" Padding="8" Margin="0,8,0,0"
+                    IsVisible="{Binding ActiveBuilder.CanBuild}">
+                <TextBlock Text="{Binding ActiveBuilder.PreviewLabel}"
+                           Foreground="#A6E3A1" FontSize="13" />
+            </Border>
+
+            <!-- Builder-specific slot UI, driven by DataTemplates keyed on builder type -->
+            <ContentControl Content="{Binding ActiveBuilder}">
+                <ContentControl.DataTemplates>
+
+                    <!-- ===== Mod-Tap: 4 mod checkboxes + basic-key grid ===== -->
+                    <DataTemplate DataType="builders:ModTapBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_HoldModifiers], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <CheckBox Content="{Binding [Picker_Mod_Ctrl],  Source={StaticResource Loc}}" IsChecked="{Binding IsCtrl,  Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Shift], Source={StaticResource Loc}}" IsChecked="{Binding IsShift, Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Alt],   Source={StaticResource Loc}}" IsChecked="{Binding IsAlt,   Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Gui],   Source={StaticResource Loc}}" IsChecked="{Binding IsGui,   Mode=TwoWay}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding [Picker_Field_TapKey], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" Margin="0,4,0,0" />
+                            <ListBox MaxHeight="200"
+                                     ItemsSource="{Binding DataContext.AllBasicKeycodes, ElementName=RootWindow}"
+                                     SelectedValue="{Binding TapKey, Mode=TwoWay}"
+                                     SelectedValueBinding="{Binding Code}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.Styles>
+                                    <Style Selector="ListBoxItem">
+                                        <Setter Property="Width" Value="64" />
+                                        <Setter Property="Height" Value="36" />
+                                        <Setter Property="Margin" Value="2" />
+                                        <Setter Property="Padding" Value="4,2" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="CornerRadius" Value="3" />
+                                    </Style>
+                                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" Value="#45475A" />
+                                        <Setter Property="BorderBrush" Value="#A6E3A1" />
+                                        <Setter Property="BorderThickness" Value="2" />
+                                    </Style>
+                                </ListBox.Styles>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="keymap:KeycodeCatalog+CatalogEntry">
+                                        <TextBlock Text="{Binding Label}"
+                                                   FontSize="11"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip.Tip="{Binding ShiftedLabel}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <!-- ===== One-Shot Mod: 4 mod checkboxes ===== -->
+                    <DataTemplate DataType="builders:OneShotModBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_Modifiers], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <CheckBox Content="{Binding [Picker_Mod_Ctrl],  Source={StaticResource Loc}}" IsChecked="{Binding IsCtrl,  Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Shift], Source={StaticResource Loc}}" IsChecked="{Binding IsShift, Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Alt],   Source={StaticResource Loc}}" IsChecked="{Binding IsAlt,   Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Gui],   Source={StaticResource Loc}}" IsChecked="{Binding IsGui,   Mode=TwoWay}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <!-- ===== Layer-Tap: layer dropdown + basic-key grid ===== -->
+                    <DataTemplate DataType="builders:LayerTapBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_Layer], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <ComboBox ItemsSource="{Binding DataContext.LayerOptions, ElementName=RootWindow}"
+                                      SelectedValue="{Binding Layer, Mode=TwoWay}"
+                                      SelectedValueBinding="{Binding Index}"
+                                      DisplayMemberBinding="{Binding DisplayName}"
+                                      HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{Binding [Picker_Field_TapKey], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" Margin="0,4,0,0" />
+                            <ListBox MaxHeight="200"
+                                     ItemsSource="{Binding DataContext.AllBasicKeycodes, ElementName=RootWindow}"
+                                     SelectedValue="{Binding TapKey, Mode=TwoWay}"
+                                     SelectedValueBinding="{Binding Code}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.Styles>
+                                    <Style Selector="ListBoxItem">
+                                        <Setter Property="Width" Value="64" />
+                                        <Setter Property="Height" Value="36" />
+                                        <Setter Property="Margin" Value="2" />
+                                        <Setter Property="Padding" Value="4,2" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="CornerRadius" Value="3" />
+                                    </Style>
+                                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                                        <Setter Property="Background" Value="#45475A" />
+                                        <Setter Property="BorderBrush" Value="#A6E3A1" />
+                                        <Setter Property="BorderThickness" Value="2" />
+                                    </Style>
+                                </ListBox.Styles>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="keymap:KeycodeCatalog+CatalogEntry">
+                                        <TextBlock Text="{Binding Label}"
+                                                   FontSize="11"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   ToolTip.Tip="{Binding ShiftedLabel}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <!-- ===== Layer-Mod: layer dropdown + mod checkboxes ===== -->
+                    <DataTemplate DataType="builders:LayerModBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_Layer], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <ComboBox ItemsSource="{Binding DataContext.LayerOptions, ElementName=RootWindow}"
+                                      SelectedValue="{Binding Layer, Mode=TwoWay}"
+                                      SelectedValueBinding="{Binding Index}"
+                                      DisplayMemberBinding="{Binding DisplayName}"
+                                      HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{Binding [Picker_Field_Modifiers], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" Margin="0,4,0,0" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <CheckBox Content="{Binding [Picker_Mod_Ctrl],  Source={StaticResource Loc}}" IsChecked="{Binding IsCtrl,  Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Shift], Source={StaticResource Loc}}" IsChecked="{Binding IsShift, Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Alt],   Source={StaticResource Loc}}" IsChecked="{Binding IsAlt,   Mode=TwoWay}" />
+                                <CheckBox Content="{Binding [Picker_Mod_Gui],   Source={StaticResource Loc}}" IsChecked="{Binding IsGui,   Mode=TwoWay}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <!-- ===== Layer Function: kind combo + layer dropdown ===== -->
+                    <DataTemplate DataType="builders:LayerFunctionBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_Function], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <ComboBox ItemsSource="{Binding DataContext.LayerFunctionKinds, ElementName=RootWindow}"
+                                      SelectedItem="{Binding Kind, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" />
+                            <TextBlock Text="{Binding KindDescription}"
+                                       Foreground="#A6ADC8" FontSize="11"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding [Picker_Field_Layer], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" Margin="0,4,0,0" />
+                            <ComboBox ItemsSource="{Binding DataContext.LayerOptions, ElementName=RootWindow}"
+                                      SelectedValue="{Binding Layer, Mode=TwoWay}"
+                                      SelectedValueBinding="{Binding Index}"
+                                      DisplayMemberBinding="{Binding DisplayName}"
+                                      HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </DataTemplate>
+
+                    <!-- ===== Custom Keycode (numeric fallback) ===== -->
+                    <DataTemplate DataType="builders:CustomKeycodeBuilder">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="{Binding [Picker_Field_CustomIndex], Source={StaticResource Loc}}"
+                                       Foreground="#CDD6F4" FontSize="12" />
+                            <NumericUpDown Minimum="0" Maximum="31"
+                                           Value="{Binding Index, Mode=TwoWay}"
+                                           FormatString="0" Width="120"
+                                           HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </DataTemplate>
+
+                </ContentControl.DataTemplates>
+            </ContentControl>
+        </DockPanel>
+
+        <!-- =============================== -->
+        <!-- Step 4: Preview                  -->
+        <!-- =============================== -->
+        <StackPanel IsVisible="{Binding IsStepPreview}" Spacing="12"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+
+            <!-- Advanced raw hex input -->
+            <StackPanel Spacing="4"
+                        IsVisible="{Binding SelectedCategory,
+                                    Converter={x:Static conv:EqualityToBoolConverter.Instance},
+                                    ConverterParameter=Advanced}">
+                <TextBlock Text="{Binding [Picker_RawHex], Source={StaticResource Loc}}"
+                           Foreground="#A6ADC8" FontSize="12" />
+                <TextBox Name="RawHexInput" Width="160" Watermark="0x0000"
+                         HorizontalAlignment="Left" />
+            </StackPanel>
+
+            <!-- Preview display -->
+            <Border Background="#181825" CornerRadius="8" Padding="24,16"
+                    HorizontalAlignment="Center" MinWidth="200">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding PreviewLabel}"
+                               FontSize="20" FontWeight="Bold"
+                               Foreground="#CDD6F4"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding PreviewRawCode, StringFormat='0x{0:X4}'}"
+                               FontSize="13" Foreground="#6C7086"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+
+    </DockPanel>
+
+</Window>

@@ -24,7 +24,12 @@
 
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="{Binding [Key_SetCustomLabel], Source={StaticResource Loc}}" Command="{Binding SetLabelCommand}" />
+            <MenuItem Header="{Binding [Key_EditKeycode], Source={StaticResource Loc}}"
+                      Command="{Binding ClickCommand}"
+                      IsVisible="{Binding IsEditMode}" />
+            <MenuItem Header="{Binding [Key_SetCustomLabel], Source={StaticResource Loc}}"
+                      Command="{Binding SetLabelCommand}"
+                      IsVisible="{Binding !IsEditMode}" />
         </ContextMenu>
     </UserControl.ContextMenu>
 
@@ -32,6 +37,7 @@
             BorderThickness="{Binding ActiveBorderThickness}"
             Padding="2"
             Margin="1"
+            Tapped="OnKeyTapped"
             Background="{Binding BackgroundColor}"
             BorderBrush="{Binding BorderColor}"
             Opacity="{Binding KeyOpacity}">

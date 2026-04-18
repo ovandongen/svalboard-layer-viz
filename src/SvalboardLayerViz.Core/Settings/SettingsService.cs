@@ -1,4 +1,6 @@
 using System.Text.Json;
+using SvalboardLayerViz.Core.Diagnostics;
+using SvalboardLayerViz.Core.Persistence;
 
 namespace SvalboardLayerViz.Core.Settings;
 
@@ -28,19 +30,83 @@ public class SettingsService : ISettingsService
 
     public UserSettings Load()
     {
+        if (!File.Exists(_filePath))
+            return new UserSettings();
+
+        string json;
         try
         {
-            if (!File.Exists(_filePath))
-                return new UserSettings();
-
-            var json = File.ReadAllText(_filePath);
-            return JsonSerializer.Deserialize<UserSettings>(json, JsonOptions) ?? new UserSettings();
+            json = File.ReadAllText(_filePath);
         }
-        catch
+        catch (IOException ex)
         {
+            DiagnosticLog.Warn("Settings", $"Read failed at {_filePath}: {ex.Message}; using defaults");
             return new UserSettings();
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            DiagnosticLog.Warn("Settings", $"Read denied at {_filePath}: {ex.Message}; using defaults");
+            return new UserSettings();
+        }
+
+        UserSettings? parsed;
+        try
+        {
+            parsed = JsonSerializer.Deserialize<UserSettings>(json, JsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            DiagnosticLog.Error("Settings", $"Parse failed at {_filePath}: {ex.Message}; using defaults");
+            return new UserSettings();
+        }
+
+        if (parsed is null) return new UserSettings();
+
+        if (parsed.SchemaVersion > UserSettings.CurrentSchemaVersion)
+        {
+            // Newer file from a newer build. Back up so the user can roll
+            // back without manual recovery, then start fresh — overwriting
+            // would lose fields the older code doesn't know about.
+            var backup = $"{_filePath}.v{parsed.SchemaVersion}.bak";
+            try
+            {
+                File.Copy(_filePath, backup, overwrite: true);
+                DiagnosticLog.Warn("Settings",
+                    $"Settings file version {parsed.SchemaVersion} > supported {UserSettings.CurrentSchemaVersion}; backed up to {Path.GetFileName(backup)} and loading defaults");
+            }
+            catch (IOException ex)
+            {
+                DiagnosticLog.Error("Settings", $"Backup of newer settings file failed: {ex.Message}");
+            }
+            return new UserSettings();
+        }
+
+        if (parsed.SchemaVersion < UserSettings.CurrentSchemaVersion)
+        {
+            var migrated = MigrateSettings(parsed);
+            try
+            {
+                Save(migrated);
+            }
+            catch (IOException ex)
+            {
+                DiagnosticLog.Warn("Settings", $"Persisting migrated settings failed: {ex.Message}");
+            }
+            return migrated;
+        }
+
+        return parsed;
     }
+
+    /// <summary>
+    /// Applies forward migrations from <c>parsed.SchemaVersion</c> up to
+    /// <see cref="UserSettings.CurrentSchemaVersion"/>. Currently a no-op
+    /// (we are at version 1) — exists so the first real schema change has
+    /// a defined landing spot instead of bolting migration logic into
+    /// <see cref="Load"/>.
+    /// </summary>
+    private static UserSettings MigrateSettings(UserSettings parsed) =>
+        parsed with { SchemaVersion = UserSettings.CurrentSchemaVersion };
 
     public void Save(UserSettings settings)
     {
@@ -49,7 +115,7 @@ public class SettingsService : ISettingsService
             Directory.CreateDirectory(dir);
 
         var json = JsonSerializer.Serialize(settings, JsonOptions);
-        File.WriteAllText(_filePath, json);
+        AtomicFile.WriteAllText(_filePath, json);
     }
 
     private static string GetDefaultPath()

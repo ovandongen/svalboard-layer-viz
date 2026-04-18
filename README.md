@@ -1,4 +1,4 @@
-# Svalboard Layer Viz
+# Svalboard Layer Viz.
 
 A cross-platform desktop app that connects to your [Svalboard](https://svalboard.com/) keyboard over USB and visualizes all your layers in real time.
 

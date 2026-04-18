@@ -1,0 +1,154 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SvalboardLayerViz.App.ViewModels"
+        x:Class="SvalboardLayerViz.App.Views.MacroEditorDialog"
+        x:DataType="vm:MacroEditorViewModel"
+        Title="{Binding [MacroEditor_Title], Source={StaticResource Loc}}"
+        Width="660" Height="520"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel Margin="12">
+        <!-- Bottom: buffer bar + buttons -->
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,12,0,0" Spacing="8">
+            <!-- Buffer usage -->
+            <Grid ColumnDefinitions="*,Auto">
+                <ProgressBar Grid.Column="0" Minimum="0" Maximum="100"
+                             Value="{Binding UsagePercent}" Height="16" />
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0"
+                           FontSize="12" Foreground="#CDD6F4">
+                    <Run Text="{Binding UsedBytes}" /><Run Text=" / " /><Run Text="{Binding BufferCapacity}" /><Run Text=" bytes" />
+                </TextBlock>
+            </Grid>
+
+            <!-- Over capacity warning -->
+            <TextBlock Text="{Binding [MacroEditor_OverCapacity], Source={StaticResource Loc}}"
+                       IsVisible="{Binding IsOverCapacity}"
+                       Foreground="#F38BA8" FontSize="12" FontStyle="Italic" />
+
+            <!-- Read-only hint -->
+            <TextBlock Text="{Binding [MacroEditor_ReadOnly], Source={StaticResource Loc}}"
+                       IsVisible="{Binding !IsEditMode}"
+                       Foreground="#A6E3A1" FontSize="11" FontStyle="Italic" />
+
+            <!-- Save / Cancel -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{Binding [Common_Cancel], Source={StaticResource Loc}}"
+                        Command="{Binding CancelCommand}" />
+                <Button Content="{Binding [Common_Save], Source={StaticResource Loc}}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding CanSave}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Main content: two columns -->
+        <Grid ColumnDefinitions="200,12,*">
+            <!-- Left: macro slot list -->
+            <DockPanel Grid.Column="0">
+                <TextBlock DockPanel.Dock="Top"
+                           Text="{Binding [MacroEditor_Slots], Source={StaticResource Loc}}"
+                           FontWeight="SemiBold" FontSize="14" Foreground="#CDD6F4"
+                           Margin="0,0,0,6" />
+                <ListBox ItemsSource="{Binding MacroSlots}"
+                         SelectedItem="{Binding SelectedSlot}"
+                         SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:MacroSlotViewModel">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{Binding DisplayIndex}"
+                                           FontWeight="SemiBold" Foreground="#89B4FA"
+                                           Width="28" />
+                                <TextBlock Text="{Binding Preview}"
+                                           Foreground="#A6ADC8"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+
+            <!-- Right: selected macro actions -->
+            <DockPanel Grid.Column="2">
+                <TextBlock DockPanel.Dock="Top"
+                           Text="{Binding [MacroEditor_Actions], Source={StaticResource Loc}}"
+                           FontWeight="SemiBold" FontSize="14" Foreground="#CDD6F4"
+                           Margin="0,0,0,6" />
+
+                <!-- Action buttons (edit mode only) -->
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                            Spacing="4" Margin="0,6,0,0"
+                            IsVisible="{Binding IsEditMode}">
+                    <!-- Add split button with flyout -->
+                    <Button Padding="6,4">
+                        <Button.Content>
+                            <TextBlock Text="{Binding [MacroEditor_AddTap], Source={StaticResource Loc}}" />
+                        </Button.Content>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="{Binding [MacroEditor_AddTap], Source={StaticResource Loc}}"
+                                          Command="{Binding AddTapActionCommand}" />
+                                <MenuItem Header="{Binding [MacroEditor_AddDown], Source={StaticResource Loc}}"
+                                          Command="{Binding AddDownActionCommand}" />
+                                <MenuItem Header="{Binding [MacroEditor_AddUp], Source={StaticResource Loc}}"
+                                          Command="{Binding AddUpActionCommand}" />
+                                <Separator />
+                                <MenuItem Header="{Binding [MacroEditor_AddDelay], Source={StaticResource Loc}}"
+                                          Command="{Binding AddDelayActionCommand}" />
+                                <MenuItem Header="{Binding [MacroEditor_AddText], Source={StaticResource Loc}}"
+                                          Command="{Binding AddTextActionCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+
+                    <Button Content="{Binding [MacroEditor_Remove], Source={StaticResource Loc}}"
+                            Command="{Binding RemoveActionCommand}"
+                            IsEnabled="{Binding CanRemoveAction}"
+                            Padding="6,4" />
+                    <Button Content="{Binding [MacroEditor_MoveUp], Source={StaticResource Loc}}"
+                            Command="{Binding MoveActionUpCommand}"
+                            IsEnabled="{Binding CanMoveActionUp}"
+                            Padding="6,4" />
+                    <Button Content="{Binding [MacroEditor_MoveDown], Source={StaticResource Loc}}"
+                            Command="{Binding MoveActionDownCommand}"
+                            IsEnabled="{Binding CanMoveActionDown}"
+                            Padding="6,4" />
+                </StackPanel>
+
+                <!-- Action list -->
+                <ListBox x:Name="ActionList"
+                         ItemsSource="{Binding SelectedActions}"
+                         SelectedItem="{Binding SelectedAction}"
+                         SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:MacroActionViewModel">
+                            <Grid ColumnDefinitions="60,*" Margin="2">
+                                <TextBlock Grid.Column="0" Text="{Binding TypeLabel}"
+                                           FontWeight="SemiBold" Foreground="#89B4FA"
+                                           VerticalAlignment="Center" />
+                                <!-- Key actions: clickable to edit via picker -->
+                                <Button Grid.Column="1" Content="{Binding ValueLabel}"
+                                        IsVisible="{Binding IsKey}"
+                                        Command="{Binding #ActionList.DataContext.EditKeyActionCommand}"
+                                        Background="Transparent" BorderThickness="0"
+                                        Padding="0" Cursor="Hand"
+                                        Foreground="#CDD6F4"
+                                        VerticalAlignment="Center" />
+                                <!-- Delay: editable -->
+                                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                            IsVisible="{Binding IsDelay}" Spacing="4">
+                                    <TextBox Text="{Binding DelayMs}"
+                                             Width="60" Padding="4,2" FontSize="12" />
+                                    <TextBlock Text="ms" Foreground="#6C7086"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                                <!-- Text: editable -->
+                                <TextBox Grid.Column="1" Text="{Binding TextContent}"
+                                         IsVisible="{Binding IsText}"
+                                         Padding="4,2" FontSize="12" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

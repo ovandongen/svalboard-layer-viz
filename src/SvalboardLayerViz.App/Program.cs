@@ -12,7 +12,7 @@ class Program
         using var mutex = new Mutex(true, "SvalboardLayerViz-SingleInstance", out bool isNew);
         if (!isNew) return;
 
-        StartupLogger.LogEnvironment();
+        DiagnosticLog.LogEnvironment();
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
@@ -45,7 +45,7 @@ class Program
 
             if (renderMode?.Equals("software", StringComparison.OrdinalIgnoreCase) == true)
             {
-                StartupLogger.Log($"Rendering mode: software (via {source})");
+                DiagnosticLog.Info("Startup", $"Rendering mode: software (via {source})");
                 builder = builder.With(new Win32PlatformOptions
                 {
                     RenderingMode = [Win32RenderingMode.Software]
@@ -53,7 +53,7 @@ class Program
             }
             else
             {
-                StartupLogger.Log($"Rendering mode: {renderMode ?? "auto"} (via {source})");
+                DiagnosticLog.Info("Startup", $"Rendering mode: {renderMode ?? "auto"} (via {source})");
             }
         }
 

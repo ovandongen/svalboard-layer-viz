@@ -1,41 +1,12 @@
 using SvalboardLayerViz.Core.Protocol;
-using HidSharp;
 using Xunit;
 
 namespace SvalboardLayerViz.Tests.Protocol;
 
-/// <summary>
-/// Fake protocol service for testing matrix polling without a real HID device.
-/// </summary>
-public class FakeVialProtocolService : IVialProtocolService
-{
-    public bool[,]? NextMatrixState { get; set; }
-    public int CallCount { get; private set; }
-
-    public void Connect(HidDevice device) { }
-    public int GetLayerCount() => 1;
-    public ulong GetKeyboardId() => 0;
-    public int GetDefinitionSize() => 0;
-    public byte[] GetDefinition() => [];
-    public ushort[,,] GetKeymapBuffer(int layers, int rows, int cols) => new ushort[layers, rows, cols];
-
-    public bool[,] GetSwitchMatrixState(int rows, int cols)
-    {
-        CallCount++;
-        return NextMatrixState ?? new bool[rows, cols];
-    }
-
-    public ushort? GetQmkSetting(ushort settingId) => null;
-
-    public uint? GetSvalProtoVersion() => null;
-    public (byte H, byte S, byte V)? GetLayerColor(int layer) => null;
-    public (byte H, byte S)? GetCurrentLedHueSat() => null;
-
-    public void Dispose() { }
-}
-
 public class MatrixPollingServiceTests
 {
+    private static readonly TimeSpan TestTimeout = TimeSpan.FromSeconds(5);
+
     [Fact]
     public void Start_BeginsPolling()
     {
@@ -43,10 +14,10 @@ public class MatrixPollingServiceTests
         using var sut = new MatrixPollingService(fake, 10, 6);
 
         sut.Start();
-        Thread.Sleep(1000); // Allow a few poll cycles (longer for CI runners)
+        var reached = fake.WaitForPolls(1, TestTimeout);
         sut.Stop();
 
-        Assert.True(fake.CallCount > 0);
+        Assert.True(reached);
     }
 
     [Fact]
@@ -56,12 +27,11 @@ public class MatrixPollingServiceTests
         using var sut = new MatrixPollingService(fake, 10, 6);
 
         sut.Start();
-        Thread.Sleep(500);
+        Assert.True(fake.WaitForPolls(1, TestTimeout));
         sut.Stop();
-        var countAfterStop = fake.CallCount;
-        Thread.Sleep(200);
-
-        Assert.Equal(countAfterStop, fake.CallCount);
+        var countAfterStop = fake.MatrixPollCount;
+        Thread.Sleep(200); // give any in-flight tick a chance to land
+        Assert.Equal(countAfterStop, fake.MatrixPollCount);
     }
 
     [Fact]
@@ -73,15 +43,15 @@ public class MatrixPollingServiceTests
         fake.NextMatrixState = state;
 
         using var sut = new MatrixPollingService(fake, 10, 6);
-        bool[,]? received = null;
-        sut.MatrixStateChanged += s => received = s;
+        var received = new TaskCompletionSource<bool[,]>();
+        sut.MatrixStateChanged += s => received.TrySetResult(s);
 
         sut.Start();
-        Thread.Sleep(1000);
+        Assert.True(received.Task.Wait(TestTimeout));
         sut.Stop();
 
-        Assert.NotNull(received);
-        Assert.True(received![0, 0]);
+        var payload = received.Task.Result;
+        Assert.True(payload[0, 0]);
     }
 
     [Fact]
@@ -103,6 +73,7 @@ public class MatrixPollingServiceTests
         var fake = new FakeVialProtocolService();
         var sut = new MatrixPollingService(fake, 10, 6);
         sut.Start();
+        Assert.True(fake.WaitForPolls(1, TestTimeout));
         sut.Dispose();
 
         Assert.False(sut.IsRunning);

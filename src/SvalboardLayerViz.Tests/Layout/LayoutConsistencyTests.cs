@@ -113,8 +113,9 @@ public class LayoutConsistencyTests
         var layer = MakeFullLayer();
         var layout = BoardLayoutComputer.Compute(layer);
 
-        var leftHand = new HandViewModel(layout.LeftHand, false, layer);
-        var rightHand = new HandViewModel(layout.RightHand, true, layer);
+        var palette = LayerColorPalette.ForSingleLayer(layer, totalLayers: 8);
+        var leftHand = new HandViewModel(layout.LeftHand, false, layer, palette);
+        var rightHand = new HandViewModel(layout.RightHand, true, layer, palette);
 
         // For each cluster, key.Left + cluster.Left + handOrigin should equal BoardX
         var leftOriginPx = 0.0;
