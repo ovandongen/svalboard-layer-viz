@@ -1,6 +1,6 @@
 # Svalboard Layer Viz.
 
-A cross-platform desktop app that connects to your [Svalboard](https://svalboard.com/) keyboard over USB and visualizes all your layers in real time.
+A cross-platform desktop app that connects to your [Svalboard](https://svalboard.com/) keyboard over USB, visualizes all your layers in real time, and lets you edit the keymap, macros, combos, tap-dances, and QMK settings directly on the device.
 
 **What it does:**
 
@@ -9,6 +9,11 @@ A cross-platform desktop app that connects to your [Svalboard](https://svalboard
 - Highlights keys as you press them in real time
 - Automatically follows which layer is active when you hold/toggle layer-switch keys
 - Works as a transparent overlay you can keep on screen while learning your layout
+- **Edit mode**: assign keycodes, rename layers, and write changes back to the device (Vial unlock required)
+- **Macros, combos, tap-dance editors**: pick keys via dialog, preview actions before saving
+- **QMK settings tab**: tweak firmware settings (tapping term, one-shot timeout, etc.)
+- **Snapshot history**: auto-snapshot on connect, manual snapshots during edits, diff view, and restore
+- **Export** current config to JSON; **Diagnostics** window for protocol troubleshooting
 
 ## Download
 
@@ -109,7 +114,7 @@ The app will open and start looking for your Svalboard. Plug it in via USB if it
 dotnet test
 ```
 
-216 tests covering protocol parsing, keycode resolution, layout positioning, and UI logic.
+~1190 tests covering protocol parsing, keycode encoding/decoding, layout positioning, snapshot diff/restore, macro/combo/tap-dance codecs, QMK settings, save flow, and UI logic.
 
 ---
 
@@ -225,6 +230,48 @@ Press **F12** (configurable) to show/hide the overlay from anywhere. On macOS, y
 
 Right-click any key to assign a custom label. Useful for keycodes the app doesn't recognize.
 
+### Edit mode
+
+Click the pencil icon to enter **edit mode** (blue banner appears above the board). While editing:
+
+- Click any key to open the key picker and change its keycode
+- Pick keys from categorized tabs (basic, modifiers, layer functions, media, macros, etc.)
+- Rename the current layer inline via the layer tab
+- **Save** writes the full keymap back to the device; **Discard** rolls everything back
+
+Saving to the device requires **Vial unlock**. The app opens an unlock dialog on first save — follow the on-screen instructions (hold the unlock key combo on the Svalboard). A safety-confirm dialog guards destructive writes.
+
+### Macros, combos, tap-dance
+
+From the play-arrow (▶) button on the toolbar — or from the edit-mode banner — open:
+
+- **Macros** — multi-slot editor; add key-tap, key-down/up, text, and delay actions; inline preview of the resulting sequence
+- **Combos** — chords that emit a keycode when pressed together; pick the trigger keys and result via key picker
+- **Tap-dance** — per-slot on-tap / on-hold / on-double-tap / on-hold-tap behaviors
+
+Slot counts are read from the firmware's dynamic-entry limits.
+
+### QMK settings
+
+From the gear icon on the edit-mode banner ("Settings to device"), open the **QMK settings tab**. Editable firmware values (tapping term, one-shot timeout, combo term, auto-shift, etc.) are rendered per-descriptor with type-appropriate input (bool toggle, numeric spinner, enum dropdown). Changes queue into the edit session and go to the device on Save.
+
+### History and snapshots
+
+Click the clock icon to open the **history window**.
+
+- **Auto snapshots** are captured on connect and before each save
+- **Manual snapshots** can be taken mid-edit via the camera icon in the edit-mode banner (prompts for a name)
+- Click a row to open the **diff dialog** — side-by-side view of what changed between snapshots
+- Restore any snapshot to revert the device to that state (with a safety confirm)
+
+Snapshots are stored as JSON in the user profile directory and keyed by keyboard ID (VID/PID + unique ID) so multiple boards stay separate.
+
+### Export / diagnostics / logs
+
+- **Export** (down-arrow icon): dump the current configuration to JSON
+- **Diagnostics** (chip icon, visible when live highlighting is on): live protocol traffic inspector
+- **Open log folder** / **Copy diagnostics**: quick access to session logs for bug reports
+
 ---
 
 ## Project Structure
@@ -232,9 +279,9 @@ Right-click any key to assign a custom label. Useful for keycodes the app doesn'
 ```
 svalboard-layer-viz/
 ├── src/
-│   ├── SvalboardLayerViz.App/       # Avalonia UI (views + view models)
-│   ├── SvalboardLayerViz.Core/      # Protocol, keymap, layout (no UI)
-│   ├── SvalboardLayerViz.Tests/     # Unit tests (216 tests)
+│   ├── SvalboardLayerViz.App/       # Avalonia UI (views + view models, dialogs, localization)
+│   ├── SvalboardLayerViz.Core/      # Protocol, keymap, layout, snapshots, macros, QMK settings (no UI)
+│   ├── SvalboardLayerViz.Tests/     # Unit tests (~1190 tests)
 │   └── SvalboardLayerViz.Debug/     # Debug utilities (icon generator, etc.)
 ├── docs/
 │   ├── SvalboardLayerViz-DesignDoc.md   # Full design document
@@ -247,15 +294,21 @@ svalboard-layer-viz/
 
 ```
 USB HID (Svalboard)
-  → VialProtocolService        reads keymaps, definitions, matrix state
+  → VialProtocolService        reads/writes keymaps, macros, combos, tap-dances,
+                               QMK settings, and definition (XZ-compressed JSON)
   → KeymapLoader               assembles full keyboard config
-  → KeycodeService              resolves 16-bit QMK codes to labels
+  → KeycodeService              resolves 16-bit QMK codes via pluggable Builders
+                               (basic, modifier, layer, mod-tap, layer-tap, custom)
   → TransparentKeyResolver      resolves KC_TRNS by walking layers
-  → MainWindowViewModel         manages state, polling, auto-layer-switch
-  → Avalonia Views              renders the board visualization
+  → KeymapEditSession           in-memory dirty state for edit mode (keys, macros,
+                               combos, tap-dances, QMK settings)
+  → SaveFlowExecutor            ordered multi-stage writeback with safety checks
+  → SnapshotService             JSON history per keyboard (auto + manual)
+  → MainWindowViewModel         state, polling, auto-layer-switch, dialog routing
+  → Avalonia Views              board visualization + edit dialogs
 ```
 
-The app uses the standard Vial/VIA protocol — the same one Vial GUI uses. No firmware modifications needed.
+The app uses the standard Vial/VIA protocol — the same one Vial GUI uses. No firmware modifications needed. Writes require the Vial **unlock** handshake.
 
 ---
 
