@@ -109,10 +109,12 @@ public class TransparentKeyResolverDeepTests
     }
 
     [Fact]
-    public void ResolutionWalksPastIntermediateTrns()
+    public void ResolutionWalksActiveStackOnly_OrphanLayersSkipIntermediate()
     {
         // Layer 0 = "Base", Layer 1 = TRNS, Layer 2 = "Mid", Layer 3 = TRNS.
-        // Layer 3's TRNS should resolve to "Mid" (nearest non-TRNS), not "Base".
+        // Without an activation path from L2 → L3, L3 is orphan and its active
+        // stack is [0, 3] only. L3's TRNS must resolve to L0 "Base", not L2's
+        // "Mid" — L2 is not active when L3 is reached. This matches QMK runtime.
         var layers = new List<Layer>
         {
             MakeLayer(0, MakeKey(0, 0, "Base")),
@@ -124,7 +126,56 @@ public class TransparentKeyResolverDeepTests
         TransparentKeyResolver.Resolve(layers);
 
         Assert.Equal("Base", layers[1].Keys[0].EffectiveLabel);
+        Assert.Equal("Base", layers[3].Keys[0].EffectiveLabel);
+    }
+
+    [Fact]
+    public void ChainedActivation_TrnsResolvesThroughIntermediate()
+    {
+        // L0 activates L2, L2 activates L3. L3's active stack = [0, 2, 3], so
+        // TRNS at (0,0) on L3 picks up "Mid" from L2 (topmost non-TRNS), not L0.
+        var moL0 = new Key { Row = 1, Col = 0, RawKeycode = 0x5202, DisplayLabel = "MO(2)",
+            IsLayerSwitch = true, TargetLayer = 2, SwitchType = LayerSwitchType.Momentary };
+        var moL2 = new Key { Row = 1, Col = 0, RawKeycode = 0x5203, DisplayLabel = "MO(3)",
+            IsLayerSwitch = true, TargetLayer = 3, SwitchType = LayerSwitchType.Momentary };
+        var layers = new List<Layer>
+        {
+            MakeLayer(0, MakeKey(0, 0, "Base"), moL0),
+            MakeLayer(1, MakeKey(0, 0, "___", transparent: true)),
+            MakeLayer(2, MakeKey(0, 0, "Mid"), moL2),
+            MakeLayer(3, MakeKey(0, 0, "___", transparent: true)),
+        };
+        var paths = LayerActivationGraph.Build(layers);
+
+        TransparentKeyResolver.Resolve(layers, paths);
+
         Assert.Equal("Mid", layers[3].Keys[0].EffectiveLabel);
+        Assert.Equal(2, layers[3].Keys[0].ResolvedFromLayer);
+    }
+
+    [Fact]
+    public void PressThroughActivation_TrnsSeesCoActivatedLayer()
+    {
+        // L0 (0,2) → MO(2), L0 (0,5) → MO(3). Hard thumb press engages both.
+        // L3 active stack = [0, 2, 3]. TRNS at (4,4) on L3 resolves to L2's
+        // value even though the primary activator jumps straight to L3.
+        var moCol2 = new Key { Row = 0, Col = 2, RawKeycode = 0x5202, DisplayLabel = "MO(2)",
+            IsLayerSwitch = true, TargetLayer = 2, SwitchType = LayerSwitchType.Momentary };
+        var moCol5 = new Key { Row = 0, Col = 5, RawKeycode = 0x5203, DisplayLabel = "MO(3)",
+            IsLayerSwitch = true, TargetLayer = 3, SwitchType = LayerSwitchType.Momentary };
+        var layers = new List<Layer>
+        {
+            MakeLayer(0, MakeKey(4, 4, "Base"), moCol2, moCol5),
+            MakeLayer(1, MakeKey(4, 4, "___", transparent: true)),
+            MakeLayer(2, MakeKey(4, 4, "Mid")),
+            MakeLayer(3, MakeKey(4, 4, "___", transparent: true)),
+        };
+        var paths = LayerActivationGraph.Build(layers);
+
+        TransparentKeyResolver.Resolve(layers, paths);
+
+        Assert.Equal("Mid", layers[3].Keys[0].EffectiveLabel);
+        Assert.Equal(2, layers[3].Keys[0].ResolvedFromLayer);
     }
 
     [Fact]

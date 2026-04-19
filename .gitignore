@@ -60,3 +60,7 @@ SvalboardLayerViz.app/Contents/MacOS/bin/
 
 # Publish output
 publish/
+
+# Claude Code local settings (auto-mutated with per-session permissions)
+.claude/settings.local.json
+.claude/settings.json

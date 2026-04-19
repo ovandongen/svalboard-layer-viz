@@ -195,7 +195,10 @@ public partial class KeyViewModel : ObservableObject
             parts.Add(loc.Format("Key_TooltipModifierFormat", SecondaryLabel));
 
         if (IsTransparent)
+        {
             parts.Add(loc["Key_TooltipTransparent"]);
+            AppendActivationPath(parts, loc);
+        }
 
         if (IsLayerSwitch && TargetLayer.HasValue)
             parts.Add(loc.Format("Key_TooltipTargetLayerFormat", TargetLayer.Value));
@@ -207,6 +210,21 @@ public partial class KeyViewModel : ObservableObject
         parts.Add($"Raw: 0x{Key.RawKeycode:X4}");
 
         return string.Join("\n", parts);
+    }
+
+    private void AppendActivationPath(List<string> parts, Loc loc)
+    {
+        var path = Layer.ActivationPath;
+        if (Key.ResolvedFromLayer is int src)
+        {
+            parts.Add(loc.Format("Key_TooltipResolvedFromFormat", src));
+            if (path.Count == 0)
+                parts.Add(loc.Format("Key_TooltipNoActivationPath", Layer.Index));
+            else
+                foreach (var hop in path)
+                    parts.Add(loc.Format("Key_TooltipActivationHopFormat",
+                        hop.SourceLayer, hop.SwitchType, hop.Row, hop.Col, hop.TargetLayer));
+        }
     }
 
     private static string Compose(string? secondary, string label) =>

@@ -74,4 +74,11 @@ public record Key
 
     /// <summary>Shifted symbol for this key (e.g., "@" for "2", ":" for ";"). US ANSI layout.</summary>
     public string? ShiftedLabel { get; init; }
+
+    /// <summary>
+    /// For a transparent key whose label was resolved, the layer the effective
+    /// label was pulled from. Null on layer 0, on unresolved TRNS, and on
+    /// non-transparent keys. Used by the tooltip to explain the fallthrough.
+    /// </summary>
+    public int? ResolvedFromLayer { get; init; }
 }

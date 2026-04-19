@@ -1394,7 +1394,13 @@ public partial class MainWindowViewModel : ObservableObject
             updatedLayers.Add(layer with { Keys = updatedKeys });
         }
 
-        TransparentKeyResolver.Resolve(updatedLayers);
+        var activationPaths = LayerActivationGraph.Build(updatedLayers);
+        for (var i = 0; i < updatedLayers.Count; i++)
+        {
+            if (activationPaths.TryGetValue(i, out var path))
+                updatedLayers[i] = updatedLayers[i] with { ActivationPath = path };
+        }
+        TransparentKeyResolver.Resolve(updatedLayers, activationPaths);
 
         KeyboardConfig = KeyboardConfig with
         {

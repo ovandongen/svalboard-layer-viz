@@ -293,6 +293,18 @@
   <data name="Key_TooltipTransparent" xml:space="preserve">
     <value>(Transparent — inherited from layer below)</value>
   </data>
+  <data name="Key_TooltipResolvedFromFormat" xml:space="preserve">
+    <value>Resolved from L{0} via activation path:</value>
+    <comment>{0} = source layer index the effective label was pulled from</comment>
+  </data>
+  <data name="Key_TooltipActivationHopFormat" xml:space="preserve">
+    <value>  L{0} — {1} @ (r{2}, c{3}) → L{4}</value>
+    <comment>{0} = source layer, {1} = switch type, {2} = row, {3} = col, {4} = target layer</comment>
+  </data>
+  <data name="Key_TooltipNoActivationPath" xml:space="preserve">
+    <value>(Activation path not traced — walks L0 → L{0} only)</value>
+    <comment>{0} = current layer index</comment>
+  </data>
   <data name="Key_TooltipTargetLayerFormat" xml:space="preserve">
     <value>&#x2192; Layer {0}</value>
     <comment>{0} = target layer index</comment>

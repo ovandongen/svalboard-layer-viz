@@ -417,6 +417,18 @@
     <value>(Transparant — overgenomen van onderliggende laag)</value>
     <comment/>
   </data>
+  <data name="Key_TooltipResolvedFromFormat" xml:space="preserve">
+    <value>Overgenomen van L{0} via activeringspad:</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipActivationHopFormat" xml:space="preserve">
+    <value>  L{0} — {1} @ (r{2}, k{3}) → L{4}</value>
+    <comment/>
+  </data>
+  <data name="Key_TooltipNoActivationPath" xml:space="preserve">
+    <value>(Activeringspad niet getraceerd — loopt alleen L0 → L{0})</value>
+    <comment/>
+  </data>
   <data name="Key_TooltipTargetLayerFormat" xml:space="preserve">
     <value>→ Laag {0}</value>
     <comment/>

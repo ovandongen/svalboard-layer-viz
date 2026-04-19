@@ -170,8 +170,15 @@ public class KeymapLoader
             });
         }
 
-        // 9. Resolve transparent keys (KC_TRNS falls through to layer below)
-        TransparentKeyResolver.Resolve(layers);
+        // 9. Build the layer activation graph, attach per-layer ActivationPath,
+        //    then resolve TRNS via the active stack (matches QMK runtime).
+        var activationPaths = LayerActivationGraph.Build(layers);
+        for (var i = 0; i < layers.Count; i++)
+        {
+            if (activationPaths.TryGetValue(i, out var path))
+                layers[i] = layers[i] with { ActivationPath = path };
+        }
+        TransparentKeyResolver.Resolve(layers, activationPaths);
 
         return new KeyboardConfig
         {

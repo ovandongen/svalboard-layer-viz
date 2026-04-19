@@ -35,6 +35,18 @@ public static class SvalboardLayout
     /// <summary>Returns true if the given row belongs to the right hand (rows 5-9: R-Thumb + R-fingers).</summary>
     public static bool IsRightHand(int row) => row >= 5;
 
+    /// <summary>
+    /// Svalboard thumb press-through coupling: on rows 0 and 5, column 5 is a
+    /// "hard press" that physically also engages column 2 on the same row.
+    /// Returns the matrix positions that are co-activated when (row, col) is
+    /// pressed. For non-coupled positions returns an empty sequence.
+    /// </summary>
+    public static IEnumerable<(int Row, int Col)> GetCoactivatedPositions(int row, int col)
+    {
+        if ((row == 0 || row == 5) && col == 5)
+            yield return (row, 2);
+    }
+
     private static readonly KeyPosition[] _positions =
     [
         // Row 0 — L-Thumb (left hand bottom cluster, 6 keys)

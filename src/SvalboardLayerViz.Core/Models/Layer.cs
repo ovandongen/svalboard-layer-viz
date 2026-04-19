@@ -1,3 +1,5 @@
+using SvalboardLayerViz.Core.Keymap;
+
 namespace SvalboardLayerViz.Core.Models;
 
 /// <summary>
@@ -22,6 +24,13 @@ public record Layer
 
     /// <summary>Layer color value/brightness (0-255).</summary>
     public byte? ColorVal { get; init; }
+
+    /// <summary>
+    /// Ordered path of layer-switch activators that reach this layer from L0.
+    /// Empty for L0 or for orphan layers with no traceable activation path.
+    /// Used to scope TRNS resolution to layers that are actually active.
+    /// </summary>
+    public IReadOnlyList<ActivationHop> ActivationPath { get; init; } = [];
 
     /// <summary>Get the display name: user name if set, otherwise "Layer N".</summary>
     public string DisplayName => Name ?? $"L{Index}";
