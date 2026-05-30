@@ -6,6 +6,10 @@ namespace SvalboardLayerViz.Tests.Keymap;
 
 public class TransparentKeyResolverTests
 {
+    // No activation graph → every layer resolves via orphan fallback [0, layer].
+    private static readonly IReadOnlyDictionary<int, IReadOnlyList<ActivationHop>> NoActivationGraph =
+        new Dictionary<int, IReadOnlyList<ActivationHop>>();
+
     private static Key MakeKey(int row, int col, string label, bool transparent = false) => new()
     {
         Row = row,
@@ -29,7 +33,7 @@ public class TransparentKeyResolverTests
             MakeLayer(0, MakeKey(0, 0, "A")),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Null(layers[0].Keys[0].EffectiveLabel);
     }
@@ -43,7 +47,7 @@ public class TransparentKeyResolverTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("A", layers[1].Keys[0].EffectiveLabel);
     }
@@ -58,7 +62,7 @@ public class TransparentKeyResolverTests
             MakeLayer(2, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("Space", layers[1].Keys[0].EffectiveLabel);
         Assert.Equal("Space", layers[2].Keys[0].EffectiveLabel);
@@ -73,7 +77,7 @@ public class TransparentKeyResolverTests
             MakeLayer(1, MakeKey(0, 0, "B")),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Null(layers[1].Keys[0].EffectiveLabel);
         Assert.Equal("B", layers[1].Keys[0].DisplayLabel);
@@ -88,7 +92,7 @@ public class TransparentKeyResolverTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         // Layer 0 transparent has no lower layer — stays null
         Assert.Null(layers[0].Keys[0].EffectiveLabel);
@@ -105,7 +109,7 @@ public class TransparentKeyResolverTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true), MakeKey(1, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("A", layers[1].Keys[0].EffectiveLabel);
         Assert.Equal("B", layers[1].Keys[1].EffectiveLabel);
@@ -120,7 +124,7 @@ public class TransparentKeyResolverTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true), MakeKey(0, 1, "X")),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("A", layers[1].Keys[0].EffectiveLabel);
         Assert.Null(layers[1].Keys[1].EffectiveLabel);

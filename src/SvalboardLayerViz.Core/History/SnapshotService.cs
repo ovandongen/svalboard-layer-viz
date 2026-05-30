@@ -9,13 +9,6 @@ namespace SvalboardLayerViz.Core.History;
 /// </summary>
 public sealed class SnapshotService : ISnapshotService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true,
-    };
-
     private readonly string _snapshotDir;
 
     // Single-writer gate — serializes Capture / Delete / Export / Import so two
@@ -75,7 +68,7 @@ public sealed class SnapshotService : ISnapshotService
             Directory.CreateDirectory(_snapshotDir);
             var filePath = Path.Combine(_snapshotDir, fileName);
 
-            var json = JsonSerializer.Serialize(snapshot, JsonOptions);
+            var json = JsonSerializer.Serialize(snapshot, CoreJson.Default);
             await AtomicFile.WriteAllTextAsync(filePath, json, ct);
         }
         finally
@@ -103,7 +96,7 @@ public sealed class SnapshotService : ISnapshotService
             try
             {
                 var json = await File.ReadAllTextAsync(file, ct);
-                var snapshot = JsonSerializer.Deserialize<KeymapSnapshot>(json, JsonOptions);
+                var snapshot = JsonSerializer.Deserialize<KeymapSnapshot>(json, CoreJson.Default);
                 if (snapshot is null) continue;
 
                 if (filter is not null &&
@@ -143,7 +136,7 @@ public sealed class SnapshotService : ISnapshotService
     public async Task<KeymapSnapshot> LoadAsync(string filePath, CancellationToken ct = default)
     {
         var json = await File.ReadAllTextAsync(filePath, ct);
-        return JsonSerializer.Deserialize<KeymapSnapshot>(json, JsonOptions)
+        return JsonSerializer.Deserialize<KeymapSnapshot>(json, CoreJson.Default)
             ?? throw new InvalidOperationException($"Failed to deserialize snapshot: {filePath}");
     }
 
@@ -170,7 +163,7 @@ public sealed class SnapshotService : ISnapshotService
         await _writeGate.WaitAsync(ct);
         try
         {
-            var json = JsonSerializer.Serialize(snapshot, JsonOptions);
+            var json = JsonSerializer.Serialize(snapshot, CoreJson.Default);
             await AtomicFile.WriteAllTextAsync(destinationPath, json, ct);
         }
         finally
@@ -191,7 +184,7 @@ public sealed class SnapshotService : ISnapshotService
         try
         {
             var json = await File.ReadAllTextAsync(sourceFilePath, ct);
-            snapshot = JsonSerializer.Deserialize<KeymapSnapshot>(json, JsonOptions);
+            snapshot = JsonSerializer.Deserialize<KeymapSnapshot>(json, CoreJson.Default);
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -216,7 +209,7 @@ public sealed class SnapshotService : ISnapshotService
             if (File.Exists(targetPath))
                 return new ImportResult(0, 1, 0, []);
 
-            var normalized = JsonSerializer.Serialize(snapshot, JsonOptions);
+            var normalized = JsonSerializer.Serialize(snapshot, CoreJson.Default);
             await AtomicFile.WriteAllTextAsync(targetPath, normalized, ct);
         }
         finally

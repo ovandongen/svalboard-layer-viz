@@ -9,7 +9,7 @@ namespace SvalboardLayerViz.App.ViewModels;
 /// ViewModel for the macro editor dialog. Shows all macro slots on the left,
 /// selected macro's actions on the right, and a buffer usage bar at the bottom.
 /// </summary>
-public partial class MacroEditorViewModel : ObservableObject
+public partial class MacroEditorViewModel : ObservableObject, IKeyPickerHost
 {
     private readonly Action<byte[]>? _applyMacroEdit;
     private int _bufferCapacity;

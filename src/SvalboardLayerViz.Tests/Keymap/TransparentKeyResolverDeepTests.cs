@@ -11,6 +11,10 @@ namespace SvalboardLayerViz.Tests.Keymap;
 /// </summary>
 public class TransparentKeyResolverDeepTests
 {
+    // No activation graph → every layer resolves via orphan fallback [0, layer].
+    private static readonly IReadOnlyDictionary<int, IReadOnlyList<ActivationHop>> NoActivationGraph =
+        new Dictionary<int, IReadOnlyList<ActivationHop>>();
+
     private static Key MakeKey(int row, int col, string label, bool transparent = false, ushort? raw = null) => new()
     {
         Row = row,
@@ -33,7 +37,7 @@ public class TransparentKeyResolverDeepTests
         for (var i = 1; i < 9; i++)
             layers.Add(MakeLayer(i, MakeKey(0, 0, "___", transparent: true)));
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         for (var i = 1; i < 9; i++)
             Assert.Equal("Base", layers[i].Keys[0].EffectiveLabel);
@@ -49,7 +53,7 @@ public class TransparentKeyResolverDeepTests
             MakeLayer(1, MakeKey(5, 5, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Null(layers[1].Keys[0].EffectiveLabel);
     }
@@ -75,7 +79,7 @@ public class TransparentKeyResolverDeepTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         var resolved = layers[1].Keys[0];
         Assert.Equal("MO(2)", resolved.EffectiveLabel);
@@ -102,7 +106,7 @@ public class TransparentKeyResolverDeepTests
             MakeLayer(1, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("A", layers[1].Keys[0].EffectiveLabel);
         Assert.Equal("MT(Ctrl)", layers[1].Keys[0].SecondaryLabel);
@@ -123,7 +127,7 @@ public class TransparentKeyResolverDeepTests
             MakeLayer(3, MakeKey(0, 0, "___", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("Base", layers[1].Keys[0].EffectiveLabel);
         Assert.Equal("Base", layers[3].Keys[0].EffectiveLabel);
@@ -182,7 +186,7 @@ public class TransparentKeyResolverDeepTests
     public void EmptyLayerList_DoesNotThrow()
     {
         var layers = new List<Layer>();
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
         Assert.Empty(layers);
     }
 
@@ -194,7 +198,7 @@ public class TransparentKeyResolverDeepTests
             MakeLayer(0, MakeKey(0, 0, "A", transparent: true)),
         };
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Null(layers[0].Keys[0].EffectiveLabel);
     }
@@ -222,7 +226,7 @@ public class TransparentKeyResolverDeepTests
             layers.Add(new Layer { Index = li, Keys = trns });
         }
 
-        TransparentKeyResolver.Resolve(layers);
+        TransparentKeyResolver.Resolve(layers, NoActivationGraph);
 
         Assert.Equal("k5-3", layers[4].Keys[5 * 10 + 3].EffectiveLabel);
         Assert.Equal("k19-9", layers[2].Keys[19 * 10 + 9].EffectiveLabel);

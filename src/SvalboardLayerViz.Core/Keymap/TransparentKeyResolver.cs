@@ -18,13 +18,14 @@ public static class TransparentKeyResolver
     /// top-down to find the nearest non-TRNS key and records its label plus
     /// the source layer on <see cref="Key.ResolvedFromLayer"/>.
     ///
-    /// When <paramref name="activationPaths"/> is null, every layer is treated
-    /// as orphan (fallback stack [0, layer]) — this preserves behavior for
-    /// callers that have not yet built the graph.
+    /// <paramref name="activationPaths"/> comes from
+    /// <see cref="LayerActivationGraph.Build"/>; pass an empty map to treat
+    /// every layer as orphan (fallback stack [0, layer]). Production callers go
+    /// through <see cref="LayerActivationGraph.ResolveInto"/>.
     /// </summary>
     public static void Resolve(
         List<Layer> layers,
-        IReadOnlyDictionary<int, IReadOnlyList<ActivationHop>>? activationPaths = null)
+        IReadOnlyDictionary<int, IReadOnlyList<ActivationHop>> activationPaths)
     {
         // Per-layer (row, col) → Key lookup. Built once so the resolver runs
         // O(total-keys * stack-depth) instead of O(keys²).
@@ -40,10 +41,7 @@ public static class TransparentKeyResolver
         for (var layerIdx = 1; layerIdx < layers.Count; layerIdx++)
         {
             var layer = layers[layerIdx];
-            IReadOnlyList<ActivationHop> path = activationPaths is not null
-                && activationPaths.TryGetValue(layerIdx, out var p)
-                    ? p
-                    : Array.Empty<ActivationHop>();
+            var path = activationPaths.TryGetValue(layerIdx, out var p) ? p : Array.Empty<ActivationHop>();
             var stack = LayerActivationGraph.GetActiveStack(layerIdx, path);
 
             var resolvedKeys = layer.Keys.ToList();

@@ -22,7 +22,7 @@ public interface ISlotEditorRow : INotifyPropertyChanged
 /// capacity/used/usage-label triple. Subclasses supply the resource key for
 /// the usage label and populate <c>Rows</c> in their constructor.
 /// </summary>
-public abstract partial class SlotListEditorViewModel<TRow> : ObservableObject
+public abstract partial class SlotListEditorViewModel<TRow> : ObservableObject, IKeyPickerHost
     where TRow : class, ISlotEditorRow
 {
     public ObservableCollection<TRow> Rows { get; } = [];

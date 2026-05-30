@@ -52,28 +52,21 @@ internal static class EditorDialogFactory
 
     public static Task ShowMacroEditorAsync(MainWindowViewModel vm, Window owner)
     {
-        var macroBuffer = vm.GetCurrentMacros();
         var macroEditorVm = new MacroEditorViewModel(
-            macroBuffer,
+            vm.GetCurrentMacros(),
             vm.IsEditMode,
             vm.IsEditMode ? vm.ApplyMacroEdit : null);
 
-        var dialog = new MacroEditorDialog
+        return ShowSlotEditorAsync<MacroEditorDialog>(vm, owner, macroEditorVm, dialog =>
         {
-            DataContext = macroEditorVm,
-            Topmost = vm.IsAlwaysOnTop,
-        };
+            macroEditorVm.Saved = () => dialog.Close();
+            macroEditorVm.Cancelled = () => dialog.Close();
 
-        Action<MacroBuffer> onMacrosLoaded = buffer => macroEditorVm.UpdateFromBuffer(buffer);
-        vm.MacrosLoaded += onMacrosLoaded;
-        dialog.Closed += (_, _) => vm.MacrosLoaded -= onMacrosLoaded;
-
-        macroEditorVm.Saved = () => dialog.Close();
-        macroEditorVm.Cancelled = () => dialog.Close();
-        macroEditorVm.RequestKeyPick = (onApply, allowed) =>
-            ShowKeyPickerAsync(vm, dialog, onApply, allowed);
-
-        return dialog.ShowDialog(owner);
+            // Macros may still be loading when the dialog opens; refresh on arrival.
+            Action<MacroBuffer> onMacrosLoaded = buffer => macroEditorVm.UpdateFromBuffer(buffer);
+            vm.MacrosLoaded += onMacrosLoaded;
+            dialog.Closed += (_, _) => vm.MacrosLoaded -= onMacrosLoaded;
+        });
     }
 
     public static Task ShowComboEditorAsync(MainWindowViewModel vm, Window owner)
@@ -84,16 +77,8 @@ internal static class EditorDialogFactory
             vm.IsEditMode,
             vm.IsEditMode ? vm.ApplyComboEdit : null);
 
-        var dialog = new ComboEditorDialog
-        {
-            DataContext = comboVm,
-            Topmost = vm.IsAlwaysOnTop,
-        };
-        comboVm.Closed = () => dialog.Close();
-        comboVm.RequestKeyPick = (onApply, allowed) =>
-            ShowKeyPickerAsync(vm, dialog, onApply, allowed);
-
-        return dialog.ShowDialog(owner);
+        return ShowSlotEditorAsync<ComboEditorDialog>(vm, owner, comboVm,
+            dialog => comboVm.Closed = () => dialog.Close());
     }
 
     public static Task ShowTapDanceEditorAsync(MainWindowViewModel vm, Window owner)
@@ -104,15 +89,30 @@ internal static class EditorDialogFactory
             vm.IsEditMode,
             vm.IsEditMode ? vm.ApplyTapDanceEdit : null);
 
-        var dialog = new TapDanceEditorDialog
+        return ShowSlotEditorAsync<TapDanceEditorDialog>(vm, owner, tdVm,
+            dialog => tdVm.Closed = () => dialog.Close());
+    }
+
+    /// <summary>
+    /// Shared scaffolding for the macro / combo / tap-dance editors: builds the
+    /// dialog, applies <c>Topmost</c>, wires the key-picker callback, runs the
+    /// editor-specific <paramref name="wireClose"/> hook, then shows it modally.
+    /// </summary>
+    private static Task ShowSlotEditorAsync<TDialog>(
+        MainWindowViewModel vm,
+        Window owner,
+        IKeyPickerHost editorVm,
+        Action<Window> wireClose)
+        where TDialog : Window, new()
+    {
+        var dialog = new TDialog
         {
-            DataContext = tdVm,
+            DataContext = editorVm,
             Topmost = vm.IsAlwaysOnTop,
         };
-        tdVm.Closed = () => dialog.Close();
-        tdVm.RequestKeyPick = (onApply, allowed) =>
+        editorVm.RequestKeyPick = (onApply, allowed) =>
             ShowKeyPickerAsync(vm, dialog, onApply, allowed);
-
+        wireClose(dialog);
         return dialog.ShowDialog(owner);
     }
 

@@ -54,27 +54,18 @@ public static class MacroCodec
                     switch (actionType)
                     {
                         case SsTapCode:
-                            pos++;
-                            if (pos >= buffer.Length)
-                                throw new InvalidDataException(
-                                    $"Macro {macroIdx}: buffer ended after SS_TAP_CODE; missing keycode byte.");
-                            actions.Add(new MacroTapAction(buffer[pos++]));
+                            actions.Add(new MacroTapAction(
+                                ReadOperandByte(buffer, ref pos, macroIdx, "after SS_TAP_CODE; missing keycode byte")));
                             break;
 
                         case SsDownCode:
-                            pos++;
-                            if (pos >= buffer.Length)
-                                throw new InvalidDataException(
-                                    $"Macro {macroIdx}: buffer ended after SS_DOWN_CODE; missing keycode byte.");
-                            actions.Add(new MacroDownAction(buffer[pos++]));
+                            actions.Add(new MacroDownAction(
+                                ReadOperandByte(buffer, ref pos, macroIdx, "after SS_DOWN_CODE; missing keycode byte")));
                             break;
 
                         case SsUpCode:
-                            pos++;
-                            if (pos >= buffer.Length)
-                                throw new InvalidDataException(
-                                    $"Macro {macroIdx}: buffer ended after SS_UP_CODE; missing keycode byte.");
-                            actions.Add(new MacroUpAction(buffer[pos++]));
+                            actions.Add(new MacroUpAction(
+                                ReadOperandByte(buffer, ref pos, macroIdx, "after SS_UP_CODE; missing keycode byte")));
                             break;
 
                         case SsModTapCode:
@@ -284,5 +275,19 @@ public static class MacroCodec
         if (pos + needed > capacity)
             throw new InvalidOperationException(
                 $"Macro buffer overflow: need {pos + needed} bytes but capacity is {capacity}.");
+    }
+
+    /// <summary>
+    /// Reads the single operand byte that follows an action-type byte: advances
+    /// <paramref name="pos"/> to the operand, bounds-checks, then returns it and
+    /// leaves <paramref name="pos"/> at the next unprocessed byte. <paramref
+    /// name="what"/> describes the missing byte for the truncation error.
+    /// </summary>
+    private static byte ReadOperandByte(byte[] buffer, ref int pos, int macroIdx, string what)
+    {
+        pos++;
+        if (pos >= buffer.Length)
+            throw new InvalidDataException($"Macro {macroIdx}: buffer ended {what}.");
+        return buffer[pos++];
     }
 }

@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SvalboardLayerViz.App.Localization;
+using SvalboardLayerViz.App.Services;
 using SvalboardLayerViz.Core.Device;
 using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.History;
@@ -37,31 +38,46 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly ISnapshotService _snapshotService;
 
-    /// <summary>Protocol service exposed for dialogs (unlock flow) that need direct device access.</summary>
-    public IVialProtocolService ProtocolService => _protocolService;
-    private IDisposable? _deviceSubscription;
-    private MatrixPollingService? _matrixPolling;
-    private LedPollingService? _ledPolling;
+    // Host-provided dialog + shell collaborators. Default to headless no-ops so
+    // the VM is fully constructible (and testable) without a windowing system;
+    // App swaps in the real Desktop* impls once the window exists (AttachHost).
+    private IDialogService _dialogs = new NoopDialogService();
+    private IShellService _shell = new NoopShellService();
 
     /// <summary>
-    /// True if the firmware responds to the standard VIA rgblight color query
-    /// (0x08, 0x83). When true, we drive SelectedLayerIndex from the polled LED
-    /// color instead of the matrix-based MO/TG heuristic — this catches layers
-    /// the heuristic can't see (e.g. the mouse layer).
+    /// Wires the App-layer host services. Called once by the composition root
+    /// after the main window is built — replaces the old per-callback property
+    /// assignments. Tests pass fakes here to observe dialog/shell interactions.
     /// </summary>
-    private bool _ledPollSupported;
+    internal void AttachHost(IDialogService dialogs, IShellService shell)
+    {
+        _dialogs = dialogs;
+        _shell = shell;
+    }
+
+    /// <summary>Protocol service exposed for dialogs (unlock flow) that need direct device access.</summary>
+    public IVialProtocolService ProtocolService => _protocolService;
+
+    // Narrow internal accessors for the extracted collaborators
+    // (LivePollingCoordinator / EditSessionController) — same assembly, impl detail.
+    internal IDialogService Dialogs => _dialogs;
+    internal IShellService Shell => _shell;
+    internal ISettingsService Settings => _settingsService;
+    internal KeycodeService KeycodeService => _keycodeService;
+    internal string? ConnectedDeviceName => _connectedDeviceName;
+    private IDisposable? _deviceSubscription;
+
+    /// <summary>
+    /// Live-polling subsystem: matrix + LED polling and the layer-switch
+    /// heuristic. The VM keeps the thin polling commands as delegators and
+    /// exposes <see cref="StopAllPolling"/>/<see cref="ResumePolling"/> for the
+    /// edit flow; everything else lives here.
+    /// </summary>
+    private readonly LivePollingCoordinator _polling;
 
     private string? _connectedDeviceName;
     private CancellationTokenSource? _connectCts;
     private bool _isConnecting;
-
-    /// <summary>
-    /// Owns momentary/toggle layer caches, edge detection, and hold-threshold
-    /// state. Rebuilt from layer 0 on connect; reset via ResetLayerState.
-    /// WARNING: Toggle state is a best-effort local mirror of firmware; see
-    /// design doc for drift sources (fast double-taps, firmware-side combos).
-    /// </summary>
-    private readonly LayerSwitchService _layerSwitch = new();
 
     [ObservableProperty]
     private int _layerHoldThresholdMs = 200;
@@ -78,9 +94,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     /// <summary>Diagnostics log for matrix polling events. Shared with the diagnostics popup.</summary>
     public DiagnosticsViewModel Diagnostics { get; } = new();
-
-    /// <summary>Callback to open the diagnostics window. Wired up by App.axaml.cs.</summary>
-    public Action? OpenDiagnosticsRequested { get; set; }
 
     [ObservableProperty]
     private KeyboardConfig? _keyboardConfig;
@@ -124,32 +137,23 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _isSaving;
 
     /// <summary>
-    /// Remembers whether the device was locked when the user entered edit mode.
-    /// Used to decide whether to re-lock after a successful save: if the user
-    /// had to go through the unlock dialog to edit, we put the device back the
-    /// way we found it. If they started unlocked (e.g. firmware shipped
-    /// unlocked, or they unlocked in Vial earlier), we leave it alone.
-    /// </summary>
-    private bool _wasLockedOnEnterEdit;
-
-    /// <summary>
     /// BackgroundOpacity captured on entering edit mode so it can be restored on exit.
     /// Edit mode forces the background fully opaque (solid) to maximize contrast while
     /// the user is clicking keys; the original transparency comes back on Discard/Save.
     /// </summary>
     private double? _preEditBackgroundOpacity;
 
-    /// <summary>Cancellation source for an in-flight save. Null when not saving.</summary>
-    private CancellationTokenSource? _saveCts;
-
     /// <summary>True only when live polling can be toggled — blocked while editing to avoid interaction conflicts.</summary>
     public bool CanToggleLivePolling => !IsEditMode;
 
-    /// <summary>In-memory edit state while <see cref="IsEditMode"/> is true; null otherwise.</summary>
-    private KeymapEditSession? _editSession;
+    /// <summary>
+    /// Keymap edit/save subsystem: session lifecycle, Apply*Edit staging, save
+    /// pipeline. The VM keeps the public edit API + edit commands as delegators.
+    /// </summary>
+    private readonly EditSessionController _edit;
 
     /// <summary>Exposed for tests to verify pending-change state.</summary>
-    public KeymapEditSession? EditSession => _editSession;
+    public KeymapEditSession? EditSession => _edit.Session;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanvasWidth))]
@@ -223,18 +227,6 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<LayerViewModel> _layers = [];
 
-    /// <summary>Callback to show/focus the main window. Wired up by App.axaml.cs.</summary>
-    public Action? ShowWindowRequested { get; set; }
-
-    /// <summary>Callback to toggle window visibility. Wired up by App.axaml.cs.</summary>
-    public Action? ToggleWindowRequested { get; set; }
-
-    /// <summary>Callback to open the settings window. Wired up by App.axaml.cs.</summary>
-    public Action<int?>? OpenSettingsRequested { get; set; }
-
-    /// <summary>Callback to open the snapshot history window. Wired up by App.axaml.cs.</summary>
-    public Action? OpenHistoryRequested { get; set; }
-
     /// <summary>Snapshot service used by both this VM and the History window.</summary>
     public ISnapshotService SnapshotService => _snapshotService;
 
@@ -242,56 +234,11 @@ public partial class MainWindowViewModel : ObservableObject
     public KeyboardId? CurrentKeyboardId =>
         KeyboardConfig is null ? null : GetKeyboardId();
 
-    /// <summary>Callback to open the macro editor dialog. Wired up by App.axaml.cs.</summary>
-    public Action? OpenMacrosRequested { get; set; }
-
-    /// <summary>Callback to open the combo editor dialog. Wired up by App.axaml.cs.</summary>
-    public Action? OpenCombosRequested { get; set; }
-
-    /// <summary>Callback to open the tap-dance editor dialog. Wired up by App.axaml.cs.</summary>
-    public Action? OpenTapDanceRequested { get; set; }
-
     /// <summary>
     /// Fired when deferred macro load completes. Lets an open macro editor
     /// dialog update its slots from the freshly loaded data.
     /// </summary>
     public event Action<MacroBuffer>? MacrosLoaded;
-
-    /// <summary>Callback to open the export dialog. Wired up by App.axaml.cs.</summary>
-    public Action? OpenExportRequested { get; set; }
-
-    /// <summary>Callback to open the help window. Wired up by App.axaml.cs.</summary>
-    public Action? OpenHelpRequested { get; set; }
-
-    /// <summary>Callback when hotkey settings change. Wired up by App.axaml.cs. Args: (key, modifiers).</summary>
-    public Action<string, string>? HotkeyChangeRequested { get; set; }
-
-    /// <summary>Callback to show a label editor for a key. Wired up by App.axaml.cs. Args: KeyViewModel.</summary>
-    public Action<KeyViewModel>? SetKeyLabelRequested { get; set; }
-
-    /// <summary>Callback to open the Vial unlock dialog. Wired up by App.axaml.cs. Arg: success callback to run on unlock.</summary>
-    public Action<Action>? OpenUnlockRequested { get; set; }
-
-    /// <summary>Callback to open the key picker dialog. Wired up by App.axaml.cs.</summary>
-    public Action<KeyEditRequest>? OpenKeyPickerRequested { get; set; }
-
-    /// <summary>
-    /// Pre-save confirmation hook. Called when <see cref="PreSaveSafetyCheck"/>
-    /// returns a non-empty warning list. Return <c>true</c> to proceed, <c>false</c>
-    /// to abort. Null means auto-confirm (tests; also, the first-cut run before
-    /// the dialog view is wired up).
-    /// </summary>
-    public Func<IReadOnlyList<SafetyWarning>, Task<bool>>? ConfirmSafetyWarningsRequested { get; set; }
-
-    /// <summary>
-    /// Fired at the end of every <see cref="SaveEdit"/> run with the final
-    /// outcome so the App layer can surface a modal for partials / errors.
-    /// Optional; status-message updates happen regardless.
-    /// </summary>
-    public Action<SaveResult>? SaveCompletedCallback { get; set; }
-
-    /// <summary>Invoked by QuitCommand so the App layer can save window state and shut down cleanly.</summary>
-    public Action? QuitRequested { get; set; }
 
     public MainWindowViewModel(
         ISettingsService? settingsService = null,
@@ -305,6 +252,8 @@ public partial class MainWindowViewModel : ObservableObject
         _snapshotService = snapshotService ?? new SnapshotService();
         _deviceService = deviceService ?? new DeviceConnectionService();
         _keycodeService = keycodeService ?? new KeycodeService();
+        _polling = new LivePollingCoordinator(this);
+        _edit = new EditSessionController(this);
         var initialSettings = _settingsService.Load();
         IsAlwaysOnTop = initialSettings.AlwaysOnTop;
         BackgroundOpacity = Math.Clamp(initialSettings.BackgroundOpacity, 0.0, 1.0);
@@ -346,8 +295,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            StopMatrixPolling();
-            StopLedPolling();
+            StopAllPolling();
 
             var settings = _settingsService.Load();
             StatusMessage = Loc.Instance["Status_LookingForDevice"];
@@ -369,10 +317,10 @@ public partial class MainWindowViewModel : ObservableObject
             }
 
             KeyboardConfig = session.Config;
-            _ledPollSupported = session.LedPollSupported;
+            _polling.LedPollSupported = session.LedPollSupported;
 
             BuildLayerViewModels(settings);
-            BuildLayerSwitchCache();
+            _polling.BuildLayerSwitchCache();
 
             // Force property change notification even if already 0 (default),
             // so the UI picks up the now-valid SelectedLayer after async connect.
@@ -405,11 +353,7 @@ public partial class MainWindowViewModel : ObservableObject
             // Deferred macro load — non-blocking, UI is already up.
             _ = LoadMacrosAsync();
 
-            if (IsLiveHighlightingEnabled && !IsEditMode)
-                StartMatrixPolling();
-
-            if (_ledPollSupported && IsAutoLayerSwitchEnabled && !IsEditMode)
-                StartLedPolling();
+            ResumePolling();
         }
         catch (OperationCanceledException)
         {
@@ -419,7 +363,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            StopMatrixPolling();
+            StopAllPolling();
             DiagnosticLog.Error("Device", $"Device connection error: {ex.Message}");
             StatusMessage = Loc.Instance.Format("Status_ConnectionErrorFormat", ex.Message);
             IsConnected = false;
@@ -469,10 +413,10 @@ public partial class MainWindowViewModel : ObservableObject
 
                 // If already in edit mode, patch the session's macro baseline
                 // so ApplyMacroEdit has a non-null buffer to work with.
-                if (_editSession?.GetCurrentMacroBuffer() is null)
+                if (_edit.Session?.GetCurrentMacroBuffer() is null)
                 {
                     var encoded = MacroCodec.Encode(macros);
-                    _editSession?.SetMacroBaseline(encoded);
+                    _edit.Session?.SetMacroBaseline(encoded);
                 }
 
                 // Clear "still loading" status if it's showing
@@ -537,7 +481,7 @@ public partial class MainWindowViewModel : ObservableObject
 
             Layers.Add(new LayerViewModel(layer, palette,
                 selectLayer: i => SelectedLayerIndex = i,
-                setLabelRequested: keyVm => SetKeyLabelRequested?.Invoke(keyVm)));
+                setLabelRequested: keyVm => _dialogs.ShowKeyLabelEditor(keyVm)));
         }
 
         // Wire per-key click routing so edit-mode clicks flow through OnKeyClicked.
@@ -555,12 +499,12 @@ public partial class MainWindowViewModel : ObservableObject
     /// </summary>
     private void OnKeyClicked(KeyViewModel keyVm)
     {
-        if (!IsEditMode || _editSession is null) return;
+        if (!IsEditMode || _edit.Session is null) return;
 
         var layer = keyVm.Layer.Index;
         var row = keyVm.Key.Row;
         var col = keyVm.Key.Col;
-        var currentCode = _editSession.GetCurrent(layer, row, col);
+        var currentCode = _edit.Session.GetCurrent(layer, row, col);
 
         // Use KeyboardConfig.Layers (all device layers) not the filtered Layers VM
         // collection — BuildLayerViewModels drops empty (all-KC_NO) layers, but the
@@ -580,7 +524,7 @@ public partial class MainWindowViewModel : ObservableObject
             LayerOptions: layerOptions,
             OnApply: newCode => ApplyKeyEdit(layer, row, col, newCode));
 
-        OpenKeyPickerRequested?.Invoke(request);
+        _dialogs.OpenKeyPicker(request);
     }
 
     /// <summary>
@@ -593,7 +537,7 @@ public partial class MainWindowViewModel : ObservableObject
         var settings = _settingsService.Load();
 
         // Notify hotkey change
-        HotkeyChangeRequested?.Invoke(settings.HotkeyKey, settings.HotkeyModifiers);
+        _shell.HotkeyChanged(settings.HotkeyKey, settings.HotkeyModifiers);
         BackgroundOpacity = Math.Clamp(settings.BackgroundOpacity, 0.0, 1.0);
         LayerHoldThresholdMs = Math.Clamp(settings.LayerHoldThresholdMs, 0, 1000);
         VerticalLayoutTopHand = settings.VerticalLayoutTopHand ?? "Left";
@@ -618,7 +562,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     /// <summary>Re-generates StatusMessage in the current locale.</summary>
-    private void RefreshStatusMessage()
+    internal void RefreshStatusMessage()
     {
         if (IsConnected && KeyboardConfig is not null && _connectedDeviceName is not null)
         {
@@ -673,171 +617,38 @@ public partial class MainWindowViewModel : ObservableObject
         ApplySettings();
     }
 
-    private void StartMatrixPolling()
+    /// <summary>
+    /// Pauses both polling loops. Called at connect entry, on connection error,
+    /// and when entering edit mode (polling interferes with edit clicks).
+    /// </summary>
+    internal void StopAllPolling()
     {
-        StopMatrixPolling();
-        if (KeyboardConfig is null) return;
-
-        _matrixPolling = new MatrixPollingService(
-            _protocolService, KeyboardConfig.MatrixRows, KeyboardConfig.MatrixCols);
-        _matrixPolling.MatrixStateChanged += OnMatrixStateChanged;
-        _matrixPolling.PollError += OnMatrixPollError;
-        _matrixPolling.Start();
-        RefreshStatusMessage();
-    }
-
-    private void OnMatrixPollError(string msg) =>
-        Dispatcher.UIThread.Post(() => StatusMessage = Loc.Instance.Format("Status_PollingErrorFormat", msg));
-
-    private void StopMatrixPolling()
-    {
-        if (_matrixPolling is null) return;
-        _matrixPolling.MatrixStateChanged -= OnMatrixStateChanged;
-        _matrixPolling.PollError -= OnMatrixPollError;
-        _matrixPolling.Dispose();
-        _matrixPolling = null;
-
-        // Clear all pressed states
-        ClearPressedStates();
-    }
-
-    private void StartLedPolling()
-    {
-        StopLedPolling();
-        if (KeyboardConfig is null || !_ledPollSupported) return;
-
-        _ledPolling = new LedPollingService(_protocolService);
-        _ledPolling.LedColorChanged += OnLedColorChanged;
-        _ledPolling.PollError += OnLedPollError;
-        _ledPolling.Start();
-    }
-
-    private void OnLedPollError(string msg) =>
-        Dispatcher.UIThread.Post(() => StatusMessage = Loc.Instance.Format("Status_PollingErrorFormat", msg));
-
-    private void StopLedPolling()
-    {
-        if (_ledPolling is null) return;
-        _ledPolling.LedColorChanged -= OnLedColorChanged;
-        _ledPolling.PollError -= OnLedPollError;
-        _ledPolling.Dispose();
-        _ledPolling = null;
+        _polling.StopMatrixPolling();
+        _polling.StopLedPolling();
     }
 
     /// <summary>
-    /// Called on the polling thread whenever the device's rgblight hue+sat
-    /// changes. Resolves the closest matching layer and, if auto-switch is on,
-    /// updates SelectedLayerIndex on the UI thread.
+    /// Restarts polling that should be active given the current state: matrix
+    /// polling when live-highlighting is on, LED polling when auto-switch is on
+    /// and the firmware supports the color query. No-op while editing or
+    /// disconnected. Called at end of connect and when leaving edit mode.
     /// </summary>
-    private void OnLedColorChanged(byte hue, byte sat)
+    internal void ResumePolling()
     {
-        if (KeyboardConfig is null) return;
-        // Suppress auto-switch while a save is in flight. The save reloads
-        // the keymap and flips SelectedLayerIndex itself; racing LED-driven
-        // posts can clobber that and leave the UI on the wrong layer.
-        if (IsSaving) return;
-
-        var match = LedColorLayerResolver.Resolve(
-            KeyboardConfig.Layers, hue, sat, SelectedLayerIndex);
-        if (match is null) return;
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            if (IsSaving) return;
-            if (IsAutoLayerSwitchEnabled && match.Value != SelectedLayerIndex)
-                SelectedLayerIndex = match.Value;
-        });
-    }
-
-    private void BuildLayerSwitchCache() =>
-        _layerSwitch.BuildCache(KeyboardConfig?.Layers.FirstOrDefault(l => l.Index == 0));
-
-    private void OnMatrixStateChanged(bool[,] state)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            var rows = state.GetLength(0);
-            var cols = state.GetLength(1);
-
-            // Update pressed states and collect pressed keys for diagnostics
-            var pressedKeys = new List<(KeyViewModel Key, string LayerName)>();
-            foreach (var layerVm in Layers)
-            {
-                foreach (var keyVm in layerVm.Keys)
-                {
-                    if (keyVm.Key.Row >= rows || keyVm.Key.Col >= cols) continue;
-                    var pressed = state[keyVm.Key.Row, keyVm.Key.Col];
-                    keyVm.IsPressed = pressed;
-                    if (pressed)
-                        pressedKeys.Add((keyVm, layerVm.DisplayName));
-                }
-            }
-
-            Diagnostics.LogMatrixEvent(pressedKeys);
-
-            // Skipped when LED polling is active — the LED is authoritative
-            // and catches layers the matrix heuristic can't see (mouse layer,
-            // firmware-internal switches, etc.).
-            if (IsAutoLayerSwitchEnabled && !_ledPollSupported)
-            {
-                var targetLayer = _layerSwitch.ResolveTargetLayer(
-                    state, Environment.TickCount64, LayerHoldThresholdMs);
-                if (targetLayer != SelectedLayerIndex)
-                    SelectedLayerIndex = targetLayer;
-            }
-        });
-    }
-
-    private void ClearPressedStates()
-    {
-        foreach (var layerVm in Layers)
-            foreach (var keyVm in layerVm.Keys)
-                keyVm.IsPressed = false;
-    }
-
-    /// <summary>
-    /// Resets locally tracked toggle state and returns to base layer.
-    /// Use this when the visualization gets out of sync with the actual keyboard layer.
-    /// </summary>
-    [RelayCommand]
-    private void ResetLayerState()
-    {
-        _layerSwitch.ResetRuntimeState();
-        SelectedLayerIndex = 0;
-    }
-
-    [RelayCommand]
-    private void ToggleAutoLayerSwitch()
-    {
-        IsAutoLayerSwitchEnabled = !IsAutoLayerSwitchEnabled;
-
-        if (IsConnected && _ledPollSupported)
-        {
-            if (IsAutoLayerSwitchEnabled)
-                StartLedPolling();
-            else
-                StopLedPolling();
-        }
-
-        var settings = _settingsService.Load();
-        _settingsService.Save(settings with { AutoLayerSwitch = IsAutoLayerSwitchEnabled });
-    }
-
-    [RelayCommand]
-    private void ToggleLiveHighlighting()
-    {
-        IsLiveHighlightingEnabled = !IsLiveHighlightingEnabled;
-
         if (IsLiveHighlightingEnabled && IsConnected && !IsEditMode)
-            StartMatrixPolling();
-        else
-            StopMatrixPolling();
-
-        RefreshStatusMessage();
-
-        var settings = _settingsService.Load();
-        _settingsService.Save(settings with { LiveKeyHighlighting = IsLiveHighlightingEnabled });
+            _polling.StartMatrixPolling();
+        if (_polling.LedPollSupported && IsAutoLayerSwitchEnabled && IsConnected && !IsEditMode)
+            _polling.StartLedPolling();
     }
+
+    [RelayCommand]
+    private void ResetLayerState() => _polling.ResetLayerState();
+
+    [RelayCommand]
+    private void ToggleAutoLayerSwitch() => _polling.ToggleAutoLayerSwitch();
+
+    [RelayCommand]
+    private void ToggleLiveHighlighting() => _polling.ToggleLiveHighlighting();
 
     // ============================================================================
     // Edit mode — Session 10
@@ -848,127 +659,13 @@ public partial class MainWindowViewModel : ObservableObject
     /// and defers session creation until the user completes the unlock sequence.
     /// </summary>
     [RelayCommand]
-    private async Task EnterEdit()
-    {
-        if (IsEditMode || !IsConnected || KeyboardConfig is null) return;
-
-        UnlockStatus status;
-        try
-        {
-            status = await Task.Run(() => _protocolService.GetUnlockStatus());
-        }
-        catch (Exception ex)
-        {
-            DiagnosticLog.Error("Edit", $"GetUnlockStatus failed: {ex.Message}");
-            StatusMessage = Loc.Instance.Format("Status_EditUnlockErrorFormat", ex.Message);
-            return;
-        }
-
-        _wasLockedOnEnterEdit = !status.Unlocked;
-
-        if (status.Unlocked)
-        {
-            BeginEditSession();
-        }
-        else
-        {
-            if (OpenUnlockRequested is null)
-            {
-                // No dialog wired up (e.g. tests) — just begin.
-                BeginEditSession();
-                return;
-            }
-            OpenUnlockRequested.Invoke(BeginEditSession);
-        }
-    }
+    private Task EnterEdit() => _edit.EnterEditAsync();
 
     /// <summary>
-    /// Starts the in-memory edit session. Stops polling (which interferes with edit clicks)
-    /// and flips every layer/key into edit mode for click handling.
+    /// Enters edit mode with a pre-populated session from a snapshot restore
+    /// (called by the History window). Delegates to the edit controller.
     /// </summary>
-    private void BeginEditSession()
-    {
-        if (KeyboardConfig is null) return;
-
-        var layers = KeyboardConfig.Layers.Count;
-        var rows = KeyboardConfig.MatrixRows;
-        var cols = KeyboardConfig.MatrixCols;
-        var baseline = new ushort[layers, rows, cols];
-        foreach (var layer in KeyboardConfig.Layers)
-        {
-            foreach (var key in layer.Keys)
-                baseline[layer.Index, key.Row, key.Col] = key.RawKeycode;
-        }
-
-        byte[]? macroBuffer = KeyboardConfig.Macros is not null
-            ? MacroCodec.Encode(KeyboardConfig.Macros) : null;
-
-        var session = new KeymapEditSession(baseline, BuildQmkSettingsDict(), BuildQmkSettingsWidths(), macroBuffer,
-            KeyboardConfig.Combos, KeyboardConfig.TapDances);
-        ActivateEditSession(session);
-        DirtyCount = 0;
-        StatusMessage = Loc.Instance["Status_EditModeActive"];
-        DiagnosticLog.Info("Edit", $"Edit session started: {layers}x{rows}x{cols}");
-    }
-
-    /// <summary>
-    /// Shared activation: sets the edit session, stops polling, and flips layer VMs
-    /// into edit mode. Called by both <see cref="BeginEditSession"/> and
-    /// <see cref="RestoreFromSnapshot"/>.
-    /// </summary>
-    private void ActivateEditSession(KeymapEditSession session)
-    {
-        StopMatrixPolling();
-        StopLedPolling();
-        _editSession = session;
-        IsEditMode = true;
-
-        // Rebuild layer VMs so that previously hidden empty layers become
-        // visible — BuildLayerViewModels skips the empty-layer filter when
-        // IsEditMode is true, and wires SetEditMode + click routing.
-        var currentLayer = SelectedLayerIndex;
-        BuildLayerViewModels(_settingsService.Load());
-        SelectedLayerIndex = -1;
-        SelectedLayerIndex = Math.Min(currentLayer, Layers.Count - 1);
-    }
-
-    /// <summary>
-    /// Enters edit mode with a pre-populated session from a snapshot restore.
-    /// Each pending change is reflected as a visual override on the corresponding key.
-    /// If already in edit mode (e.g. after a save that kept edit mode active),
-    /// the existing session is cleanly replaced.
-    /// </summary>
-    public void RestoreFromSnapshot(KeymapEditSession session)
-    {
-        if (KeyboardConfig is null) return;
-
-        // If already in edit mode, tear down the existing session first
-        if (IsEditMode)
-        {
-            _editSession?.Discard();
-            _editSession = null;
-            foreach (var layerVm in Layers)
-                layerVm.ClearAllPendingOverrides();
-            IsEditMode = false;
-        }
-
-        ActivateEditSession(session);
-
-        // Apply visual overrides for each pending change
-        foreach (var (layer, row, col, _, newCode) in session.PendingChanges)
-        {
-            var layerVm = Layers.FirstOrDefault(l => l.Index == layer);
-            if (layerVm is not null)
-            {
-                var info = _keycodeService.Resolve(newCode);
-                layerVm.ApplyPendingOverride(row, col, newCode, info.Label, info.SecondaryLabel);
-            }
-        }
-
-        DirtyCount = ComputeDirtyCount();
-        StatusMessage = Loc.Instance.Format("Status_RestoreLoaded", DirtyCount);
-        DiagnosticLog.Info("Snapshot", $"Restore session loaded: {session.PendingChanges.Count} pending changes");
-    }
+    public void RestoreFromSnapshot(KeymapEditSession session) => _edit.RestoreFromSnapshot(session);
 
     /// <summary>Snapshot of current device state for diff/restore dialogs, or null if disconnected.</summary>
     public DeviceSnapshot? GetDeviceSnapshotForDiff() =>
@@ -979,321 +676,47 @@ public partial class MainWindowViewModel : ObservableObject
     public IReadOnlyList<byte[]>? GetDeviceTapDancesForDiff() => GetDeviceSnapshotForDiff()?.TapDances;
     public ushort[,,]? GetDeviceKeymapForDiff() => GetDeviceSnapshotForDiff()?.Keymap;
 
-    /// <summary>
-    /// Applies a keycode change from the picker. Mirrors the change into the affected
-    /// LayerViewModel's pending overrides and bumps <see cref="DirtyCount"/>.
-    /// </summary>
-    public void ApplyKeyEdit(int layer, int row, int col, ushort newCode)
-    {
-        if (_editSession is null) return;
+    // ---- Edit/save public API: thin delegators onto the EditSessionController ----
 
-        var oldCode = _editSession.GetCurrent(layer, row, col);
-        if (oldCode == newCode) return;
+    /// <summary>Applies a keycode change from the picker. Delegates to the edit controller.</summary>
+    public void ApplyKeyEdit(int layer, int row, int col, ushort newCode) => _edit.ApplyKeyEdit(layer, row, col, newCode);
 
-        _editSession.Apply(new SetKeyOp(layer, row, col, oldCode, newCode));
+    /// <summary>Stages a QMK setting edit. Called from the Device tab in SettingsWindow.</summary>
+    public void ApplySettingEdit(ushort settingId, ushort newValue) => _edit.ApplySettingEdit(settingId, newValue);
 
-        var baseline = _editSession.GetBaseline(layer, row, col);
-        var layerVm = Layers.FirstOrDefault(l => l.Index == layer);
-        if (layerVm is not null)
-        {
-            if (newCode == baseline)
-            {
-                layerVm.ClearPendingOverride(row, col);
-            }
-            else
-            {
-                var info = _keycodeService.Resolve(newCode);
-                layerVm.ApplyPendingOverride(row, col, newCode, info.Label, info.SecondaryLabel);
-            }
-        }
+    /// <summary>Applies a macro buffer edit (whole-buffer swap). Called by the macro editor.</summary>
+    public void ApplyMacroEdit(byte[] newEncodedBuffer) => _edit.ApplyMacroEdit(newEncodedBuffer);
 
-        DirtyCount = ComputeDirtyCount();
-        DiagnosticLog.Info("Edit", $"ApplyKeyEdit L{layer} R{row} C{col}: 0x{oldCode:X4} → 0x{newCode:X4} (dirty={DirtyCount})");
-    }
+    /// <summary>Applies a single combo entry edit. Called by the combo editor dialog.</summary>
+    public void ApplyComboEdit(int index, byte[] newBytes) => _edit.ApplyComboEdit(index, newBytes);
 
-    /// <summary>
-    /// Stages a QMK setting edit in the current edit session. Called from the
-    /// Device tab in SettingsWindow when the user changes a firmware setting value.
-    /// </summary>
-    public void ApplySettingEdit(ushort settingId, ushort newValue)
-    {
-        if (_editSession is null) return;
+    /// <summary>Applies a single tap-dance entry edit. Called by the tap-dance editor dialog.</summary>
+    public void ApplyTapDanceEdit(int index, byte[] newBytes) => _edit.ApplyTapDanceEdit(index, newBytes);
 
-        var oldValue = _editSession.GetCurrentSetting(settingId) ?? 0;
-        if (oldValue == newValue) return;
+    /// <summary>Working combo list — from the edit session if active, else device baseline.</summary>
+    public IReadOnlyList<byte[]> GetCurrentCombos() => _edit.GetCurrentCombos();
 
-        _editSession.Apply(new SetQmkSettingOp(settingId, oldValue, newValue));
-        DirtyCount = ComputeDirtyCount();
-        DiagnosticLog.Info("Edit", $"ApplySettingEdit 0x{settingId:X4}: {oldValue} → {newValue} (dirty={DirtyCount})");
-    }
+    /// <summary>Working tap-dance list — from the edit session if active, else device baseline.</summary>
+    public IReadOnlyList<byte[]> GetCurrentTapDances() => _edit.GetCurrentTapDances();
 
-    /// <summary>
-    /// Applies a macro buffer edit (whole-buffer swap).
-    /// Called by the future macro editor VM.
-    /// </summary>
-    public void ApplyMacroEdit(byte[] newEncodedBuffer)
-    {
-        if (_editSession is null) return;
+    /// <summary>Working macro buffer — from the edit session if active, else loaded config.</summary>
+    public MacroBuffer? GetCurrentMacros() => _edit.GetCurrentMacros();
 
-        var oldBuffer = _editSession.GetCurrentMacroBuffer();
-        if (oldBuffer is null) return;
-
-        _editSession.Apply(new SetMacroBufferOp(oldBuffer, newEncodedBuffer));
-        DirtyCount = ComputeDirtyCount();
-        DiagnosticLog.Info("Edit", $"ApplyMacroEdit: buffer {newEncodedBuffer.Length}B (dirty={DirtyCount})");
-    }
-
-    /// <summary>
-    /// Applies a single combo entry edit (index + 10-byte payload) as a
-    /// <see cref="SetComboOp"/>. Called by the combo editor dialog.
-    /// </summary>
-    public void ApplyComboEdit(int index, byte[] newBytes)
-    {
-        if (_editSession is null) return;
-        if (index < 0 || index >= _editSession.ComboCount) return;
-
-        var oldBytes = _editSession.GetCurrentCombo(index);
-        if (oldBytes.AsSpan().SequenceEqual(newBytes)) return;
-
-        _editSession.Apply(new SetComboOp(index, oldBytes, (byte[])newBytes.Clone()));
-        DirtyCount = ComputeDirtyCount();
-        DiagnosticLog.Info("Edit", $"ApplyComboEdit #{index} (dirty={DirtyCount})");
-    }
-
-    /// <summary>
-    /// Applies a single tap-dance entry edit (index + 10-byte payload) as a
-    /// <see cref="SetTapDanceOp"/>. Called by the tap-dance editor dialog.
-    /// </summary>
-    public void ApplyTapDanceEdit(int index, byte[] newBytes)
-    {
-        if (_editSession is null) return;
-        if (index < 0 || index >= _editSession.TapDanceCount) return;
-
-        var oldBytes = _editSession.GetCurrentTapDance(index);
-        if (oldBytes.AsSpan().SequenceEqual(newBytes)) return;
-
-        _editSession.Apply(new SetTapDanceOp(index, oldBytes, (byte[])newBytes.Clone()));
-        DirtyCount = ComputeDirtyCount();
-        DiagnosticLog.Info("Edit", $"ApplyTapDanceEdit #{index} (dirty={DirtyCount})");
-    }
-
-    /// <summary>
-    /// Returns the working combo list — from the edit session if active,
-    /// otherwise the device baseline. Used by the combo editor dialog.
-    /// </summary>
-    public IReadOnlyList<byte[]> GetCurrentCombos()
-    {
-        if (_editSession is not null)
-        {
-            var list = new List<byte[]>(_editSession.ComboCount);
-            for (var i = 0; i < _editSession.ComboCount; i++)
-                list.Add(_editSession.GetCurrentCombo(i));
-            return list;
-        }
-        return KeyboardConfig?.Combos ?? [];
-    }
-
-    /// <summary>
-    /// Returns the working tap-dance list — from the edit session if active,
-    /// otherwise the device baseline. Used by the tap-dance editor dialog.
-    /// </summary>
-    public IReadOnlyList<byte[]> GetCurrentTapDances()
-    {
-        if (_editSession is not null)
-        {
-            var list = new List<byte[]>(_editSession.TapDanceCount);
-            for (var i = 0; i < _editSession.TapDanceCount; i++)
-                list.Add(_editSession.GetCurrentTapDance(i));
-            return list;
-        }
-        return KeyboardConfig?.TapDances ?? [];
-    }
-
-    private int ComputeDirtyCount() =>
-        _editSession is null ? 0
-        : _editSession.PendingChanges.Count
-          + _editSession.PendingSettingsChanges.Count
-          + (_editSession.HasPendingMacroChanges ? 1 : 0)
-          + (_editSession.HasPendingComboChanges ? 1 : 0)
-          + (_editSession.HasPendingTapDanceChanges ? 1 : 0);
-
-    /// <summary>
-    /// Discards all pending changes and exits edit mode. Restores polling if it was on.
-    /// </summary>
+    /// <summary>Discards all pending changes and exits edit mode. Delegates to the edit controller.</summary>
     [RelayCommand]
-    private void DiscardEdit()
-    {
-        if (!IsEditMode) return;
+    private void DiscardEdit() => _edit.DiscardEdit();
 
-        _editSession?.Discard();
-        _editSession = null;
-        DirtyCount = 0;
-        IsEditMode = false;
-        _wasLockedOnEnterEdit = false;
-
-        // Rebuild layer VMs so empty layers are hidden again in view mode,
-        // and clear edit-mode state on remaining layers.
-        var currentLayer = SelectedLayerIndex;
-        BuildLayerViewModels(_settingsService.Load());
-        SelectedLayerIndex = -1;
-        SelectedLayerIndex = Math.Clamp(currentLayer, 0, Math.Max(0, Layers.Count - 1));
-
-        // Resume polling if it was enabled before edit mode
-        if (IsLiveHighlightingEnabled && IsConnected)
-            StartMatrixPolling();
-        if (_ledPollSupported && IsAutoLayerSwitchEnabled && IsConnected)
-            StartLedPolling();
-
-        RefreshStatusMessage();
-        DiagnosticLog.Info("Edit", "Edit session discarded");
-    }
-
-    /// <summary>
-    /// Flushes every pending edit to the device. Full pipeline:
-    /// pre-save safety check → pre-save snapshot → per-op write loop →
-    /// reload device state → reconcile → post-save snapshot → optional re-lock.
-    ///
-    /// On success the edit session is cleared but edit mode stays active so
-    /// the user can keep editing. On a mid-batch failure the session is
-    /// rebuilt from the reloaded baseline and refilled with the still-pending
-    /// writes, so the user can fix the problem and press Save again without
-    /// re-typing anything.
-    /// </summary>
+    /// <summary>Flushes every pending edit to the device. Delegates to the edit controller.</summary>
     [RelayCommand(CanExecute = nameof(CanSaveEdit))]
-    private async Task SaveEdit()
-    {
-        if (_editSession is null || KeyboardConfig is null) return;
-
-        IsSaving = true;
-        _saveCts = new CancellationTokenSource();
-        var ct = _saveCts.Token;
-        var totalPending = ComputeDirtyCount();
-
-        try
-        {
-            if (!await RunPreflightAsync()) return;
-
-            StatusMessage = Loc.Instance.Format("Status_SaveInProgressFormat", totalPending);
-
-            var flowCtx = new SaveFlow.Context(
-                Protocol: _protocolService,
-                SnapshotService: _snapshotService,
-                EditSession: _editSession,
-                KeyboardId: GetKeyboardId(),
-                DeviceName: _connectedDeviceName ?? KeyboardConfig.DeviceName,
-                KeepFirstConnectDays: _settingsService.Load().KeepFirstConnectDays,
-                CurrentDeviceSnapshot: CurrentDeviceSnapshot,
-                ReloadAsync: (macroBuf, skip, token) => ReloadKeymapFromDeviceAsync(token, macroBuf, skip));
-
-            var flow = await SaveFlow.RunAsync(flowCtx, ct);
-
-            SaveResult result;
-            if (flow.Execution.Cancelled)
-                result = new SaveCancelled(flow.Execution.Applied.Count);
-            else if (flow.Execution.Failure is null)
-                result = new SaveSuccess(flow.Execution.Applied.Count);
-            else
-                result = BuildPartialResult(flow.Execution, flow.Intended, totalPending);
-
-            ApplySaveResult(result, totalPending);
-
-            if (result is SaveSuccess && _wasLockedOnEnterEdit)
-            {
-                await SaveFlow.ReLockAsync(_protocolService);
-                _wasLockedOnEnterEdit = false;
-            }
-
-            SaveCompletedCallback?.Invoke(result);
-        }
-        catch (OperationCanceledException)
-        {
-            DiagnosticLog.Warn("Save", "Save cancelled");
-            try { await ReloadKeymapFromDeviceAsync(CancellationToken.None); }
-            catch (Exception ex)
-            {
-                DiagnosticLog.Warn("Save", $"Post-cancel reload failed: {ex.Message}");
-            }
-            StatusMessage = Loc.Instance["Status_SaveCancelled"];
-        }
-        catch (Exception ex)
-        {
-            DiagnosticLog.Error("Save", $"Unexpected save error: {ex}");
-            StatusMessage = Loc.Instance.Format("Status_SaveErrorFormat", ex.Message);
-        }
-        finally
-        {
-            IsSaving = false;
-            _saveCts?.Dispose();
-            _saveCts = null;
-        }
-    }
-
-    /// <summary>
-    /// Pre-save gates: safety-warning confirmation + macro buffer overflow.
-    /// Returns false (and fires <see cref="SaveCompletedCallback"/> with
-    /// <see cref="SaveAborted"/>) when the save must not proceed.
-    /// </summary>
-    private async Task<bool> RunPreflightAsync()
-    {
-        var intended = _editSession!.CloneCurrent();
-        var warnings = PreSaveSafetyCheck.Check(intended);
-        if (warnings.Count > 0 && ConfirmSafetyWarningsRequested is not null)
-        {
-            var proceed = await ConfirmSafetyWarningsRequested(warnings);
-            if (!proceed)
-            {
-                StatusMessage = Loc.Instance["Status_SaveCancelledSafety"];
-                DiagnosticLog.Info("Save",
-                    $"Save aborted by user: {warnings.Count} safety warning(s)");
-                SaveCompletedCallback?.Invoke(new SaveAborted("safety warnings declined"));
-                return false;
-            }
-        }
-
-        if (_editSession.HasPendingMacroChanges && KeyboardConfig!.Macros is not null)
-        {
-            var currentBuf = _editSession.GetCurrentMacroBuffer();
-            if (currentBuf is not null && currentBuf.Length > KeyboardConfig.Macros.BufferCapacity)
-            {
-                StatusMessage = Loc.Instance["Edit_MacroBufferOverflow"];
-                DiagnosticLog.Warn("Save",
-                    $"Save blocked: macro buffer {currentBuf.Length} > capacity {KeyboardConfig.Macros.BufferCapacity}");
-                SaveCompletedCallback?.Invoke(new SaveAborted("macro buffer overflow"));
-                return false;
-            }
-        }
-
-        return true;
-    }
+    private Task SaveEdit() => _edit.SaveEditAsync();
 
     private bool CanSaveEdit() =>
         IsEditMode && DirtyCount > 0 && !IsSaving && KeyboardConfig is not null;
 
-    private KeyboardId GetKeyboardId() =>
+    internal KeyboardId GetKeyboardId() =>
         KeyboardId.From(KeyboardConfig!.VendorId, KeyboardConfig.ProductId, KeyboardConfig.KeyboardId);
 
-    private Dictionary<ushort, ushort> BuildQmkSettingsDict() =>
-        KeyboardConfig?.QmkSettings.ToDictionary(s => s.SettingId, s => s.Value)
-        ?? new Dictionary<ushort, ushort>();
-
-    private Dictionary<ushort, byte> BuildQmkSettingsWidths() =>
-        KeyboardConfig?.QmkSettings.ToDictionary(s => s.SettingId, s => s.Width)
-        ?? new Dictionary<ushort, byte>();
-
-    private DeviceSnapshot CurrentDeviceSnapshot() => DeviceSnapshot.From(KeyboardConfig!);
-    private ushort[,,] GetDeviceKeymap() => CurrentDeviceSnapshot().Keymap;
-
-    /// <summary>
-    /// Returns the current working macro buffer — from the edit session if active,
-    /// otherwise from the loaded KeyboardConfig. Used by the macro editor dialog
-    /// so it shows in-progress edits, not stale baseline data.
-    /// </summary>
-    public MacroBuffer? GetCurrentMacros()
-    {
-        if (_editSession?.GetCurrentMacroBuffer() is { } buffer && KeyboardConfig?.Macros is { } original)
-            return MacroCodec.Decode(buffer, original.Macros.Count, original.BufferCapacity);
-        return KeyboardConfig?.Macros;
-    }
+    internal DeviceSnapshot CurrentDeviceSnapshot() => DeviceSnapshot.From(KeyboardConfig!);
 
     private async Task TryCaptureFirstConnectSnapshotAsync()
     {
@@ -1339,267 +762,12 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
-    /// <summary>Prompts the user for a label, then takes a manual snapshot.</summary>
-    public Func<Task<string?>>? RequestManualSnapshotLabel { get; set; }
-
     [RelayCommand]
     private async Task CaptureManualSnapshotWithPromptAsync()
     {
-        if (RequestManualSnapshotLabel is null) return;
-        var label = await RequestManualSnapshotLabel();
+        var label = await _dialogs.PromptSnapshotLabelAsync();
         if (label is null) return; // user cancelled
         await CaptureManualSnapshot(label.Length > 0 ? label : null);
-    }
-
-    /// <summary>
-    /// Re-fetches the keymap from the connected device without re-running
-    /// device enumeration or the LED/definition probes. Runs on a background
-    /// thread (the protocol service is synchronous); UI updates happen on
-    /// the calling thread once it resumes.
-    /// </summary>
-    private async Task ReloadKeymapFromDeviceAsync(CancellationToken ct, byte[]? knownMacroBuffer = null, bool skipMacroReload = false)
-    {
-        if (KeyboardConfig is null) return;
-
-        var refresh = await Task.Run(
-            () => DeviceRefreshService.Fetch(_protocolService, KeyboardConfig, knownMacroBuffer, skipMacroReload), ct);
-
-        var physical = SvalboardLayout.GetKeyPositions();
-        var updatedLayers = new List<Layer>(KeyboardConfig.Layers.Count);
-        foreach (var layer in KeyboardConfig.Layers)
-        {
-            var updatedKeys = new List<Key>(layer.Keys.Count);
-            foreach (var key in layer.Keys)
-            {
-                var raw = refresh.Keymap[layer.Index, key.Row, key.Col];
-                var info = _keycodeService.Resolve(raw);
-                var position = physical.FirstOrDefault(p => p.Row == key.Row && p.Col == key.Col);
-                updatedKeys.Add(key with
-                {
-                    RawKeycode = raw,
-                    DisplayLabel = info.Label,
-                    SecondaryLabel = info.SecondaryLabel,
-                    IsTransparent = info.IsTransparent,
-                    IsLayerSwitch = info.IsLayerSwitch,
-                    TargetLayer = info.TargetLayer,
-                    SwitchType = info.SwitchType,
-                    IsUnknown = info.IsUnknown,
-                    ShiftedLabel = info.ShiftedLabel,
-                    X = position?.X ?? key.X,
-                    Y = position?.Y ?? key.Y,
-                    Width = position?.Width ?? key.Width,
-                    Height = position?.Height ?? key.Height,
-                });
-            }
-            updatedLayers.Add(layer with { Keys = updatedKeys });
-        }
-
-        var activationPaths = LayerActivationGraph.Build(updatedLayers);
-        for (var i = 0; i < updatedLayers.Count; i++)
-        {
-            if (activationPaths.TryGetValue(i, out var path))
-                updatedLayers[i] = updatedLayers[i] with { ActivationPath = path };
-        }
-        TransparentKeyResolver.Resolve(updatedLayers, activationPaths);
-
-        KeyboardConfig = KeyboardConfig with
-        {
-            Layers = updatedLayers,
-            QmkSettings = refresh.QmkSettings,
-            Macros = refresh.Macros ?? KeyboardConfig.Macros,
-            Combos = refresh.Combos,
-            TapDances = refresh.TapDances,
-        };
-
-        // Update existing layer/key VMs in place. Rebuilding the VM tree
-        // (the previous approach) replaced every KeyViewModel instance, and
-        // the creative thumb-cluster bindings ended up pointing at stale
-        // instances — making the first post-save edit's label appear frozen.
-        // Keeping instances stable lets Avalonia bindings keep working and
-        // preserves OnClickAction / SetEditMode wiring.
-        if (Layers.Count == 0)
-        {
-            BuildLayerViewModels(_settingsService.Load());
-        }
-        else
-        {
-            foreach (var layerVm in Layers)
-            {
-                var updatedLayer = updatedLayers.FirstOrDefault(l => l.Index == layerVm.Index);
-                if (updatedLayer is not null)
-                    layerVm.UpdateBaselineFromLayer(updatedLayer);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Reconciles a mid-batch failure against the reloaded device state.
-    /// Each cell the user intended to change falls into one of three buckets:
-    /// <list type="bullet">
-    /// <item>applied — device now matches intent;</item>
-    /// <item>still pending — device still matches baseline, so the write never
-    ///   landed and can be retried;</item>
-    /// <item>diverged — device matches neither (unexpected external write or
-    ///   partial write). Flagged for the user but not auto-retried.</item>
-    /// </list>
-    /// Rebuilds <see cref="_editSession"/> from the reloaded baseline with
-    /// <see cref="SetKeyOp"/>s for each still-pending cell so the user can
-    /// press Save again with zero re-typing.
-    /// </summary>
-    private SavePartial BuildPartialResult(
-        SaveFlowExecutor.ExecutionOutcome outcome,
-        ushort[,,] intended,
-        int totalPending)
-    {
-        var device = GetDeviceKeymap();
-        var baseline = _editSession!.CloneBaseline();
-        var pendingSettings = _editSession.PendingSettingsChanges;
-
-        var reconciled = SaveReconciliation.Reconcile(device, baseline, intended);
-
-        // Rebuild the edit session on top of the reloaded device state so
-        // the user can hit Save again without re-editing.
-        _editSession = new KeymapEditSession(device, BuildQmkSettingsDict(), BuildQmkSettingsWidths(),
-            macroBuffer: null,
-            combos: KeyboardConfig?.Combos,
-            tapDances: KeyboardConfig?.TapDances);
-        foreach (var w in reconciled.StillPending)
-        {
-            var old = _editSession.GetCurrent(w.Layer, w.Row, w.Col);
-            _editSession.Apply(new SetKeyOp(w.Layer, w.Row, w.Col, old, w.Keycode));
-        }
-
-        foreach (var (id, _, newVal) in pendingSettings)
-        {
-            var current = _editSession.GetCurrentSetting(id) ?? 0;
-            if (current != newVal)
-                _editSession.Apply(new SetQmkSettingOp(id, current, newVal));
-        }
-
-        var message = outcome.Failure?.Message ?? "unknown error";
-        DiagnosticLog.Warn("Save",
-            $"Partial save: {reconciled.Applied} applied, {reconciled.StillPending.Count} pending, {reconciled.Diverged} diverged — {message}");
-
-        return new SavePartial(
-            Applied: reconciled.Applied,
-            StillPending: reconciled.StillPending.Count,
-            Diverged: reconciled.Diverged,
-            FailureMessage: message,
-            Remaining: reconciled.StillPending);
-    }
-
-    /// <summary>
-    /// Pushes a <see cref="SaveResult"/> into the VM: updates the status
-    /// message, rebuilds layer pending overlays, and clears the session on
-    /// full success. Keeps edit mode on so the user can keep working.
-    /// </summary>
-    private void ApplySaveResult(SaveResult result, int totalPending)
-    {
-        switch (result)
-        {
-            case SaveSuccess s:
-                // Rebuild a fresh edit session on top of the now-current device
-                // state so the user can immediately make another edit. The session
-                // must stay non-null while IsEditMode is true — OnKeyClicked
-                // early-returns otherwise, which makes the app appear frozen.
-                foreach (var layerVm in Layers)
-                    layerVm.ClearAllPendingOverrides();
-                RebuildEditSessionFromCurrentConfig(preserveIntent: false);
-                StatusMessage = Loc.Instance.Format("Status_SaveCompleteFormat", s.Applied);
-                DiagnosticLog.Info("Save", $"Save complete: {s.Applied} change(s) written");
-                break;
-
-            case SavePartial p:
-                // _editSession was already rebuilt by BuildPartialResult.
-                DirtyCount = p.StillPending;
-                RebuildPendingOverlaysFromSession();
-                StatusMessage = Loc.Instance.Format(
-                    "Status_SavePartialFormat", p.Applied, totalPending, p.StillPending);
-                break;
-
-            case SaveCancelled c:
-                // Rebuild session on top of whatever is now on the device so
-                // the user can retry without re-typing the still-unsaved ones.
-                RebuildEditSessionFromCurrentConfig(preserveIntent: true);
-                StatusMessage = Loc.Instance["Status_SaveCancelled"];
-                DiagnosticLog.Info("Save", $"Save cancelled after {c.Applied} write(s)");
-                break;
-        }
-    }
-
-    /// <summary>
-    /// Rebuilds layer pending overlays from the current <see cref="_editSession"/>
-    /// so the visible UI reflects the (possibly reconciled) pending set.
-    /// </summary>
-    private void RebuildPendingOverlaysFromSession()
-    {
-        foreach (var layerVm in Layers)
-            layerVm.ClearAllPendingOverrides();
-        if (_editSession is null) return;
-
-        foreach (var (layer, row, col, _, newCode) in _editSession.PendingChanges)
-        {
-            var layerVm = Layers.FirstOrDefault(l => l.Index == layer);
-            if (layerVm is null) continue;
-            var info = _keycodeService.Resolve(newCode);
-            layerVm.ApplyPendingOverride(row, col, newCode, info.Label, info.SecondaryLabel);
-        }
-    }
-
-    /// <summary>
-    /// Rebuilds <see cref="_editSession"/> from the current <see cref="KeyboardConfig"/>.
-    /// If <paramref name="preserveIntent"/> is true and the previous session
-    /// had pending changes, those (layer, row, col, newCode) tuples are
-    /// re-applied on top of the new baseline — used by the cancellation path
-    /// so the user doesn't lose their unsaved work when they hit Save again.
-    /// </summary>
-    private void RebuildEditSessionFromCurrentConfig(bool preserveIntent)
-    {
-        if (KeyboardConfig is null) return;
-
-        var previousPending = preserveIntent && _editSession is not null
-            ? _editSession.PendingChanges.ToList()
-            : new List<(int Layer, int Row, int Col, ushort OldCode, ushort NewCode)>();
-        var previousSettingsPending = preserveIntent && _editSession is not null
-            ? _editSession.PendingSettingsChanges.ToList()
-            : new List<(ushort SettingId, ushort OldValue, ushort NewValue)>();
-        var previousMacroBuffer = preserveIntent && _editSession is not null
-            ? _editSession.GetCurrentMacroBuffer() : null;
-
-        var layers = KeyboardConfig.Layers.Count;
-        var rows = KeyboardConfig.MatrixRows;
-        var cols = KeyboardConfig.MatrixCols;
-        var baseline = new ushort[layers, rows, cols];
-        foreach (var layer in KeyboardConfig.Layers)
-            foreach (var key in layer.Keys)
-                baseline[layer.Index, key.Row, key.Col] = key.RawKeycode;
-
-        byte[]? macroBuffer = KeyboardConfig.Macros is not null
-            ? MacroCodec.Encode(KeyboardConfig.Macros) : null;
-        _editSession = new KeymapEditSession(baseline, BuildQmkSettingsDict(), BuildQmkSettingsWidths(), macroBuffer,
-            KeyboardConfig.Combos, KeyboardConfig.TapDances);
-        foreach (var (l, r, c, _, newCode) in previousPending)
-        {
-            // Only re-apply edits whose target cell actually still diverges
-            // from the new baseline — anything the device already has is done.
-            var old = _editSession.GetCurrent(l, r, c);
-            if (old != newCode)
-                _editSession.Apply(new SetKeyOp(l, r, c, old, newCode));
-        }
-        foreach (var (id, _, newVal) in previousSettingsPending)
-        {
-            var current = _editSession.GetCurrentSetting(id) ?? 0;
-            if (current != newVal)
-                _editSession.Apply(new SetQmkSettingOp(id, current, newVal));
-        }
-        if (previousMacroBuffer is not null)
-        {
-            var baselineMacro = _editSession.GetBaselineMacroBuffer();
-            if (baselineMacro is not null && !baselineMacro.AsSpan().SequenceEqual(previousMacroBuffer))
-                _editSession.Apply(new SetMacroBufferOp(baselineMacro, previousMacroBuffer));
-        }
-        DirtyCount = ComputeDirtyCount();
-        RebuildPendingOverlaysFromSession();
     }
 
     partial void OnIsEditModeChanged(bool value)
@@ -1620,23 +788,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         // If the device disconnects mid-edit, tear down the session and warn the user.
         if (!value && IsEditMode)
-        {
-            _saveCts?.Cancel();
-            _editSession?.Discard();
-            _editSession = null;
-            DirtyCount = 0;
-            IsEditMode = false;
-            _wasLockedOnEnterEdit = false;
-
-            foreach (var layerVm in Layers)
-            {
-                layerVm.ClearAllPendingOverrides();
-                layerVm.SetEditMode(false);
-            }
-
-            StatusMessage = Loc.Instance["Status_EditAbortedDisconnect"];
-            DiagnosticLog.Warn("Edit", "Edit session aborted: device disconnected");
-        }
+            _edit.AbortForDisconnect();
     }
 
     [RelayCommand]
@@ -1645,31 +797,31 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void Show()
     {
-        ShowWindowRequested?.Invoke();
+        _shell.ShowWindow();
     }
 
     [RelayCommand]
     private void ToggleOverlay()
     {
-        ToggleWindowRequested?.Invoke();
+        _shell.ToggleWindow();
     }
 
     [RelayCommand]
     private void OpenSettings()
     {
-        OpenSettingsRequested?.Invoke(null);
+        _dialogs.OpenSettings(null);
     }
 
     [RelayCommand]
     private void OpenSettingsToDevice()
     {
-        OpenSettingsRequested?.Invoke(2);
+        _dialogs.OpenSettings(2);
     }
 
     [RelayCommand]
     private void OpenHistory()
     {
-        OpenHistoryRequested?.Invoke();
+        _dialogs.OpenHistory();
     }
 
     [RelayCommand]
@@ -1681,7 +833,7 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        OpenMacrosRequested?.Invoke();
+        _dialogs.OpenMacroEditor();
     }
 
     [RelayCommand]
@@ -1692,7 +844,7 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = Loc.Instance["ComboEditor_None"];
             return;
         }
-        OpenCombosRequested?.Invoke();
+        _dialogs.OpenComboEditor();
     }
 
     [RelayCommand]
@@ -1703,25 +855,25 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = Loc.Instance["TapDanceEditor_None"];
             return;
         }
-        OpenTapDanceRequested?.Invoke();
+        _dialogs.OpenTapDanceEditor();
     }
 
     [RelayCommand]
     private void OpenDiagnostics()
     {
-        OpenDiagnosticsRequested?.Invoke();
+        _dialogs.OpenDiagnostics();
     }
 
     [RelayCommand]
     private void Export()
     {
-        OpenExportRequested?.Invoke();
+        _dialogs.OpenExport();
     }
 
     [RelayCommand]
     private void OpenHelp()
     {
-        OpenHelpRequested?.Invoke();
+        _dialogs.OpenHelp();
     }
 
     [RelayCommand]
@@ -1767,17 +919,14 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void CopyDiagnostics()
     {
-        CopyDiagnosticsRequested?.Invoke();
+        _shell.CopyDiagnostics();
     }
-
-    /// <summary>Invoked by CopyDiagnosticsCommand so the App layer can access the clipboard.</summary>
-    public Action? CopyDiagnosticsRequested { get; set; }
 
     [RelayCommand]
     private async Task Quit()
     {
         await ShutdownAsync();
-        QuitRequested?.Invoke();
+        _shell.Quit();
     }
 
     // int, not bool, because Interlocked has no bool overload. CompareExchange
@@ -1798,8 +947,7 @@ public partial class MainWindowViewModel : ObservableObject
     public Task ShutdownAsync()
     {
         if (Interlocked.CompareExchange(ref _isShutdown, 1, 0) != 0) return Task.CompletedTask;
-        StopMatrixPolling();
-        StopLedPolling();
+        _polling.Dispose();
         _deviceSubscription?.Dispose();
         _deviceSubscription = null;
         _connectCts?.Cancel();

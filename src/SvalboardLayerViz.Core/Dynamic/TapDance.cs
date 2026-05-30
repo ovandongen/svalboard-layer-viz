@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+
 namespace SvalboardLayerViz.Core.Dynamic;
 
 /// <summary>
@@ -31,11 +33,11 @@ public static class TapDanceCodec
     public static byte[] Encode(TapDance td)
     {
         var buf = new byte[TapDance.EntryBytes];
-        WriteLe(buf, 0, td.OnTap);
-        WriteLe(buf, 2, td.OnHold);
-        WriteLe(buf, 4, td.OnDoubleTap);
-        WriteLe(buf, 6, td.OnTapHold);
-        WriteLe(buf, 8, td.TappingTerm);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(0), td.OnTap);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(2), td.OnHold);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(4), td.OnDoubleTap);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(6), td.OnTapHold);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(8), td.TappingTerm);
         return buf;
     }
 
@@ -47,19 +49,10 @@ public static class TapDanceCodec
                 nameof(bytes));
 
         return new TapDance(
-            ReadLe(bytes, 0),
-            ReadLe(bytes, 2),
-            ReadLe(bytes, 4),
-            ReadLe(bytes, 6),
-            ReadLe(bytes, 8));
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(0)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(2)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(4)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(6)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(8)));
     }
-
-    private static void WriteLe(byte[] buf, int offset, ushort value)
-    {
-        buf[offset] = (byte)(value & 0xFF);
-        buf[offset + 1] = (byte)((value >> 8) & 0xFF);
-    }
-
-    private static ushort ReadLe(byte[] buf, int offset) =>
-        (ushort)(buf[offset] | (buf[offset + 1] << 8));
 }

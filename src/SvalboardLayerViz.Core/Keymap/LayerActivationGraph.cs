@@ -30,7 +30,11 @@ public static class LayerActivationGraph
         // Reverse edges: for each target layer, list of activators that reach it.
         // A co-activated (press-through) activator is also attached to its own
         // separate target — each hop still reflects a single MO/LT/etc. key.
+        // byPosition indexes every hop by its origin (sourceLayer, row, col) so
+        // press-through co-hop lookup is O(1); the key is unique because a
+        // position holds at most one keycode per layer.
         var incoming = new Dictionary<int, List<ActivationHop>>();
+        var byPosition = new Dictionary<(int SourceLayer, int Row, int Col), ActivationHop>();
         foreach (var layer in layers)
         {
             foreach (var key in layer.Keys)
@@ -41,6 +45,7 @@ public static class LayerActivationGraph
                 if (!incoming.TryGetValue(target, out var list))
                     incoming[target] = list = new List<ActivationHop>();
                 list.Add(hop);
+                byPosition[(layer.Index, key.Row, key.Col)] = hop;
             }
         }
 
@@ -52,10 +57,27 @@ public static class LayerActivationGraph
         foreach (var layer in layers)
         {
             if (layer.Index == 0) continue;
-            result[layer.Index] = BuildPath(layer.Index, incoming);
+            result[layer.Index] = BuildPath(layer.Index, incoming, byPosition);
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Canonical one-call keymap resolution: builds the activation graph for
+    /// <paramref name="layers"/>, attaches each layer's
+    /// <see cref="Layer.ActivationPath"/>, then resolves TRNS via the active
+    /// stack (matches QMK runtime). Mutates the list in place.
+    /// </summary>
+    public static void ResolveInto(List<Layer> layers)
+    {
+        var activationPaths = Build(layers);
+        for (var i = 0; i < layers.Count; i++)
+        {
+            if (activationPaths.TryGetValue(i, out var path))
+                layers[i] = layers[i] with { ActivationPath = path };
+        }
+        TransparentKeyResolver.Resolve(layers, activationPaths);
     }
 
     /// <summary>
@@ -67,7 +89,7 @@ public static class LayerActivationGraph
     public static IReadOnlyList<int> GetActiveStack(int layerIndex, IReadOnlyList<ActivationHop> path)
     {
         if (layerIndex == 0) return new[] { 0 };
-        if (path.Count == 0) return layerIndex == 0 ? new[] { 0 } : new[] { 0, layerIndex };
+        if (path.Count == 0) return new[] { 0, layerIndex }; // orphan fallback
 
         var stack = new int[path.Count + 1];
         stack[0] = 0;
@@ -78,7 +100,8 @@ public static class LayerActivationGraph
 
     private static IReadOnlyList<ActivationHop> BuildPath(
         int target,
-        Dictionary<int, List<ActivationHop>> incoming)
+        Dictionary<int, List<ActivationHop>> incoming,
+        IReadOnlyDictionary<(int SourceLayer, int Row, int Col), ActivationHop> byPosition)
     {
         // BFS from target back toward L0 via reverse edges, tracking the
         // shortest path per visited node. Press-through coupling is applied on
@@ -101,7 +124,7 @@ public static class LayerActivationGraph
             {
                 if (!visited.Add(hop.SourceLayer)) continue;
                 parent[hop.SourceLayer] = hop;
-                parentCoHop[hop.SourceLayer] = FindCoHop(hop, incoming);
+                parentCoHop[hop.SourceLayer] = FindCoHop(hop, byPosition);
                 if (hop.SourceLayer == 0) { rootParent = 0; queue.Clear(); break; }
                 queue.Enqueue(hop.SourceLayer);
             }
@@ -133,23 +156,11 @@ public static class LayerActivationGraph
     /// </summary>
     private static ActivationHop? FindCoHop(
         ActivationHop hop,
-        Dictionary<int, List<ActivationHop>> incoming)
+        IReadOnlyDictionary<(int SourceLayer, int Row, int Col), ActivationHop> byPosition)
     {
         foreach (var (coRow, coCol) in SvalboardLayout.GetCoactivatedPositions(hop.Row, hop.Col))
-        {
-            foreach (var otherList in incoming.Values)
-            {
-                foreach (var candidate in otherList)
-                {
-                    if (candidate.SourceLayer == hop.SourceLayer
-                        && candidate.Row == coRow
-                        && candidate.Col == coCol)
-                    {
-                        return candidate;
-                    }
-                }
-            }
-        }
+            if (byPosition.TryGetValue((hop.SourceLayer, coRow, coCol), out var co))
+                return co;
         return null;
     }
 

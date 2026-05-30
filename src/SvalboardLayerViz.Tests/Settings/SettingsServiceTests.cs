@@ -183,7 +183,7 @@ public class SettingsServiceTests : IDisposable
         // path is the only thing under test.
         var raw = File.ReadAllText(_tempFile);
         using var doc = JsonDocument.Parse(raw);
-        Assert.Equal(UserSettings.CurrentSchemaVersion, doc.RootElement.GetProperty("SchemaVersion").GetInt32());
+        Assert.Equal(UserSettings.CurrentSchemaVersion, doc.RootElement.GetProperty("schemaVersion").GetInt32());
 
         // And the re-Load still works too — kept for regression coverage.
         var rereread = _service.Load();

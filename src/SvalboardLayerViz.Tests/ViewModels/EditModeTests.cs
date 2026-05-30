@@ -92,7 +92,8 @@ public class EditModeTests
         var vm = CreateVmWithConfig();
 
         Action? captured = null;
-        vm.OpenUnlockRequested = onUnlocked => captured = onUnlocked;
+        var host = new FakeAppHost { OnOpenUnlock = onUnlocked => captured = onUnlocked };
+        vm.AttachHost(host, host);
 
         await vm.EnterEditCommand.ExecuteAsync(null);
 

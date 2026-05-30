@@ -137,15 +137,13 @@ public class SaveFlowTests : IDisposable
 
     private static async Task EnterEditAsync(MainWindowViewModel vm, bool lockedBeforeEdit = false)
     {
-        // Protocol starts locked-on-entry iff the caller asks; when locked we
-        // stub OpenUnlockRequested to auto-run the unlock callback so the VM
-        // enters edit mode synchronously without poking real UI.
+        // Protocol starts locked-on-entry iff the caller asks. When locked, the
+        // VM's headless default dialog service auto-runs the unlock callback, so
+        // edit mode is entered synchronously without poking real UI.
         var fake = (FakeVialProtocolService)vm.ProtocolService;
         fake.NextUnlockStatus = lockedBeforeEdit
             ? new UnlockStatus(false, false, [(0, 0)])
             : new UnlockStatus(true, false, []);
-        if (lockedBeforeEdit)
-            vm.OpenUnlockRequested = cb => cb();
         await vm.EnterEditCommand.ExecuteAsync(null);
     }
 
@@ -363,7 +361,8 @@ public class SaveFlowTests : IDisposable
         vm.ApplyKeyEdit(1, keyOnL1.Key.Row, keyOnL1.Key.Col, 0x0021);
 
         SavePartial? partial = null;
-        vm.SaveCompletedCallback = r => partial = r as SavePartial;
+        var host = new FakeAppHost { OnSaveCompleted = r => partial = r as SavePartial };
+        vm.AttachHost(host, host);
         _protocol.SetKeycodeFailAt = (0, new IOException("boom"));
 
         await vm.SaveEditCommand.ExecuteAsync(null);
@@ -400,7 +399,8 @@ public class SaveFlowTests : IDisposable
             vm.ApplyKeyEdit(0, k.Key.Row, k.Key.Col, (ushort)(0x0030 + i));
 
         SavePartial? partial = null;
-        vm.SaveCompletedCallback = r => partial = r as SavePartial;
+        var host = new FakeAppHost { OnSaveCompleted = r => partial = r as SavePartial };
+        vm.AttachHost(host, host);
         _protocol.SetKeycodeFailAt = (1, new InvalidOperationException("mid-batch"));
 
         await vm.SaveEditCommand.ExecuteAsync(null);
@@ -433,7 +433,8 @@ public class SaveFlowTests : IDisposable
             vm.ApplyKeyEdit(0, k.Key.Row, k.Key.Col, (ushort)(0x0030 + i));
 
         SavePartial? partial = null;
-        vm.SaveCompletedCallback = r => partial = r as SavePartial;
+        var host = new FakeAppHost { OnSaveCompleted = r => partial = r as SavePartial };
+        vm.AttachHost(host, host);
         _protocol.SetKeycodeFailAt = (2, new IOException("late"));
 
         await vm.SaveEditCommand.ExecuteAsync(null);
@@ -501,10 +502,13 @@ public class SaveFlowTests : IDisposable
         vm.ApplyKeyEdit(1, r, c, 0x0022);
 
         var asked = false;
-        vm.ConfirmSafetyWarningsRequested = _ => { asked = true; return Task.FromResult(false); };
-
         SaveResult? result = null;
-        vm.SaveCompletedCallback = r2 => result = r2;
+        var host = new FakeAppHost
+        {
+            OnConfirmSafety = _ => { asked = true; return Task.FromResult(false); },
+            OnSaveCompleted = r2 => result = r2,
+        };
+        vm.AttachHost(host, host);
 
         await vm.SaveEditCommand.ExecuteAsync(null);
 
@@ -524,10 +528,13 @@ public class SaveFlowTests : IDisposable
         var (r, c) = FirstKeyOnLayer(vm, 1);
         vm.ApplyKeyEdit(1, r, c, 0x0022);
 
-        vm.ConfirmSafetyWarningsRequested = _ => Task.FromResult(true);
-
         SaveResult? result = null;
-        vm.SaveCompletedCallback = r2 => result = r2;
+        var host = new FakeAppHost
+        {
+            OnConfirmSafety = _ => Task.FromResult(true),
+            OnSaveCompleted = r2 => result = r2,
+        };
+        vm.AttachHost(host, host);
 
         await vm.SaveEditCommand.ExecuteAsync(null);
 
@@ -545,9 +552,10 @@ public class SaveFlowTests : IDisposable
         var (r, c) = FirstKeyOnLayer(vm, 1);
         vm.ApplyKeyEdit(1, r, c, 0x0022);
 
-        // ConfirmSafetyWarningsRequested stays null → auto-confirm.
+        // No OnConfirmSafety hook → FakeAppHost auto-confirms (returns true).
         SaveResult? result = null;
-        vm.SaveCompletedCallback = r2 => result = r2;
+        var host = new FakeAppHost { OnSaveCompleted = r2 => result = r2 };
+        vm.AttachHost(host, host);
 
         await vm.SaveEditCommand.ExecuteAsync(null);
 
@@ -580,7 +588,8 @@ public class SaveFlowTests : IDisposable
         _protocol.Keymap![0, targets[1].Key.Row, targets[1].Key.Col] = 0x00FF;
 
         SavePartial? partial = null;
-        vm.SaveCompletedCallback = r => partial = r as SavePartial;
+        var host = new FakeAppHost { OnSaveCompleted = r => partial = r as SavePartial };
+        vm.AttachHost(host, host);
 
         await vm.SaveEditCommand.ExecuteAsync(null);
 

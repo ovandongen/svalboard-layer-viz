@@ -9,12 +9,6 @@ namespace SvalboardLayerViz.Core.Settings;
 /// </summary>
 public class SettingsService : ISettingsService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true,
-    };
-
     private readonly string _filePath;
 
     public SettingsService()
@@ -52,7 +46,7 @@ public class SettingsService : ISettingsService
         UserSettings? parsed;
         try
         {
-            parsed = JsonSerializer.Deserialize<UserSettings>(json, JsonOptions);
+            parsed = JsonSerializer.Deserialize<UserSettings>(json, CoreJson.Default);
         }
         catch (JsonException ex)
         {
@@ -114,7 +108,7 @@ public class SettingsService : ISettingsService
         if (dir is not null && !Directory.Exists(dir))
             Directory.CreateDirectory(dir);
 
-        var json = JsonSerializer.Serialize(settings, JsonOptions);
+        var json = JsonSerializer.Serialize(settings, CoreJson.Default);
         AtomicFile.WriteAllText(_filePath, json);
     }
 

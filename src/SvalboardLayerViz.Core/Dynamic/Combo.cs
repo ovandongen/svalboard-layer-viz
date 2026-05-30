@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+
 namespace SvalboardLayerViz.Core.Dynamic;
 
 /// <summary>
@@ -22,11 +24,11 @@ public static class ComboCodec
     public static byte[] Encode(Combo combo)
     {
         var buf = new byte[Combo.EntryBytes];
-        WriteLe(buf, 0, combo.Input0);
-        WriteLe(buf, 2, combo.Input1);
-        WriteLe(buf, 4, combo.Input2);
-        WriteLe(buf, 6, combo.Input3);
-        WriteLe(buf, 8, combo.Output);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(0), combo.Input0);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(2), combo.Input1);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(4), combo.Input2);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(6), combo.Input3);
+        BinaryPrimitives.WriteUInt16LittleEndian(buf.AsSpan(8), combo.Output);
         return buf;
     }
 
@@ -38,19 +40,10 @@ public static class ComboCodec
                 nameof(bytes));
 
         return new Combo(
-            ReadLe(bytes, 0),
-            ReadLe(bytes, 2),
-            ReadLe(bytes, 4),
-            ReadLe(bytes, 6),
-            ReadLe(bytes, 8));
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(0)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(2)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(4)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(6)),
+            BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(8)));
     }
-
-    private static void WriteLe(byte[] buf, int offset, ushort value)
-    {
-        buf[offset] = (byte)(value & 0xFF);
-        buf[offset + 1] = (byte)((value >> 8) & 0xFF);
-    }
-
-    private static ushort ReadLe(byte[] buf, int offset) =>
-        (ushort)(buf[offset] | (buf[offset + 1] << 8));
 }

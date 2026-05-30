@@ -4,6 +4,7 @@ using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Dynamic;
 using SvalboardLayerViz.Core.Layout;
 using SvalboardLayerViz.Core.Models;
+using SvalboardLayerViz.Core.Persistence;
 using SvalboardLayerViz.Core.Protocol;
 using SvalboardLayerViz.Core.QmkSettings;
 using SvalboardLayerViz.Core.Settings;
@@ -41,10 +42,7 @@ public class KeymapLoader
         // 3. Get and parse the keyboard definition (compressed JSON)
         var definitionBytes = _protocol.GetDefinition();
         var definitionJson = XzDecompressor.DecompressToString(definitionBytes);
-        var definition = JsonSerializer.Deserialize<LayoutDefinition>(definitionJson, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        var definition = JsonSerializer.Deserialize<LayoutDefinition>(definitionJson, CoreJson.ExternalRead);
 
         if (definition is null)
             throw new InvalidOperationException("Failed to parse keyboard definition.");
@@ -170,15 +168,9 @@ public class KeymapLoader
             });
         }
 
-        // 9. Build the layer activation graph, attach per-layer ActivationPath,
-        //    then resolve TRNS via the active stack (matches QMK runtime).
-        var activationPaths = LayerActivationGraph.Build(layers);
-        for (var i = 0; i < layers.Count; i++)
-        {
-            if (activationPaths.TryGetValue(i, out var path))
-                layers[i] = layers[i] with { ActivationPath = path };
-        }
-        TransparentKeyResolver.Resolve(layers, activationPaths);
+        // 9. Build the activation graph, attach per-layer ActivationPath, and
+        //    resolve TRNS via the active stack (matches QMK runtime).
+        LayerActivationGraph.ResolveInto(layers);
 
         return new KeyboardConfig
         {
