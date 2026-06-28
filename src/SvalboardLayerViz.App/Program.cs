@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Media;
 using SvalboardLayerViz.Core.Diagnostics;
 using SvalboardLayerViz.Core.Settings;
 
@@ -20,6 +21,13 @@ class Program
     {
         var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            // Ship Inter as the app-wide default font. The macOS system fallback font,
+            // rendered through the Metal backend, leaks ~2 MB of native memory per text
+            // re-render (a layer switch repaints all 60 labels → ~135 MB/switch → multi-GB).
+            // An embedded font avoids the leaking glyph path entirely while keeping GPU
+            // rendering. Also gives Fluent the metrics it's tuned for (cleaner labels).
+            .WithInterFont()
+            .With(new FontManagerOptions { DefaultFamilyName = "fonts:Inter#Inter" })
             .LogToTrace();
 
         // Allow users to force software rendering via environment variable or settings.json.
